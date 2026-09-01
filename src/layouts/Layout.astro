@@ -126,5 +126,7 @@ const siteUrl = new URL(path, "https://yesmcp.com/").href;
   <body class="grain antialiased">
     <slot />
     <script is:inline type="module" src="/js/reveal.js"></script>
+    {/* WebMCP: in-browser agents get real tools on every page (no API — no-op). */}
+    <script is:inline type="module" src="/js/webmcp.js"></script>
   </body>
 </html>
