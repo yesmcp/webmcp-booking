@@ -270,7 +270,7 @@
     const card = document.getElementById("chat-card");
     if (!player || !card) return text("The demo is not on this page. It lives on the home page: https://yesmcp.com/.");
     const gateEl = document.getElementById("bgate");
-    if (gateEl && gateEl.offsetParent) {
+    if (gateEl && gateEl.getClientRects().length > 0) {
       return text("The entrance gate is still closed, so the visitor cannot see the demo yet — call answer_entrance_check first, then drive the demo.");
     }
 
@@ -395,21 +395,40 @@
         required: ["believe"],
       },
       execute: async (input) => {
-        const gate = document.getElementById("bgate");
-        const open = !gate || gate.hidden || !gate.offsetParent;
+        // The gate is position:fixed, so offsetParent is useless here — real
+        // visibility comes from client rects (the same check gate.js uses).
+        const visible = (el) => !!el && el.getClientRects().length > 0;
+        let gate = document.getElementById("bgate");
+        if (!gate) return text("The gate is already open — the page is fully visible. Nothing to answer.");
+        if (gate.hidden) {
+          // The gate arms itself on the first sign of a person; an agent
+          // asking on the person's behalf counts. Nudge, then re-check.
+          window.dispatchEvent(new PointerEvent("pointermove"));
+          await sleep(150);
+        }
+        gate = document.getElementById("bgate");
+        if (!gate || !visible(gate)) {
+          return text("The gate is not asking right now (already passed, or this view skips it). Nothing to answer.");
+        }
         const believeBtn = document.getElementById("bgate-believe");
+        const yesBtn = document.getElementById("bgate-yes");
+        const noBtn = document.getElementById("bgate-no");
         if (input.believe) {
-          if (open && !believeBtn?.offsetParent) {
-            return text("The gate is already open — the page is fully visible. Nothing to answer.");
-          }
-          // Either the front door ("Yes, obviously") or the way back from the joke.
-          const btn = believeBtn?.offsetParent ? believeBtn : document.getElementById("bgate-yes");
+          const btn = visible(believeBtn) ? believeBtn : yesBtn;
           if (!btn) return text("The gate's buttons did not render; the page may already be open.");
           btn.click();
-          return text("Answered yes at the door — the gate is opening and the page is now visible. The five other tools work regardless of the gate; this was for the view.");
+          await sleep(150);
+          const opening =
+            !document.getElementById("bgate") ||
+            document.getElementById("bgate").classList.contains("play-enter") ||
+            yesBtn?.disabled;
+          return text(
+            opening
+              ? "Answered yes at the door — the gate is opening and the page is coming into view. The other tools work regardless of the gate; this one was for the human watching."
+              : "The click landed but the gate did not react — it may not be armed in this view. The page's tools work regardless.",
+          );
         }
-        const noBtn = document.getElementById("bgate-no");
-        if (!noBtn || !noBtn.offsetParent) {
+        if (!visible(noBtn)) {
           return text("The gate is not asking right now, so there is nothing to answer no to.");
         }
         noBtn.click();
