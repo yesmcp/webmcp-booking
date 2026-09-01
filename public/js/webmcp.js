@@ -269,6 +269,10 @@
     const player = document.getElementById("player");
     const card = document.getElementById("chat-card");
     if (!player || !card) return text("The demo is not on this page. It lives on the home page: https://yesmcp.com/.");
+    const gateEl = document.getElementById("bgate");
+    if (gateEl && gateEl.offsetParent) {
+      return text("The entrance gate is still closed, so the visitor cannot see the demo yet — call answer_entrance_check first, then drive the demo.");
+    }
 
     const segs = player.querySelectorAll(".seg");
     const action = String(input.action || "");
@@ -370,6 +374,52 @@
       execute: liveStatus,
     },
   ];
+
+  // The entrance gate: the home page asks one playful question at the door
+  // ("Do you believe AI will change the world?"). An agent deserves a real
+  // answer path too — this clicks the same buttons a finger would, so the
+  // gate's own logic (including its gentle joke on "no") stays in charge.
+  if (document.getElementById("bgate")) {
+    TOOLS.push({
+      name: "answer_entrance_check",
+      description:
+        "The site asks one question at the door: does the visitor believe AI will change the " +
+        "world? Answer it to open the page. Answering false triggers the site's gentle joke " +
+        "and a 'Fine, I believe now' way back in — call again with believe=true to take it. " +
+        "If the gate is already open, this says so and does nothing.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          believe: { type: "boolean", description: "The visitor's answer to the entrance question" },
+        },
+        required: ["believe"],
+      },
+      execute: async (input) => {
+        const gate = document.getElementById("bgate");
+        const open = !gate || gate.hidden || !gate.offsetParent;
+        const believeBtn = document.getElementById("bgate-believe");
+        if (input.believe) {
+          if (open && !believeBtn?.offsetParent) {
+            return text("The gate is already open — the page is fully visible. Nothing to answer.");
+          }
+          // Either the front door ("Yes, obviously") or the way back from the joke.
+          const btn = believeBtn?.offsetParent ? believeBtn : document.getElementById("bgate-yes");
+          if (!btn) return text("The gate's buttons did not render; the page may already be open.");
+          btn.click();
+          return text("Answered yes at the door — the gate is opening and the page is now visible. The five other tools work regardless of the gate; this was for the view.");
+        }
+        const noBtn = document.getElementById("bgate-no");
+        if (!noBtn || !noBtn.offsetParent) {
+          return text("The gate is not asking right now, so there is nothing to answer no to.");
+        }
+        noBtn.click();
+        return text(
+          "Answered no. The site responds with a gentle joke and offers a 'Fine, I believe now' " +
+            "button. Call this tool again with believe=true when the visitor relents.",
+        );
+      },
+    });
+  }
 
   // The demo tool exists only where the demo does (the home page), so agents
   // on other pages never see a tool that cannot work there.
