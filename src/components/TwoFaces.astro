@@ -1,0 +1,135 @@
+---
+// "What we build", the two faces of one connector, told as two chat moments.
+//
+// Replaces the widget-mock cards (owner, 2026-08-31): the mocks carried
+// button- and chip-shaped elements that were dead decoration, rode a
+// horizontal snap carousel on mobile that fought the vertical scroll, and
+// pictured a floating dashboard nobody has ever seen inside a real assistant.
+// The section's own copy says "in your customer's own chat", so the visual is
+// now exactly that: a short transcript in the same dark Claude frame as the
+// hero demo. Bubbles are not expected to be tappable, so nothing lies to the
+// finger; on mobile the two cards stack and scroll like the rest of the page.
+//
+// Tool rows speak plain verbs (no `day.open` syntax) for the same reason the
+// 2026-08-31 board stripped function-call syntax from the hero. Both locales
+// live here because the strings are markup-shaped and would rot if split
+// across the page files. No JS: the transcripts are honest static HTML.
+
+interface Props {
+  lang?: "en" | "uk";
+}
+
+const { lang = "en" } = Astro.props;
+
+const dict = {
+  en: {
+    chatAria: "Example conversation with the connector",
+    tool: (verb: string) => `▸ lingua studio · ${verb}`,
+    cards: [
+      {
+        stamp: "team connector",
+        time: "09:00, before the first call",
+        h3: "The face your team sees",
+        para: "The same connector, behind a login. The picture of the day lives in five tabs. Your team asks for it in the chat they already sit in, and acts on it.",
+        chrome: "claude.ai · your team's chat",
+        u1: "Morning. What's my day?",
+        verb: "opening the day",
+        a1: "9 lessons. One free window at 14:00, and two trial requests waiting. Offer it to both?",
+        u2: "Yes, offer it.",
+        done: "two offers drafted · nothing is sent without your OK",
+      },
+      {
+        stamp: "customer connector",
+        time: "21:00, nobody at the desk",
+        h3: "The face your customers see",
+        para: "Booking, orders, status, answers grounded in your data, in your customer's own chat. No app, and for guest scenarios no login at all.",
+        chrome: "claude.ai · your customer's chat",
+        u1: "Can I move tomorrow's lesson to the weekend?",
+        verb: "checking the calendar",
+        a1: "Saturday 11:00 with Olena K. is free. Move it?",
+        u2: "yes",
+        done: "moved · the calendar is already up to date",
+      },
+    ],
+  },
+  uk: {
+    chatAria: "Приклад розмови з конектором",
+    tool: (verb: string) => `▸ lingua studio · ${verb}`,
+    cards: [
+      {
+        stamp: "конектор для команди",
+        time: "09:00, до першого дзвінка",
+        h3: "Обличчя, яке бачить ваша команда",
+        para: "Той самий конектор, за логіном. Картина дня живе у п'яти вкладках. Команда питає про неї в чаті, де вже сидить, і одразу діє.",
+        chrome: "claude.ai · чат вашої команди",
+        u1: "Доброго ранку. Що в мене сьогодні?",
+        verb: "відкриває день",
+        a1: "9 уроків. Одне вільне вікно о 14:00, і двоє чекають на пробний. Запропонувати обом?",
+        u2: "Так, запропонуй.",
+        done: "дві пропозиції готові · без вашого підтвердження ніщо не надсилається",
+      },
+      {
+        stamp: "конектор для клієнтів",
+        time: "21:00, за стійкою нікого",
+        h3: "Обличчя, яке бачать ваші клієнти",
+        para: "Запис, замовлення, статус, відповіді з ваших даних, просто в чаті вашого клієнта. Без застосунку, а гостьовим сценаріям не потрібен навіть логін.",
+        chrome: "claude.ai · чат вашого клієнта",
+        u1: "Можна перенести завтрашній урок на вихідні?",
+        verb: "перевіряє календар",
+        a1: "Субота 11:00 в Олени К. вільна. Переносити?",
+        u2: "так",
+        done: "перенесено · календар уже оновлено",
+      },
+    ],
+  },
+} as const;
+
+const t = dict[lang];
+---
+
+<div class="grid gap-4 md:grid-cols-2">
+  {t.cards.map((c, i) => (
+    <div
+      class={`reveal flex flex-col rounded-2xl border border-ink/10 p-6 sm:p-7 ${i === 0 ? "bg-ink/[0.03]" : "bg-paper"}`}
+      style={i > 0 ? "--r:0.1s" : undefined}
+    >
+      <p class="font-mono text-xs text-ink-faint">{c.stamp} <span class="text-yes-deep">· {c.time}</span></p>
+      <h3 class="mt-3 text-lg font-semibold">{c.h3}</h3>
+      <p class="mt-2 text-sm leading-relaxed text-ink-soft">{c.para}</p>
+      <div class="fc-chat mt-5 flex flex-1 flex-col gap-2.5 rounded-xl p-4" role="group" aria-label={t.chatAria}>
+        <p class="fc-faint font-mono text-meta">{c.chrome}</p>
+        <p class="fc-bubble ml-auto w-fit max-w-[85%] rounded-xl px-3.5 py-2">{c.u1}</p>
+        <p class="fc-faint font-mono text-meta">{t.tool(c.verb)}</p>
+        <p class="fc-text2 max-w-[92%] text-note">{c.a1}</p>
+        <p class="fc-bubble ml-auto w-fit max-w-[85%] rounded-xl px-3.5 py-2">{c.u2}</p>
+        <p class="fc-done font-mono text-meta">✓ {c.done}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  /* The same warm near-black Claude palette as the hero chat, so the page has
+     one idiom for "a real assistant chat". Component-scoped: it never reaches
+     the site design system. Contrast pairs are the ones the hero already
+     ships through the axe gate. */
+  .fc-chat {
+    --fc-bg: hsl(0 0% 8.24%);
+    --fc-text: hsl(60 14.29% 97.25%);
+    --fc-text2: hsl(55 9.09% 74.12%);
+    --fc-text3: hsl(48 4.59% 57.25%);
+    --fc-border: hsl(52.5 11.76% 86.67% / 0.14);
+    background: var(--fc-bg);
+    border: 1px solid var(--fc-border);
+    color: var(--fc-text);
+    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .fc-bubble {
+    background: hsl(60 14.29% 97.25% / 0.06);
+    border: 0.5px solid hsl(60 14.29% 97.25% / 0.08);
+    font-size: 13px;
+  }
+  .fc-text2 { color: var(--fc-text2); }
+  .fc-faint { color: var(--fc-text3); }
+  .fc-done { color: var(--color-yes-bright); }
+</style>

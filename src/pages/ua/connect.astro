@@ -1,0 +1,155 @@
+---
+import { Picture } from "astro:assets";
+import stepDialog from "../../assets/connect/step2-dialog-prefilled.jpg";
+import stepConnected from "../../assets/connect/step3-connected.jpg";
+import stepChatUa from "../../assets/connect/step4-chat.jpg";
+import stepSlotsUa from "../../assets/connect/step5-slots.jpg";
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+
+const MCP_URL = "https://mcp.yesmcp.com/mcp";
+// Documented install link: opens the Add custom connector dialog with both
+// fields prefilled (claude.com/docs/connectors/building/directory-vs-custom).
+const CLAUDE_ADD_URL = `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=yesmcp&connectorUrl=${encodeURIComponent(MCP_URL)}`;
+---
+
+<Layout
+  title="Спробуйте конектор yesmcp у Claude | yesmcp"
+  description="Додайте конектор yesmcp у свій Claude за хвилину: одне посилання, без реєстрації і без логіна. Спитайте, що MCP-конектор дасть вашому бізнесу, і забронюйте консультацію, не виходячи з чату."
+  ogTitle="Спробуйте наш конектор у своєму Claude"
+  ogDescription="Одне посилання, без логіна. Наш власний бізнес живе в Claude: послуги, сценарії для вашої галузі та справжнє бронювання консультації."
+  path="/ua/connect/"
+  lang="uk"
+  alternates={{ en: "/connect/", uk: "/ua/connect/" }}
+>
+  <Fragment slot="head">
+    {/* Warm up the connection before the Add to Claude click — saves DNS+TLS on the jump. */}
+    <link rel="preconnect" href="https://claude.ai" crossorigin />
+    <link rel="dns-prefetch" href="https://claude.ai" />
+  </Fragment>
+
+  <SiteNav lang="uk" switchHref="/connect/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-24 sm:pt-36">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">спробуйте наживо</p>
+    <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+      Спробуйте наш конектор<br />у своєму Claude
+    </h1>
+
+    <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+      Ми продаємо MCP-конектори, тому один працює в нас самих. Додайте його у
+      свій Claude за хвилину: без реєстрації, без логіна, нічого не треба
+      встановлювати. Працює на будь-якому тарифі Claude, зокрема безкоштовному.
+      Ви побачите саме те, що бачили б ваші клієнти, якби ваш
+      бізнес жив у ШІ-чаті.
+    </p>
+
+    <div class="mt-12 space-y-11">
+      <section>
+        <h2 class="font-display text-xl font-600">1. Додайте конектор</h2>
+        <div class="mt-4 space-y-4">
+          <div class="rounded-2xl border border-yes-deep/25 bg-white/40 p-5">
+            <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">одним натисканням · з комп'ютера чи телефона</p>
+            <a href={CLAUDE_ADD_URL} class="mt-4 inline-block rounded-full bg-yes-deep px-6 py-3 font-medium text-white shadow-[0_8px_24px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">Додати в Claude</a>
+            <ol class="mt-4 list-decimal space-y-1.5 pl-5 leading-relaxed text-ink-soft">
+              <li>Натисніть кнопку. Claude відкриє форму додавання з <strong class="text-ink">уже заповненими</strong> назвою і посиланням, як на знімку нижче.</li>
+              <li>Перевірте поля й натисніть <strong class="text-ink">Add</strong>. Готово.</li>
+            </ol>
+            <p class="mt-3 text-sm leading-relaxed text-ink-faint">На телефоні Claude може вантажитись кілька секунд, тож дайте формі мить з'явитися. Ще не увійшли в Claude? Спершу він попросить увійти, а потім покаже ту саму заповнену форму.</p>
+          </div>
+          <div class="rounded-2xl border border-ink/10 bg-white/40 p-5">
+            <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">якщо кнопка відкрила просто чат</p>
+            <p class="mt-2 text-sm leading-relaxed text-ink-faint">Так буває, коли посилання відкрилось у застосунку Claude, а не в браузері. Два кроки вручну:</p>
+            <ol class="mt-2 list-decimal space-y-1.5 pl-5 leading-relaxed text-ink-soft">
+              <li>У Claude: ваш профіль → <strong class="text-ink">Settings → Connectors</strong>.</li>
+              <li>Натисніть <strong class="text-ink">Add custom connector</strong>, вставте посилання нижче й підтвердьте.</li>
+            </ol>
+          </div>
+        </div>
+        <p class="mt-4 leading-relaxed text-ink-soft">Посилання конектора для ручного додавання (кнопка вище підставляє його сама):</p>
+        <div class="mt-4 flex items-center justify-between gap-4 rounded-2xl border border-ink/10 bg-white/40 px-5 py-4" data-copy={MCP_URL}>
+          <span class="font-mono text-sm text-yes-deep select-all break-all">{MCP_URL}</span>
+          <button type="button" data-copy-btn data-done="Скопійовано ✓" hidden
+            class="shrink-0 cursor-pointer rounded-full border border-yes-deep/40 px-4 py-1.5 font-mono text-xs text-yes-deep transition-colors hover:bg-yes-deep hover:text-paper">
+            Копіювати
+          </button>
+        </div>
+        <div class="mt-5 flex items-center gap-5 rounded-2xl border border-ink/10 bg-white/40 p-5">
+          <img src="/assets/qr/connect-ua.svg" alt="QR-код, що відкриває цю сторінку" width="104" height="104" loading="lazy" />
+          <p class="text-sm leading-relaxed text-ink-soft">
+            Читаєте з ноутбука, а Claude живе в телефоні? Скануйте код: ця
+            сторінка відкриється там, і посилання буде під рукою.
+          </p>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-ink-faint">
+          Працює на claude.ai, у мобільних застосунках і в Claude Desktop,
+          зокрема на безкоштовному плані. Користувачам ChatGPT: ми готуємо
+          заявку до каталогу застосунків, наразі конектор працює в Claude.
+        </p>
+        <Picture src={stepDialog} formats={["avif", "webp"]} alt="Вікно Add custom connector, відкрите кнопкою: назва і посилання вже заповнені"
+          widths={[536, 1072]} sizes="(min-width: 640px) 28rem, 100vw" loading="lazy" decoding="async"
+          class="mt-5 w-full max-w-md rounded-2xl border border-ink/10" />
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">2. Дозвольте інструменти</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Після додавання натисніть <strong class="text-ink">Connect</strong> у картці конектора.
+          Відкриється екран дозволів: поставте для <strong class="text-ink">Read-only tools</strong> варіант <strong class="text-ink">Always allow</strong>, і Claude не питатиме дозволу на
+          кожне читання. Для бронювання лишіть підтвердження: перед записом Claude спитає вас, і це
+          правильно.
+        </p>
+        <Picture src={stepConnected} formats={["avif", "webp"]} alt="Картка конектора yesmcp з дозволами інструментів"
+          widths={[640, 960, 1200]} sizes="(min-width: 768px) 44rem, 100vw" loading="lazy" decoding="async"
+          class="mt-5 w-full rounded-2xl border border-ink/10" />
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">3. Спитайте його про щось</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">Почніть новий чат і спробуйте будь-яке з цього:</p>
+        <ul class="mt-4 space-y-3">
+          <li class="rounded-2xl border border-ink/10 bg-white/40 px-5 py-3 text-ink-soft">«Що MCP-конектор дав би <strong class="text-ink">стоматологічній клініці</strong>?»</li>
+          <li class="rounded-2xl border border-ink/10 bg-white/40 px-5 py-3 text-ink-soft">«Що саме будує <strong class="text-ink">yesmcp</strong> і як проходить проєкт?»</li>
+          <li class="rounded-2xl border border-ink/10 bg-white/40 px-5 py-3 text-ink-soft">«Покажи вільні консультаційні слоти yesmcp і <strong class="text-ink">забронюй один</strong> для мене.»</li>
+        </ul>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          Ось як це виглядає в чаті: Claude сам викликає інструменти конектора
+          й відповідає з реальних даних.
+        </p>
+        <Picture src={stepChatUa} formats={["avif", "webp"]} alt="Чат Claude: відповідь конектора про послуги yesmcp"
+          widths={[640, 960, 1200]} sizes="(min-width: 768px) 44rem, 100vw" loading="lazy" decoding="async"
+          class="mt-4 w-full rounded-2xl border border-ink/10" />
+        <Picture src={stepSlotsUa} formats={["avif", "webp"]} alt="Чат Claude: живі слоти консультацій із часовими поясами"
+          widths={[640, 960, 1200]} sizes="(min-width: 768px) 44rem, 100vw" loading="lazy" decoding="async"
+          class="mt-4 w-full rounded-2xl border border-ink/10" />
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          Бронювання справжнє: ви обираєте живий слот, одразу отримуєте лист із
+          підтвердженням, і ми зустрічаємось у призначений час. Кожна відповідь
+          береться з нашого опублікованого контенту, тож асистент не може
+          вигадати ціни чи обіцянки.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">Що він знає про вас</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Нічого, поки ви не бронюєте. Бронювання зберігає рівно три речі: ваше
+          ім'я, вашу email-адресу і тему розмови. Деталі в нашій <a href="/ua/privacy/" class="link-und text-ink">політиці приватності</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">Хочете такий для свого бізнесу?</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Ця сторінка і є демо продукту: те, що ви щойно спробували, ми будуємо
+          для клієнтів, під їхній реальний розклад, каталог і замовлення.
+          Забронюйте дзвінок прямо в чаті вище або напишіть нам: <a href="https://t.me/yesmcp_bot?start=connect_ua" class="link-und text-ink">@yesmcp_bot</a>{" · "}<a href="mailto:yes@yesmcp.com" class="link-und text-ink">yes@yesmcp.com</a>
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <SiteFooter lang="uk" switchHref="/connect/" />
+  <script is:inline type="module" src="/js/copy-url.js"></script>
+</Layout>

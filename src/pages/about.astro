@@ -1,0 +1,235 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+// K1 of the showcase plan (docs/plans/2026-08-30-showcase-execution.md):
+// first person, one structure for BOTH locales, person before company.
+// Voice rules: docs/foundations/BRAND.md (first-person articles decision
+// 2026-08-30; no em dashes; no competitor names; facts over adjectives).
+// Structure follows docs/research/about-page-patterns-2026-08-30.md:
+// present-tense opening, artifact-carried credibility, compressed history,
+// honest disclosures, a bus-factor answer nobody else gives, graduated CTAs.
+// Factual claims are load-bearing — change them only with the owner.
+// Mirrors src/pages/ua/about.astro — edit both in the same commit.
+const lastUpdated = "2026-08-30";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://yesmcp.com/#serhii",
+      name: "Serhii Kravchenko",
+      jobTitle: "AI engineer",
+      description:
+        "AI engineer building agent systems full-time for two years, working in Claude Code since its first day on the market. Led AI on contract at a fintech; shipped agent solutions for HR, sales, marketing, lead generation and IT across industries; onboards executives and teams onto agent systems. Founder of Yes MCP; builds two products with a small team. Based in Cyprus.",
+      url: "https://yesmcp.com/about/",
+      worksFor: { "@id": "https://yesmcp.com/#organization" },
+      hasOccupation: [
+        { "@type": "Occupation", name: "AI engineer" },
+        { "@type": "Occupation", name: "AI agent engineer" },
+      ],
+      sameAs: [
+        "https://www.linkedin.com/in/awrshift/",
+        "https://x.com/awrshift",
+        "https://github.com/awrshift",
+      ],
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://yesmcp.com/#organization",
+      name: "Yes MCP",
+      alternateName: "yesmcp",
+      url: "https://yesmcp.com/",
+      email: "yes@yesmcp.com",
+      description:
+        "Yes MCP builds MCP connectors and agent systems for businesses, founded and run by AI engineer Serhii Kravchenko with a team of AI agents handling the routine. Its own connector runs live inside Claude with guest access by design; the weekly hand-counted census of the Claude connector directory is published as open data.",
+      founder: { "@id": "https://yesmcp.com/#serhii" },
+      knowsAbout: [
+        "Model Context Protocol",
+        "MCP servers",
+        "MCP Apps",
+        "OAuth 2.1",
+        "AI agents",
+        "business scenarios inside AI chats",
+        "LLM tool design",
+        "AI adoption in organisations",
+      ],
+      sameAs: [
+        "https://www.linkedin.com/company/yesmcp/",
+        "https://github.com/yesmcp",
+        "https://x.com/YesMCPapp",
+        "https://www.youtube.com/@YesMCPapp",
+        "https://t.me/yesmcp",
+        "https://www.producthunt.com/@yesmcpapp",
+      ],
+    },
+    {
+      "@type": "AboutPage",
+      "@id": "https://yesmcp.com/about/#page",
+      url: "https://yesmcp.com/about/",
+      mainEntity: { "@id": "https://yesmcp.com/#serhii" },
+      isPartOf: { "@id": "https://yesmcp.com/#website" },
+      inLanguage: "en",
+    },
+  ],
+};
+---
+
+<Layout
+  title="About: Serhii Kravchenko, the engineer behind yesmcp | yesmcp"
+  description="Who builds yesmcp: AI engineer Serhii Kravchenko, two years full-time in agent systems, working in Claude Code since its first day. A live connector, a weekly hand-counted census, and notes with measured numbers."
+  ogTitle="Serhii Kravchenko: the engineer behind yesmcp"
+  ogDescription="Two years full-time in agent systems. A live connector, a weekly census, measured notes. Who you are actually hiring, and what happens to your system without me."
+  ogImage="/assets/og/about-serhii.png"
+  ogType="profile"
+  path="/about/"
+  alternates={{ en: "/about/", uk: "/ua/about/" }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav switchHref="/ua/about/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-20 sm:pt-36">
+    <article>
+      <p class="font-mono text-xs text-ink-faint">Last updated {lastUpdated}</p>
+
+      <h1 class="mt-4 font-display text-[clamp(1.4rem,3.4vw,2.1rem)] leading-tight font-800">
+        I'm Serhii Kravchenko.<br />I build agent systems.
+      </h1>
+
+      <p class="mt-7 text-lg leading-relaxed text-ink-soft">
+        I have worked in Claude Code since its first day on the market. Right now
+        that means yesmcp: making a business reachable inside its customers' AI
+        chats, where people ask, choose and book without leaving the conversation.
+        The connector that does this for our own business is live in Claude and
+        books real consultations, and our weekly hand count of the Claude
+        connector directory ships as open data that nobody else publishes.
+      </p>
+
+      <div class="prose-ink mt-10">
+        <h2>What I have built and measured</h2>
+
+        <p>
+          The proof on this site is checkable, not claimed. A live connector
+          anyone can try: <a href="/connect/">add it to your own Claude in a minute</a>, nothing to sign into, and book a real call with me. A census of the
+          Claude connector directory, counted by hand every week and published as
+          an <a href="/data/directory.json">open dataset</a>. And <a href="/writing/">field notes</a> where every number was measured on my own server: which of
+          what a server sends actually reaches the AI, what a chat card really
+          weighs, what the platform silently drops.
+        </p>
+
+        <p>
+          Beside yesmcp I build two products with a small team. They are not the
+          subject of this site, but they are why the notes here come from live
+          systems rather than from reading documentation.
+        </p>
+
+        <h2>The path, briefly</h2>
+
+        <p>
+          I have been building agent systems full-time for two years. Before that
+          I ran my own e-commerce projects on Amazon and Shopify. In these two
+          years: leading AI on contract at a fintech, agent solutions shipped
+          across very different industries, and onboarding executives and teams
+          onto agent systems. The vertical never mattered much to me. What matters is a challenge where an
+          agent system can be pushed to its real potential.
+        </p>
+
+        <h2>Where I can be useful</h2>
+
+        <ul>
+          <li><strong>Your business inside AI chats.</strong> Customers ask, choose and book inside Claude and ChatGPT; an MCP connector is how a business gets there.</li>
+          <li><strong>Departments working by hand.</strong> Agent systems I have shipped in HR, sales, marketing, lead generation and IT.</li>
+          <li><strong>Getting the team past demos.</strong> I bring teams and executives into agent systems past the surface level, on their own work.</li>
+          <li><strong>Problems with no known answer.</strong> R&amp;D is my favourite work: the answer has to be found, not looked up.</li>
+        </ul>
+
+        <h2>Who I work with, and who I don't</h2>
+
+        <p>
+          I need a real problem. If something in your company hurts: enquiries go
+          unanswered, the team drowns in routine, customers wait, then we have
+          something to talk about, even if you have no idea yet what AI has to do
+          with it. Figuring that out is exactly what the free <a href="/scenario-map/">scenario map</a> is for. What I don't take on is «add some AI, everyone is
+          doing it». Where there is nothing to solve, there is nothing for me to
+          strengthen.
+        </p>
+
+        <h2>How I work</h2>
+
+        <p>
+          I live in Cyprus and spend ten to twelve hours a day inside agent
+          systems, running two or three projects in parallel. That is not a
+          schedule, it is the thing I love doing. The yesmcp routine, monitoring,
+          checks and daily operations, is run by a team of AI agents I built
+          myself. Every pilot is answered for by me personally: the agents
+          execute, I decide and I sign. This site, the connector and the census
+          are built with the same instruments I offer to businesses.
+        </p>
+
+        <h2>What happens to your system without me</h2>
+
+        <p>
+          The honest answer to the fear of hiring one person. The code and the
+          specification belong to you from day one, and you can move them to your
+          own servers whenever you choose. The connector stands on an open
+          standard, not on my private framework: the pool of engineers who can
+          read it grows every month. The documentation is kept so that a stranger
+          can pick the system up without me.
+        </p>
+
+        <h2>The standard this site is held to</h2>
+
+        <p>
+          Everything published here is something I ran myself, and every number
+          was measured on a live system. The prose is written with AI assistance,
+          which seems worth saying out loud on a site about AI tooling. Where
+          something is still a guess, it says so. If something here turns out to
+          be wrong, I would rather hear it and correct it in place with a dated
+          note than quietly edit the page.
+        </p>
+
+        <div class="not-prose my-10 rounded-2xl border border-ink/10 bg-white/40 p-7 text-center">
+          <p class="text-ink-soft">
+            Have a real problem worth solving? Tell me, one call is enough.
+          </p>
+          <a href="https://t.me/yesmcp_bot?start=about"
+            class="mt-5 inline-block rounded-full bg-yes-deep px-7 py-3.5 font-medium text-white shadow-[0_12px_32px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+            Chat on Telegram
+          </a>
+        </div>
+
+        <h2>Elsewhere</h2>
+
+        <p>
+          <a href="https://www.linkedin.com/in/awrshift/" rel="me">LinkedIn</a> ·
+          <a href="https://github.com/awrshift" rel="me">GitHub</a> ·
+          <a href="https://x.com/awrshift" rel="me">X</a> ·
+          <a href="https://t.me/yesmcp_bot?start=about">Telegram</a> ·
+          <a href="mailto:yes@yesmcp.com">yes@yesmcp.com</a>
+        </p>
+
+        <div class="evidence">
+          <p class="eyebrow">Who is responsible for this site</p>
+          <p>
+            Yes MCP is operated by Serhii Kravchenko. Contact for anything, including
+            corrections and takedown requests: <a href="mailto:yes@yesmcp.com">yes@yesmcp.com</a>.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <p class="mt-14 border-t border-ink/10 pt-7 font-mono text-sm">
+      <a href="/" class="link-und text-ink-soft">← Back to the front page</a>
+    </p>
+  </main>
+
+  <SiteFooter switchHref="/ua/about/" />
+</Layout>

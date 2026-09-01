@@ -1,0 +1,132 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import { expandDataTokens } from "../../lib/census";
+import ArticleFooter from "../../components/ArticleFooter.astro";
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("writing");
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: CollectionEntry<"writing">;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+const path = `/writing/${post.id}/`;
+const url = `https://yesmcp.com${path}`;
+
+// Frontmatter strings may carry {{census:...}} tokens (src/lib/census.ts) so
+// data articles' metadata stays as fresh as their tables. Expanded here, once.
+const [description, ogDescription, schemaDescription, lede, provenance] =
+  await Promise.all(
+    [d.description, d.ogDescription, d.schemaDescription, d.lede, d.provenance].map(
+      (s) => expandDataTokens(s, "en")
+    )
+  );
+
+// hreflang pair exists iff a Ukrainian twin with the same id is in writingUa.
+const uaTwin = (await getCollection("writingUa")).find((p) => p.id === post.id);
+const uaPath = uaTwin ? `/ua/writing/${post.id}/` : undefined;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": `${url}#article`,
+      headline: d.headline,
+      description: schemaDescription,
+      datePublished: d.date,
+      dateModified: d.dateModified,
+      url,
+      mainEntityOfPage: { "@id": url },
+      author: { "@id": "https://yesmcp.com/#serhii" },
+      publisher: { "@id": "https://yesmcp.com/#organization" },
+      inLanguage: "en",
+      isAccessibleForFree: true,
+    },
+    {
+      "@type": "Person",
+      "@id": "https://yesmcp.com/#serhii",
+      name: "Serhii Kravchenko",
+      jobTitle: "AI engineer",
+      url: "https://yesmcp.com/about/",
+      sameAs: [
+        "https://www.linkedin.com/in/awrshift/",
+        "https://x.com/awrshift",
+        "https://github.com/awrshift",
+      ],
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://yesmcp.com/#organization",
+      name: "Yes MCP",
+      url: "https://yesmcp.com/",
+      sameAs: ["https://www.linkedin.com/company/yesmcp/"],
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${url}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://yesmcp.com/" },
+        { "@type": "ListItem", position: 2, name: "Writing", item: "https://yesmcp.com/writing/" },
+        { "@type": "ListItem", position: 3, name: d.headline },
+      ],
+    },
+  ],
+};
+---
+
+<Layout
+  title={`${d.title} | yesmcp`}
+  description={description}
+  ogTitle={d.ogTitle}
+  ogDescription={ogDescription}
+  ogImage={d.ogImage}
+  ogType="article"
+  path={path}
+  alternates={uaPath ? { en: path, uk: uaPath } : undefined}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav switchHref={uaPath} />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-20 sm:pt-36">
+    <article>
+      <p class="font-mono text-xs text-ink-faint">
+        By <a href="/about/" class="link-und text-ink-soft">Serhii Kravchenko</a> · <time datetime={d.date}>{d.date}</time> · {provenance}
+      </p>
+
+      <h1 class="mt-4 font-display text-[clamp(1.7rem,4.6vw,2.8rem)] leading-tight font-800">
+        {d.headline}
+      </h1>
+
+      <p class="mt-7 text-lg leading-relaxed text-ink-soft">
+        <strong class="font-normal text-ink">{lede}</strong>
+      </p>
+
+      <div class="prose-ink mt-10">
+        <Content />
+      </div>
+    </article>
+
+    <ArticleFooter lang="en" url={url} title={d.headline} />
+
+    <p class="mt-14 border-t border-ink/10 pt-7 font-mono text-sm">
+      <a href="/writing/" class="link-und text-ink-soft">← All writing</a>
+    </p>
+  </main>
+
+  <SiteFooter switchHref={uaPath} />
+</Layout>

@@ -1,0 +1,61 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import ScenarioMap, { type ChromeStrings } from "../components/ScenarioMap.astro";
+import raw from "../data/diagnostic.json";
+import { asDiagnostic } from "../lib/scenario-map";
+
+const data = asDiagnostic(raw);
+
+// Every shelf bullet, question and feasibility note below is the connector's
+// own owner-reviewed copy, synced verbatim by scripts/sync-diagnostic.mjs.
+// The strings in `t` are page chrome and are the only new English on the page.
+const t: ChromeStrings = {
+  eyebrow: "scenario map",
+  heading: "Your scenario map",
+  intro:
+    "Pick your business, answer two questions, see what your customers and your team could do in an AI chat.",
+  step1: "1. Pick your business",
+  otherTitle: "Something close to these",
+  otherText: "Not on the list? Pick the nearest one, and on the call we map that playbook onto your actual business.",
+  step2: "2. Answer two questions",
+  resultHeading: "Your map",
+  customersShelf: "Your customers",
+  teamShelf: "Your team",
+  // The count is read from the data, not typed: the connector gained an eighth
+  // playbook while this page was being built, and a hardcoded "seven" would
+  // have gone stale silently.
+  browseHeading: `Or browse all ${data.verticals.length} maps`,
+  browseHint: "Every map is on this page already, no answers required.",
+  ctaHeading: "Talk your map through",
+  ctaText: "The same diagnostic runs inside our own connector, live in Claude. Bring your map to us and we will tell you what the first build would actually cover.",
+  ctaPrimary: "Discuss your map",
+  ctaSecondary: "See it live in Claude",
+  verdict: { green: "green", yellow: "yellow" },
+  change: "Change",
+};
+---
+
+<Layout
+  title="Your scenario map: what an AI chat could do for your business | yesmcp"
+  description="Pick your business type, answer two questions, and see the concrete scenarios your customers and your team could run inside an AI chat, plus an honest verdict on how ready your systems are."
+  ogTitle="Your scenario map"
+  ogDescription={`${data.verticals.length} business playbooks: what your customers and your team could do inside Claude or ChatGPT, and what it takes to get there.`}
+  path="/scenario-map/"
+  alternates={{ en: "/scenario-map/", uk: "/ua/scenario-map/" }}
+>
+  <SiteNav switchHref="/ua/scenario-map/" />
+  <ScenarioMap
+    data={data}
+    t={t}
+    connectHref="/connect/"
+    verticalPages={{
+      "professional-services": {
+        href: "/for/professional-services/",
+        label: "What it costs, how long it takes, and what about the risks: the page for your field",
+      },
+    }}
+  />
+  <SiteFooter />
+</Layout>

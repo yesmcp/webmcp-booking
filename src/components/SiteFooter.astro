@@ -1,0 +1,33 @@
+---
+interface Props {
+  width?: string;
+  lang?: "en" | "uk";
+  /** Path of the same page in the other language; renders the EN/UA switch. */
+  switchHref?: string;
+}
+const { width = "max-w-3xl", lang = "en", switchHref } = Astro.props;
+const t =
+  lang === "uk"
+    ? { tagline: "© 2026 yesmcp · AI-інженерія: Сергій Кравченко", try: "Спробуйте конектор", book: "Запис на розмову", writing: "Нотатки", about: "Про мене", privacy: "Приватність", notrack: "без cookie, без аналітики, без трекерів", switch: "English" }
+    : { tagline: "© 2026 yesmcp · AI engineering by Serhii Kravchenko", try: "Try the connector", book: "Book a call", writing: "Writing", about: "About", privacy: "Privacy", notrack: "no cookies, no analytics, no trackers", switch: "Українська" };
+---
+
+<footer class="border-t border-ink/10 py-8">
+  <div class={`mx-auto flex ${width} flex-wrap items-center justify-between gap-3 px-5 font-mono text-xs text-ink-faint`}>
+    <span>{t.tagline}</span>
+    <span class="flex flex-wrap items-center gap-3">
+      <a href={lang === "uk" ? "/ua/connect/" : "/connect/"} class="link-und">{t.try}</a>
+      <a href={lang === "uk" ? "/ua/book/" : "/book/"} class="link-und">{t.book}</a>
+      <a href={lang === "uk" ? "/ua/writing/" : "/writing/"} class="link-und">{t.writing}</a>
+      <a href={lang === "uk" ? "/ua/about/" : "/about/"} class="link-und">{t.about}</a>
+      <a href={lang === "uk" ? "/ua/privacy/" : "/privacy/"} class="link-und">{t.privacy}</a>
+      <a href="https://t.me/yesmcp_bot?start=footer" class="link-und">Telegram</a>
+      <a href="mailto:yes@yesmcp.com" class="link-und">yes@yesmcp.com</a>
+      {switchHref && <a href={switchHref} class="link-und">{t.switch}</a>}
+    </span>
+    {/* A checkable claim, not a slogan: it links to the page that owns and
+        details it, so a future exception has a home instead of a lie (board
+        adjudication 2026-08-30 — no bare absolutes in a shared component). */}
+    <a href={lang === "uk" ? "/ua/privacy/" : "/privacy/"} class="link-und">{t.notrack}</a>
+  </div>
+</footer>

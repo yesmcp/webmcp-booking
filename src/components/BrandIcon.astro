@@ -1,0 +1,42 @@
+---
+// Monochrome brand glyph, inlined at build time from the simple-icons package
+// (MIT; each glyph is nominative use of the respective trademark). Rendered as
+// currentColor so it inherits the chip's ink — never brand-colored, to keep the
+// one-green-accent rule. ChatGPT/OpenAI is deliberately ABSENT: simple-icons
+// removed it at the brand owner's request, so the ticker keeps it text-only.
+import * as si from "simple-icons";
+
+const registry: Record<string, { path: string; title: string }> = {
+  claude: si.siClaude,
+  mistral: si.siMistralai,
+  perplexity: si.siPerplexity,
+  gemini: si.siGooglegemini,
+  gcal: si.siGooglecalendar,
+  gsheets: si.siGooglesheets,
+  gdrive: si.siGoogledrive,
+  notion: si.siNotion,
+  hubspot: si.siHubspot,
+  jira: si.siJira,
+  trello: si.siTrello,
+  asana: si.siAsana,
+  quickbooks: si.siQuickbooks,
+  xero: si.siXero,
+  shopify: si.siShopify,
+  woocommerce: si.siWoocommerce,
+  zendesk: si.siZendesk,
+  intercom: si.siIntercom,
+  telegram: si.siTelegram,
+  clickup: si.siClickup,
+  mcp: si.siModelcontextprotocol,
+};
+
+interface Props {
+  name: string;
+  class?: string;
+}
+const { name, class: cls = "h-3 w-3" } = Astro.props;
+const icon = registry[name];
+if (!icon) throw new Error(`BrandIcon: unknown icon "${name}"`);
+---
+
+<svg viewBox="0 0 24 24" class={cls} fill="currentColor" aria-hidden="true"><path d={icon.path}></path></svg>

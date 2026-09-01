@@ -1,0 +1,168 @@
+---
+import { getCollection } from "astro:content";
+import { CENSUS_CATEGORY_IDS } from "../content.config";
+import { ukConnectors } from "../lib/census";
+
+// The census table for data articles (EN + UA). Single source of truth for
+// every published count: prose must reference this table, never hardcode
+// numbers (evergreen rule, owner decision 2026-08-24). Renders the latest
+// snapshot for the given ecosystem; once a previous snapshot exists, a
+// week-over-week delta column appears automatically. Zero client JS.
+interface Props {
+  ecosystem: "claude" | "chatgpt";
+  lang?: "en" | "uk";
+}
+const { ecosystem, lang = "en" } = Astro.props;
+
+type CategoryId = (typeof CENSUS_CATEGORY_IDS)[number];
+
+// Exhaustive by construction: adding an id to the schema enum without adding
+// labels here fails `astro check` (Record over the union type).
+const LABELS: Record<CategoryId, { en: string; uk: string }> = {
+  productivity: { en: "Productivity", uk: "Продуктивність" },
+  data: { en: "Data", uk: "Дані" },
+  "sales-marketing": { en: "Sales and marketing", uk: "Продажі й маркетинг" },
+  code: { en: "Code", uk: "Код" },
+  "financial-services": { en: "Financial services", uk: "Фінансові послуги" },
+  communication: { en: "Communication", uk: "Комунікації" },
+  design: { en: "Design", uk: "Дизайн" },
+  legal: { en: "Legal", uk: "Юридичні" },
+  "life-sciences": { en: "Life sciences", uk: "Life sciences" },
+  health: { en: "Health", uk: "Здоров'я" },
+};
+
+const t =
+  lang === "uk"
+    ? {
+        category: "Категорія",
+        count: "Конекторів",
+        share: "Частка",
+        delta: "Зміна",
+        countedIntro: "Перепис",
+        countedOn: "станом на",
+        totalLine: (n: number, c: number) =>
+          `${n.toLocaleString("uk-UA")} ${ukConnectors(n)} у ${c} категоріях`,
+        note: "Конектор може стояти в кількох категоріях, тому частки в сумі перевищують 100%. Каталог змінюється щотижня; ця таблиця оновлюється з кожного нового перепису.",
+        vsPrev: "проти перепису",
+      }
+    : {
+        category: "Category",
+        count: "Connectors",
+        share: "Share",
+        delta: "Change",
+        countedIntro: "Census",
+        countedOn: "as of",
+        totalLine: (n: number, c: number) =>
+          `${n.toLocaleString("en-US")} connectors across ${c} categories`,
+        note: "A connector can sit in more than one category, so shares sum past 100%. The directory changes weekly; this table updates with every new count.",
+        vsPrev: "vs the count of",
+      };
+
+const snapshots = (await getCollection("census"))
+  .filter((s) => s.data.ecosystem === ecosystem)
+  .sort((a, b) => b.data.counted_at.localeCompare(a.data.counted_at));
+
+if (snapshots.length === 0) {
+  throw new Error(`CensusTable: no census snapshots for ecosystem "${ecosystem}"`);
+}
+
+const latest = snapshots[0].data;
+const prev = snapshots[1]?.data;
+const prevCounts = new Map(prev?.categories.map((c) => [c.id, c.count]) ?? []);
+
+const p =
+  lang === "uk"
+    ? {
+        badge: "відкритий датасет",
+        census: (n: number) => `перепис №${n}`,
+        raw: "сирі дані (JSON)",
+        mechanism:
+          "Таблиця оновлюється програмно: новий перепис каталогу перебудовує її автоматично, текст статті не змінюється. Метод кожного перепису зафіксовано в датасеті. Дані відкриті (CC BY 4.0), цитуйте з посиланням на yesmcp.com.",
+      }
+    : {
+        badge: "open dataset",
+        census: (n: number) => `count #${n}`,
+        raw: "raw data (JSON)",
+        mechanism:
+          "This table updates programmatically: every new count of the directory rebuilds it automatically, without touching the article's text. The method of every count is recorded in the dataset. The data is open (CC BY 4.0); cite with a link to yesmcp.com.",
+      };
+
+// schema.org/Dataset — makes the article's data weight machine-readable
+// (Google Dataset Search). Same @id from both language pages → one entity.
+const datasetLd = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": `https://yesmcp.com/data/directory.json#${ecosystem}`,
+  name: `${ecosystem === "claude" ? "Claude" : "ChatGPT"} connector directory census (yesmcp)`,
+  description: `Recurring census of the ${ecosystem === "claude" ? "claude.ai connector" : "ChatGPT app"} directory: total listings and per-category counts taken on a logged-in profile. Snapshot history included; per-count method recorded in the data.`,
+  url: new URL(Astro.url.pathname, "https://yesmcp.com").href,
+  creator: { "@id": "https://yesmcp.com/#organization" },
+  license: "https://creativecommons.org/licenses/by/4.0/",
+  isAccessibleForFree: true,
+  dateModified: latest.counted_at,
+  temporalCoverage: `${snapshots[snapshots.length - 1].data.counted_at}/${latest.counted_at}`,
+  measurementTechnique: latest.method,
+  variableMeasured: "number of directory listings per category",
+  distribution: {
+    "@type": "DataDownload",
+    encodingFormat: "application/json",
+    contentUrl: "https://yesmcp.com/data/directory.json",
+  },
+};
+
+const rows = [...latest.categories]
+  .sort((a, b) => b.count - a.count)
+  .map((c) => {
+    const before = prevCounts.get(c.id);
+    return {
+      label: LABELS[c.id][lang],
+      count: c.count,
+      share: Math.round((c.count / latest.total) * 100),
+      delta: before === undefined ? undefined : c.count - before,
+    };
+  });
+const hasDelta = prev !== undefined;
+const fmtDelta = (d: number) => (d > 0 ? `+${d}` : d === 0 ? "±0" : `${d}`);
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(datasetLd)} />
+
+<div class="rounded-2xl border border-ink/10 bg-white/40 px-5 py-4">
+  <p class="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-meta tracking-widest uppercase">
+    <span class="pulse-dot inline-block h-2 w-2 rounded-full bg-yes"></span>
+    <span class="font-semibold text-yes-deep">{p.badge}</span>
+    <span class="text-ink-soft">{p.census(snapshots.length)} · {latest.counted_at}</span>
+    <a href="/data/directory.json" class="link-und normal-case tracking-normal text-ink-soft">{p.raw}</a>
+  </p>
+  <p class="mt-2 text-note leading-relaxed text-ink-soft">{p.mechanism}</p>
+</div>
+
+<p>
+  <strong>{t.countedIntro} {t.countedOn} {latest.counted_at}: {t.totalLine(latest.total, latest.categories.length)}.</strong>
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>{t.category}</th>
+      <th>{t.count}</th>
+      <th>{t.share}</th>
+      {hasDelta && <th>{t.delta}</th>}
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map((r) => (
+      <tr>
+        <td>{r.label}</td>
+        <td>{r.count}</td>
+        <td>{r.share}%</td>
+        {hasDelta && <td>{r.delta === undefined ? "new" : fmtDelta(r.delta)}</td>}
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<p class="table-note">
+  {t.note}
+  {hasDelta && ` ${t.delta}: ${t.vsPrev} ${prev.counted_at}.`}
+</p>

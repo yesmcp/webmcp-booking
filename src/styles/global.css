@@ -1,0 +1,578 @@
+@import "tailwindcss";
+@import "./fonts.css";
+
+@theme {
+  --color-paper: #f5f0e6;
+  --color-paper-deep: #ece5d5;
+  --color-ink: #17140e;
+  --color-ink-soft: #4b4538;
+  --color-ink-faint: #6b6455;
+  --color-yes: #0b9d4e;
+  --color-yes-deep: #067a3a;
+  /* the green that works ON dark surfaces: 7.99:1 on ink, where --color-yes
+     manages 5.2 on plain ink and drops under AA once a green tint sits behind
+     it. Was hardcoded as #2ec27e in three files until the design gate found it. */
+  --color-yes-bright: #2ec27e;
+  --color-amber: #e8a020;
+  --color-claude: #d97757; /* Anthropic terracotta — the Clawd mascot on the bridge */
+  --color-chat: #1d1a13;
+  /* the raised panel inside a dark chat mock: back in @theme because the
+     input/output cut it served came back on the vertical pages, where the
+     owner sent it when it left the home page (2026-08-26). */
+  --color-chat-raised: #2a2619;
+
+  --font-display: "Fixel Display", sans-serif;
+  --font-body: "Fixel Text", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  /* ── the small end of the type scale ──────────────────────────────────
+     Tailwind's own scale starts at 12px and jumps in 2px steps, which is
+     too coarse below 16px: the site kept reaching for text-[10px] through
+     text-[15px] and ended up with 152 one-off sizes across five values.
+     A size written as a number is a size nobody can audit, so each of
+     those five is named for the ROLE it plays. A sixth name means a sixth
+     role — if a new size has no role to state, it is a mistake.
+
+     Roles bigger than this are Tailwind's own: text-sm body in dense
+     places, text-base body, text-lg/text-xl lead, and the display sizes. */
+  --text-stamp: 10px;  /* mono uppercase labels, chips inside the mocks */
+  --text-meta: 11px;   /* technical captions: tool rows, notes under a block */
+  --text-mini: 12px;   /* small UI inside the mocks, one-line section footnote */
+  --text-note: 13px;   /* small prose: mock replies, italic asides, mock buttons */
+  --text-card: 15px;   /* card text — heavier than a caption, lighter than body */
+}
+
+@utility font-600 {
+  font-weight: 600;
+}
+
+@utility font-800 {
+  font-weight: 800;
+}
+
+/* ── language switch tag ─────────────────────────────────────────────────
+   A miniature tag hanging off the bottom edge of the fixed header, tilted
+   like a real swing tag. Markup: components/LangTag.astro. The entrance
+   keyframe gives one pendulum swing so the eye finds it; hover straightens
+   it, which telegraphs "clickable". */
+.lang-tag {
+  position: absolute;
+  top: 100%;
+  right: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem 0.35rem 0.45rem;
+  background: var(--color-paper);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+  border-top: none;
+  border-radius: 0 0 0.55rem 0.55rem;
+  box-shadow: 0 10px 18px -12px rgba(23, 20, 14, 0.5);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-soft);
+  transform: rotate(-7deg);
+  transform-origin: top center;
+  animation: lang-tag-swing 1.6s ease-out 0.6s 1 both;
+  transition: transform 0.25s ease, color 0.2s, border-color 0.2s;
+}
+.lang-tag:hover {
+  animation: none;
+  transform: rotate(0deg) translateY(1px);
+  color: var(--color-ink);
+  border-color: color-mix(in srgb, var(--color-yes) 55%, transparent);
+}
+.lang-tag-hole {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 35%, transparent);
+}
+.lang-tag-sw {
+  font-size: 11px;
+  color: var(--color-yes-deep);
+}
+.lang-tag-flag {
+  width: 14px;
+  height: 10.5px;
+  border-radius: 1.5px;
+  outline: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+@keyframes lang-tag-swing {
+  0% { transform: rotate(-15deg); }
+  40% { transform: rotate(-2deg); }
+  70% { transform: rotate(-10deg); }
+  100% { transform: rotate(-7deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lang-tag { animation: none; }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  overflow-x: hidden;
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-yes);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── paper grain ─────────────────────────────── */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── load-in stagger ─────────────────────────── */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+.rise {
+  opacity: 0;
+  animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 120ms);
+}
+
+/* ── chat message sequence ───────────────────── */
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.msg {
+  opacity: 0;
+  animation: msg-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+.pulse-dot { animation: blink 1.4s ease-in-out infinite; }
+
+/* ── scroll reveal (only when JS is running) ─── */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+              transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--r, 0s);
+}
+html.js .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── marquee ─────────────────────────────────── */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker { animation: ticker 28s linear infinite; }
+
+/* ── underline accent for links ──────────────── */
+.link-und {
+  background-image: linear-gradient(var(--color-yes), var(--color-yes));
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.35s ease;
+}
+.link-und:hover { background-size: 100% 2px; }
+
+/* ── long-form prose (writing + about) ───────── */
+.prose-ink {
+  color: var(--color-ink-soft);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+.prose-ink > * + * { margin-top: 1.25em; }
+
+.prose-ink h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.15rem, 2.6vw, 1.5rem);
+  line-height: 1.3;
+  color: var(--color-ink);
+  margin-top: 2.4em;
+}
+.prose-ink h3 {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--color-ink);
+  margin-top: 2em;
+}
+.prose-ink strong { color: var(--color-ink); font-weight: 600; }
+
+.prose-ink a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-yes) 55%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.25s ease;
+}
+.prose-ink a:hover { text-decoration-color: var(--color-yes); }
+
+.prose-ink ul,
+.prose-ink ol { padding-left: 1.15rem; }
+.prose-ink ul { list-style: none; padding-left: 0; }
+.prose-ink ul > li {
+  position: relative;
+  padding-left: 1.4rem;
+}
+.prose-ink ul > li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--color-yes-deep);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+.prose-ink ol { list-style: decimal; }
+.prose-ink li + li { margin-top: 0.6em; }
+
+.prose-ink code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--color-yes-deep);
+  background: color-mix(in srgb, var(--color-ink) 5%, transparent);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.prose-ink pre {
+  background: var(--color-chat);
+  color: #e7e2d5;
+  border-radius: 1rem;
+  padding: 1.15rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.prose-ink pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* data tables inside articles (the census/scenario tables) */
+.prose-ink table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.prose-ink th,
+.prose-ink td {
+  padding: 0.55rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+}
+.prose-ink thead th {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+  border-bottom: 2px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
+}
+.prose-ink tbody tr:hover { background: rgb(255 255 255 / 0.4); }
+.prose-ink .table-note {
+  margin-top: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-ink-faint);
+}
+
+/* FAQ accordion inside articles — collapsed by default, card look mirrors the
+   home-page FAQ. Content stays in the DOM (Google and LLM readers see it). */
+.prose-ink details {
+  border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  background: rgb(255 255 255 / 0.4);
+  border-radius: 1rem;
+  padding: 0.85rem 1.25rem;
+}
+.prose-ink details + details { margin-top: 0.6rem; }
+.prose-ink details summary {
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.prose-ink details summary::-webkit-details-marker { display: none; }
+.prose-ink details summary::before {
+  content: "→";
+  margin-right: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--color-yes-deep);
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.prose-ink details[open] summary::before { transform: rotate(90deg); }
+.prose-ink details summary h3 {
+  display: inline;
+  margin: 0;
+  font-size: 1rem;
+}
+.prose-ink details > p {
+  margin-top: 0.7rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.prose-ink blockquote {
+  border-left: 3px solid var(--color-yes);
+  padding-left: 1.15rem;
+  font-size: 1.05em;
+  color: var(--color-ink);
+}
+.prose-ink blockquote p { margin-top: 0.6em; }
+.prose-ink blockquote > :first-child { margin-top: 0; }
+
+/* boxed measurement callout, ported from the previous site */
+.prose-ink .evidence {
+  border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  background: rgb(255 255 255 / 0.45);
+  border-radius: 1rem;
+  padding: 1.35rem 1.5rem;
+}
+.prose-ink .evidence > * + * { margin-top: 1rem; }
+.prose-ink .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+/* Bridge liveliness (home page): marching dashes along the arc, a hop for the
+   agent runners (composes with their SMIL animateMotion because it sits on a
+   separate nested <g>), and an arrival pulse on the destination dot. All three
+   are CSS animations precisely so prefers-reduced-motion can switch them off —
+   SMIL can't be stopped from CSS. */
+.bridge-path-flow { animation: bridge-dash 0.9s linear infinite; }
+@keyframes bridge-dash { to { stroke-dashoffset: -10; } }
+.bridge-hop {
+  animation: bridge-hop 0.52s ease-in-out infinite;
+  animation-delay: var(--hop, 0s);
+}
+@keyframes bridge-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+/* The arrival ring and the "+$" are SMIL (see the bridge SVG) so they stay on
+   the runners' clock — CSS can only switch the whole group off. */
+
+/* ── coin edge ───────────────────────────────────────────────────────────
+   The seam between the two halves of the scenario catalog: milling, like the
+   edge of a coin. It reads as one object cut in two rather than two blocks
+   stacked, which is the whole argument of that section — one connector, two
+   sides. Decorative, so it carries aria-hidden in the markup. */
+.coin-edge {
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-ink) 22%, transparent) 0 1px,
+    transparent 1px 7px
+  );
+}
+.coin-edge-dark {
+  background-image: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-paper) 22%, transparent) 0 1px,
+    transparent 1px 7px
+  );
+}
+
+
+/* ── the /book/ picker ───────────────────────────────────────────────────
+   A month calendar and the chosen day's times, side by side from sm up and
+   stacked in reading order below it. The shape is the market's on purpose:
+   a visitor should spend their attention on which half-hour suits them, not
+   on learning an interface. Everything here is in ONE timezone, the one the
+   select above it names. */
+.book-picker {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+  border-radius: 1rem;
+  background: var(--color-paper-deep);
+}
+/* Tailwind's utilities sit in a LAYER, and unlayered rules beat a layer: the
+   `display: grid` above would quietly outrank `.hidden` and keep the picker on
+   screen through the loading state and the confirmation. Say it out loud. */
+.book-picker.hidden { display: none; }
+@media (min-width: 40rem) {
+  .book-picker {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem;
+    padding: 1.75rem;
+  }
+}
+
+.book-cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.book-month { font-weight: 600; }
+/* Ukrainian Intl hands back "серпень 2026 р." and Tailwind's `capitalize` would
+   turn the abbreviation into "Р." as well. Only the first letter is ours to
+   raise; the rest is the locale's business. */
+.book-month::first-letter,
+.book-day-head::first-letter { text-transform: uppercase; }
+.book-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  line-height: 1;
+  cursor: pointer;
+}
+.book-nav:hover:not([disabled]) { border-color: var(--color-yes-deep); }
+.book-nav[disabled] {
+  color: var(--color-ink-faint);
+  border-color: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  background: transparent;
+  cursor: default;
+}
+
+.book-grid {
+  width: 100%;
+  margin-top: 0.85rem;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 2px;
+}
+.book-grid th {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+  padding-bottom: 0.3rem;
+}
+/* A day with nothing open is not a target: it is disabled, not dimmed-and-
+   clickable. A day that has windows carries the green outline that the rest
+   of the site uses for "yes, here". */
+.book-day-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.4rem;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-card);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.book-day-btn.has-slots {
+  background: var(--color-paper);
+  border-color: color-mix(in srgb, var(--color-yes) 45%, transparent);
+  font-weight: 600;
+}
+.book-day-btn.has-slots:hover { border-color: var(--color-yes-deep); }
+.book-day-btn[disabled] {
+  color: var(--color-ink-faint);
+  cursor: default;
+}
+.book-day-btn[aria-pressed="true"] {
+  background: var(--color-yes-deep);
+  border-color: var(--color-yes-deep);
+  color: var(--color-paper);
+}
+.book-day-btn.is-today { text-decoration: underline; text-underline-offset: 3px; }
+
+.book-tz { margin-top: 1.1rem; }
+.book-tz select {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: var(--text-card);
+}
+
+.book-slots {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+/* The cap is desktop-only on purpose: on a phone the page already scrolls, and
+   a scroll region inside a scroll region is how a visitor loses the last slot. */
+@media (min-width: 40rem) {
+  .book-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 19rem;
+    overflow-y: auto;
+  }
+}
+.book-empty { font-size: var(--text-card); color: var(--color-ink-soft); }
+
+/* One open window. It carries a single start time, in the selected zone:
+   the second reading of the clock belongs on the summary below the form,
+   where the meeting stops being browsed and starts being fixed. */
+.slot {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  text-align: center;
+  border-radius: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.slot:hover { border-color: var(--color-yes-deep); }
+.slot[aria-pressed="true"] {
+  background: var(--color-yes-deep);
+  border-color: var(--color-yes-deep);
+  color: var(--color-paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .msg { animation-duration: 0.01s; animation-delay: 0s; }
+  html.js .reveal { transition: none; opacity: 1; transform: none; }
+  .ticker { animation: none; }
+  /* SMIL travellers and the payout burst on the home-page bridge can't be
+     paused from CSS — hide them */
+  .bridge-traveler, .bridge-payout { display: none; }
+  .pulse-dot { animation: none; }
+  .bridge-path-flow, .bridge-hop { animation: none; }
+}

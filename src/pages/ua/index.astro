@@ -1,0 +1,865 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import LangTag from "../../components/LangTag.astro";
+import SiteLogo from "../../components/SiteLogo.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import HeroChatStories from "../../components/HeroChatStories.astro";
+import BrandIcon from "../../components/BrandIcon.astro";
+import BelieverGate from "../../components/BelieverGate.astro";
+import TwoFaces from "../../components/TwoFaces.astro";
+import { siClaudecode, siGooglegemini, siPerplexity, siGithubcopilot, siOllama } from "simple-icons";
+
+// Ukrainian home page. Mirrors ../index.astro section for section — when the
+// English page changes, this file changes in the same commit (see CLAUDE.md).
+// Copy voice: native Ukrainian product copy (monobank-school rhythm: short,
+// verb-first, conversational), NOT a translation calque. Owner rule: no em/en
+// dashes in the visible text.
+// Чотири питання, які власник ставить перед тим, як написати нам.
+// Оголошені тут, бо вузол FAQPage нижче будується саме з цього масиву:
+// один дім для факту, тож сторінка і структуровані дані не розійдуться.
+const faqs = [
+  {
+    q: "Хіба мій розробник не зробить це сам?",
+    a: "Зробить. Питання не в тому, хто пише сервер: питання в тому, хто вирішує, які п'ять запитань ваших клієнтів мають жити в чаті, де проходить межа, яку асистент не переступає ніколи, і хто дивиться в п'ятницю ввечері, коли сценарій починає відповідати неправильно. Саме над цим ми працюємо разом із вашими розробниками.",
+  },
+  {
+    q: "Як саме мої клієнти отримають конектор?",
+    a: "У Claude все просто: сторінка з одним посиланням, клієнт додає ваш конектор за хвилину, на будь-якому тарифі. У ChatGPT шлях лежить через офіційний каталог застосунків: OpenAI переглядає кожну заявку, і коли ви захочете місце там, ми готуємо вашу заявку і проводимо її через рев'ю. Ми чесно кажемо, що працює вже сьогодні, а що ще чекає на рев'ю.",
+  },
+  {
+    q: "Що з нашими даними й безпекою?",
+    a: "Ваші дані живуть у ваших системах: конектор читає їх з обмеженими правами, прямого доступу до бази немає. Читання і запис розділені, незворотні дії просять підтвердження перед запуском. Гостьова бронь зберігає ім'я та email, і все; коли сценарію справді потрібна особистість, ми будуємо його на OAuth 2.1, і це теж працює наживо. А ще ми атакуємо власний сервер підробленими заголовками й ворожими запитами раніше, ніж це спробує хтось інший.",
+  },
+  {
+    q: "Скільки це коштує і чому тут немає ціни?",
+    a: "Бо кожен конектор будується під один бізнес, і число без цього обсягу було б вигадкою. Діагностика безкоштовна, і з цього безкоштовного кроку ви виходите з числом для свого випадку. Замість прайсу два зобов'язання: якщо перший сценарій виявиться не тим, наступний будуємо з вашої мапи без доплати; а проти системи з API перший сценарій займає близько двох тижнів.",
+  },
+  {
+    q: "Чи не прив'яжусь я до вас?",
+    a: "Ні. Специфікація і код ваші з першого дня, і ви можете перенести конектор на свої сервери, коли захочете. Ми тримаємо клієнтів роботою, а не замком.",
+  },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://yesmcp.com/#organization",
+      name: "Yes MCP",
+      alternateName: "yesmcp",
+      url: "https://yesmcp.com/",
+      email: "yes@yesmcp.com",
+      description:
+        "Yes MCP проєктує, запускає і супроводжує конектори Model Context Protocol для бізнесів, щоб їхні клієнти могли бронювати, замовляти, перевіряти статус і отримувати підтримку всередині ШІ-чатів, таких як Claude і ChatGPT.",
+      founder: { "@id": "https://yesmcp.com/#serhii" },
+      sameAs: [
+        "https://www.linkedin.com/company/yesmcp/",
+        "https://github.com/yesmcp",
+        "https://x.com/YesMCPapp",
+        "https://www.youtube.com/@YesMCPapp",
+        "https://t.me/yesmcp",
+        "https://www.producthunt.com/@yesmcpapp",
+      ],
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: "yes@yesmcp.com",
+        url: "https://t.me/yesmcp_bot",
+        availableLanguage: ["en", "uk"],
+      },
+    },
+    {
+      "@type": "Person",
+      "@id": "https://yesmcp.com/#serhii",
+      name: "Serhii Kravchenko",
+      jobTitle: "AI engineer",
+      url: "https://yesmcp.com/about/",
+    },
+    // Вузол сайту повторюємо тут навмисно: WebPage нижче посилається на нього
+    // через isPartOf, а граф кожної сторінки має бути самодостатнім. Без цього
+    // українська головна лишала висяче посилання (аудит сайту, 2026-08-29).
+    {
+      "@type": "WebSite",
+      "@id": "https://yesmcp.com/#website",
+      url: "https://yesmcp.com/",
+      name: "yesmcp",
+      description:
+        "MCP-конектори для бізнесу: бронювання, замовлення, каталог і підтримка доступні вашим клієнтам просто в Claude і ChatGPT.",
+      publisher: { "@id": "https://yesmcp.com/#organization" },
+      inLanguage: "uk",
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://yesmcp.com/ua/#webpage",
+      url: "https://yesmcp.com/ua/",
+      name: "yesmcp: ваш бізнес у ШІ-чатах",
+      isPartOf: { "@id": "https://yesmcp.com/#website" },
+      about: { "@id": "https://yesmcp.com/#organization" },
+      inLanguage: "uk",
+    },
+    // Блок FAQ у машиночитному вигляді. Google уже майже не малює FAQ-сніпети
+    // для таких сайтів, як наш; він тут заради іншого читача: асистентів, які
+    // цитують відповіді про MCP-конектори. Текст береться з `faqs`, не
+    // передруковується.
+    {
+      "@type": "FAQPage",
+      "@id": "https://yesmcp.com/ua/#faq",
+      isPartOf: { "@id": "https://yesmcp.com/ua/#webpage" },
+      inLanguage: "uk",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+};
+
+// icon = слаг BrandIcon; chatgpt свідомо без іконки (див. BrandIcon.astro).
+//
+// hostsCheckedAt проставляється РУКАМИ того дня, коли хтось справді перевірив
+// нотатки платформ нижче. Це не дата збірки і ніколи не має з неї виводитися:
+// обіцянка «ми стежимо» варта чогось лише тоді, коли під нею стоїть дата
+// справжньої перевірки. Той самий день, що і в англійському дзеркалі.
+const hostsCheckedAt = "31 серпня 2026";
+const customerHosts = [
+  { name: "claude.ai", note: "працює · всі тарифи", icon: "claude" },
+  { name: "chatgpt", note: "через рев'ю каталогу", icon: null },
+  { name: "le chat", note: "працює · безкоштовний тариф", icon: "mistral" },
+  { name: "perplexity", note: "тарифи pro", icon: "perplexity" },
+  { name: "gemini", note: "обмежений доступ", icon: "gemini" },
+];
+
+// Бригада агентів, що біжить мостом секції «чому саме зараз» слідом за
+// Claude Code. Кожен гліф це офіційна марка з simple-icons, і кожен із цих
+// клієнтів уже говорить мовою MCP: власне тому вони й на мосту.
+//
+// НІКОЛИ не давай бігунам різні тривалості. animateMotion іде рівномірно, тож
+// спільний період плюс рівні зсуви старту тримають однакову відстань між ними
+// (довжина шляху / 5, близько 125 одиниць, кілька ширин іконки). Різні періоди
+// розсинхронізуються, і бігуни врешті проходять один крізь одного.
+const BRIDGE_DUR = "6.5s";
+const bridgeAgents = [
+  { icon: siGooglegemini, begin: "-3.9s", hop: "-0.12s", scale: 0.8 },
+  // Знак Perplexity тонкий контурний: на 0.8 він розчиняється на папері, тож
+  // біжить на розмір більший. hop розводить лише підстрибування, не позицію.
+  { icon: siPerplexity, begin: "-2.6s", hop: "-0.31s", scale: 0.95 },
+  { icon: siGithubcopilot, begin: "-1.3s", hop: "-0.22s", scale: 0.8 },
+  { icon: siOllama, begin: "0s", hop: "-0.05s", scale: 0.85 },
+];
+
+// Кроки розказані у валюті ЧИТАЧА, а не в нашій (борд, 26.08). Кожен
+// заголовок починався з «ми»: 174 слова про наш процес на сторінці, де
+// власник питає, чого це коштує йому. `cost` це те, що він справді витрачає
+// на цьому кроці, і саме це він читає в рядку першим.
+//
+// Моно-рядки, що висіли під кожним кроком (`audit → scenarios.yaml`,
+// `auth: guest or oauth 2.1`, `deploy → status: in production`), прибрані:
+// моно тримаємо для машинного виводу, ці рядки були костюмом для
+// розробника, якого серед наших покупців немає, а останній повторював живий
+// лічильник у #proof, де за тим же твердженням стоїть доказ. Заявка в
+// каталог теж поїхала з кроку 3: вона умовна, і FAQ відповідає на неї повністю.
+//
+// Рейка під списком несе послідовність, тож цифрам більше не треба її
+// викрикувати: порожнє кільце це крок попереду, залитий зелений вузол це
+// результат, той самий словник, що й на мосту. На телефоні вона йде лівим
+// краєм, де рядки складаються самі й карусель не потрібна, а від md стає
+// горизонтальною, де три колонки просто компактніші.
+const steps = [
+  {
+    n: "01",
+    cost: "одна розмова",
+    title: "Ви обираєте сценарії",
+    text: "Дивимося на ваш сайт, CRM, запис і каталог, а ви вирішуєте, що з цього ваші клієнти і ваша команда зможуть робити просто в чаті.",
+  },
+  {
+    n: "02",
+    cost: "доступ і одна людина для питань",
+    title: "Будуємо під ваші системи",
+    text: "Ви даєте обмежений доступ до систем, на яких уже працює бізнес. Ми проєктуємо інструменти, додаємо запобіжники й тестуємо на живих розмовах.",
+  },
+  {
+    n: "03",
+    cost: "нічого з вашого боку",
+    title: "Клієнтам посилання, команді логін",
+    text: "Конектор працює наживо: клієнти встановлюють його за одним посиланням, команда входить за логіном. Далі ми щодня за ним стежимо і покращуємо його.",
+  },
+];
+// Згорнутий блок «технічні квитанції» і картку founding clients видалив
+// власник (31.08). Дзеркалить ../index.astro.
+
+// Запасні числа для смужки статусу. public/js/live-status.js перезаписує їх
+// з https://mcp.yesmcp.com/status; якщо запит не пройшов, на екрані
+// залишається саме це.
+//
+// У смужці немає годинника: ні лічильника днів, ні дати запуску. І те, і те
+// відповідає на питання «скільки ви існуєте», якого читач не ставить, а на
+// молодому проєкті така відповідь грає проти нас. Натомість смужка несе те,
+// що робить конектор вартим довіри: він працює, він обслуговує, і відповіді
+// беруться з даних самого клієнта. startedAt лишається в даних, бо його
+// віддає /status, а не тому, що ми його показуємо.
+const liveFallback = {
+  startedAt: "2026-08-21",
+  tools: 10,
+};
+
+// Каталог сценаріїв, дві полиці. Кожна картка це артефакт: рядок, який пише
+// людина, інструмент, що спрацьовує, і результат. Ідентифікатори карток є
+// якорями для майбутніх галузевих статей, перейменовувати їх не можна.
+// Каталог: дві полиці ПО ТРИ (симетрія — рішення власника, 31.08; «ваш бізнес»
+// закриває всю плиту смугою на повну ширину замість четвертої картки-сироти).
+// Рядки інструментів кажуть звичайні дієслова, не `journal.read`: покупець не
+// розробник. Цитати не переказують два транскрипти екрана 4 (відкрити день,
+// перенести бронь), які вони дублювали до редизайну 31.08. Якорі id не
+// перейменовувати, навіть де цитата поїхала далі (s-team-day).
+const customerCases = [
+  {
+    id: "s-education-homework",
+    tag: "мовна школа",
+    quote: "Що задали моєму сину на четвер і як у нього успіхи?",
+    tool: "читає журнал занять",
+    result: "Домашнє завдання, нотатки про прогрес і що проходила група: з вашого журналу, а не з прокрутки батьківського чату.",
+    services: [["gsheets", "Google Sheets"], ["gcal", "Google Calendar"]],
+  },
+  {
+    id: "s-accounting-docs",
+    tag: "бухгалтерська фірма",
+    quote: "Що вам ще потрібно від мене для квартального звіту?",
+    tool: "збирає ваш чеклист",
+    result: "Список саме по вашій компанії: які документи вже прийняті, яких бракує, і захищене посилання, щоб довантажити решту.",
+    services: [["quickbooks", "QuickBooks"], ["gdrive", "Google Drive"]],
+  },
+  {
+    id: "s-shop-order",
+    tag: "інтернет-магазин",
+    quote: "Де моє замовлення?",
+    tool: "перевіряє замовлення",
+    result: "Покупець, який замовив у чаті, питає там само: жива відповідь із даних вашої системи, а не тікет у підтримку.",
+    services: [["shopify", "Shopify"], ["woocommerce", "WooCommerce"]],
+  },
+];
+
+const teamCases = [
+  {
+    id: "s-team-day",
+    tag: "рецепція клініки",
+    quote: "Хто прийде об 11:00 і на чому ми зупинилися?",
+    tool: "читає розклад і нотатки візитів",
+    result: "Сьогоднішній розклад плюс історія клієнта, з ваших систем, ще до того, як людина зайде.",
+    services: [["gcal", "Google Calendar"], [null, "система вашої клініки"]],
+  },
+  {
+    id: "s-team-attention",
+    tag: "партнер агенції",
+    quote: "Що потребує уваги цього тижня?",
+    tool: "читає CRM, трекер і бухгалтерію",
+    result: "Завислі пропозиції, робота, за яку ще не виставили рахунок, та прострочені платежі в одній відповіді замість трьох вкладок.",
+    services: [["hubspot", "HubSpot"], ["jira", "Jira"], ["quickbooks", "QuickBooks"]],
+  },
+  {
+    id: "s-team-write",
+    tag: "будь-яка команда",
+    quote: "Ігор заплатив готівкою. Запиши це і забронюй наступний візит.",
+    tool: "записує оплату, бронює візит",
+    result: "Дії запису виконуються за логіном і підтверджуються перед запуском: санкціоновано, з обмеженими правами, із журналом.",
+    services: [["quickbooks", "QuickBooks"], ["gcal", "Google Calendar"]],
+  },
+];
+
+// «Ваш бізнес» закриває каталог смугою від імені обох полиць. Якір лишився
+// з картярської ери. Посилання на мапу тут свідомо нема: мапа живе рівно у
+// двох місцях сторінки (hero і фінал), ієрархія CTA вирішена.
+const yourScenario = {
+  id: "s-your-scenario",
+  tag: "ваш бізнес",
+  quote: "А мої клієнти й моя команда теж зможуть так у чаті?",
+  result: "Під'єднати можна майже будь-яку систему. Найшвидший спосіб побачити свою: мапа сценаріїв.",
+  chip: "ваша власна система",
+};
+
+// На телефоні кожна полиця це горизонтальний snap-ряд (прийом віджета послуг,
+// із визирянням наступної картки): 12 карток стовпчиком це було ~5 екранів.
+// Від sm і вище знову сітка. Без JS, кожна картка лишається в DOM, тож якорі
+// працюють. (Саме JS-коментар: HTML-коментар усередині циклу потрапляє в
+// прод-HTML, по разу на полицю.)
+// Дві полиці, один об'єкт: каталог малюється однією плитою в рамці, розрізаною
+// на світлу половину (публічний бік: гість, без логіна) і темну (бік за
+// логіном), а між ними гурт монети з насічками. `dark` задає тему карток,
+// `status` це однорядкове нагадування, на якому боці читач.
+const caseShelves = [
+  { label: "Ваші клієнти", status: "гість · без логіна", dark: false, note: null, strip: false, cards: customerCases },
+  {
+    label: "Ваша команда",
+    status: "вхід виконано",
+    dark: true,
+    // Смужка під цією приміткою робить аргумент проти точкових рішень:
+    // кожен інструмент нижче має власний конектор, який команда додасть і сама;
+    // наш продукт: система, що об'єднує їх усі.
+    note: "Кожен інструмент нижче має власний конектор на один сервіс. Наша робота саме в системі: усі вони, плюс ваш власний софт, зібрані в одному місці за вашими правилами.",
+    strip: true,
+    cards: teamCases,
+  },
+];
+
+// Ієрархія «що ми будуємо» (вердикт борду, docs/plans/2026-08-25-offer-expansion.md):
+// один конектор, два обличчя (для клієнтів / для команди), віджети як рівень
+// оздоблення, мапа сценаріїв як нульовий крок. Свідомо НЕ меню рівних послуг.
+// Трійка `included` (хостинг / безпека / код ваш), що жила тут, малювалася на
+// сторінці двічі: картками самого демо в героєві і ще раз унизу #build, слово
+// в слово, за десять екранів. Демо її лишає собі, а #build каже це одним
+// рядком. Один дім на один факт (прибрано 26.08).
+
+// ─────────────────────────────────────────────────────────
+// Notes on the markup below. They live here as JS comments, not as
+// HTML comments in the template: an HTML comment ships to production
+// and is readable in page source, which is how internal rationale
+// ended up public (found by the design review, 2026-08-26).
+// ─────────────────────────────────────────────────────────
+//
+// On phones the hero's own CTA is one scroll-free tap away; the header
+// slot is better spent on the only nav links a phone user gets.
+//
+// Безкоштовний хід на першому екрані: наш власний конектор працює
+// наживо, і будь-хто додає його за хвилину. Усе, що нижче, доводить, що
+// ми вміємо такий зібрати; це дає перевірити самому.
+// БЕЗ голої адреси і без кнопки копіювання, свідомо (власник, 26.08):
+// адресу конектора не можна вставити в чат, вона йде в діалог
+// налаштувань, а це технічний крок, якого наш читач не знає і не має
+// знати. Кнопка веде на /connect/, де посилання з передзаповненою
+// формою робить цей крок за нього; ручна адреса теж живе там.
+//
+// інтерактивне демо чату (див. components/HeroChatStories.astro)
+//
+// Mirrors the EN bridge band: SMIL travellers, no JS, CSP untouched.
+// 900M = official OpenAI WAU figure (Feb 2026) — keep the attribution.
+//
+// Дуга теплішає від чорнила до зеленого ближче до вашого боку:
+// лінія сама промовляє те, про що секція.
+//
+// Бригада ШІ-агентів на мосту, склад обрав власник: попереду
+// офіційний гліф-маскот Claude Code (з блимаючим термінальним
+// курсором), за ним менші Gemini, Perplexity, GitHub Copilot і
+// Ollama. Гліфи інлайняться з simple-icons (зняті з офіційних
+// сайтів вендорів); OpenAI/ChatGPT там нема на вимогу власника
+// бренду. Та сама SMIL-механіка, що й у точок: нуль JS,
+// reduced-motion ховає всіх через .bridge-traveler.
+//
+// Спалах винагороди. Усі бігуни мають спільний період, тож
+// прибуття стається рівно кожні BRIDGE_DUR / 5 = 1.3s: кільце і
+// «+$» живуть у цьому ж ритмі. Обидва на SMIL, на одному
+// годиннику з бігунами, бо CSS-анімація з ними розсинхронізується;
+// .bridge-payout це ручка, за яку ховає reduced-motion.
+//
+// Один продукт, поданий ієрархією, а не меню: конектор як іменник; клієнтське
+// і командне обличчя; віджети як рівень оздоблення; мапа сценаріїв як
+// нульовий крок. Словник закріплено бордом (docs/plans/2026-08-25-offer-
+// expansion.md) — перед правкою тексту звірся з його правилами.
+//
+// Крок нуль був коробкою в рамці з власною вертикальною ниткою під нею:
+// четвертий складений об'єкт до того, як читач дійде до продукту. Речення
+// те саме, але тепер воно висить на одній пунктирній рейці від заголовка:
+// частина вступної заяви, а не окреме оголошення.
+//
+// Два обличчя: два чат-моменти замість віджет-моків (власник, 31.08;
+// обґрунтування в components/TwoFaces.astro). На телефоні вертикальний
+// стек, без каруселі.
+//
+// Тут жили два рівні там, де вистачає одного: есе на шість рядків про те,
+// чому картки кращі за текст, плюс трійка «у кожному проєкті», яка
+// дослівно повторювала картки самого демо в героєві. Перевірюване
+// твердження лишилось; есе і дубль пішли.
+//
+// Нитка. Пунктир це шлях, порожні кільця це кроки в дорозі, залитий
+// зелений вузол це результат. Той самий словник, що на мосту і в нитках
+// складання в секції «що ми будуємо»; декоративна, тому схована від
+// читалок і малюється лише там, де кроки стоять поруч.
+//
+// Та сама карусель, що на полицях сценаріїв: від md
+// три кроки це один об'єкт із волосяними лініями, на телефоні це три
+// картки з гортанням замість 1750px складеного аргументу. Роздільники
+// (gap-px поверх світлого тла) існують лише у формі сітки, тому нижче md
+// кожна картка має власну рамку.
+//
+// Питання, яке власник ставить одразу після трьох кроків: звідки береться
+// відповідь і чи вона свіжа. Відповідати текстом це абзац, якого ніхто не
+// читає; показати рядок джерела поруч із реченням, на яке він
+// перетворюється, коштує однієї смужки. Підсвічений рядок це правка: та
+// сама ціна з обох боків, без жодної синхронізації між ними.
+//
+// Свідомий перепочинок між каталогом і доказами: п'ять екранів карток у
+// рамках поспіль це і є причина, чому прокрутка здавалася безперервною. Ні
+// картки, ні рамки, ні надзаголовка, ні заклику: одна пунктирна рейка із
+// зеленим вузлом на кінці, той самий словник, що на мосту і в трьох кроках,
+// і одне речення, яке повертає сторінку від «що вміє конектор» до «що вміє
+// наш». py-16, свідомо менше за py-24 кожної справжньої секції: це такт, а
+// не секція.
+//
+// Три шари, які власник бізнесу перевіряє сам (статус наживо, результати,
+// три страхи), а інженерні факти згорнуті внизу. Числа у смужці живі:
+// public/js/live-status.js читає https://mcp.yesmcp.com/status, а якщо
+// запит не пройшов, залишаються запасні значення з цієї розмітки.
+//
+// Один кейс, бо один і є (власник, 26.08). Поруч стояли дві картки
+// «вільне місце»: у секції «докази, які можна перевірити» два кейси з трьох
+// повідомляли про відсутність клієнтів.
+//
+// Три страхи на телефоні їдуть тією самою каруселлю: складені, вони були
+// ще трьома аргументами на повний екран у секції, де вже є жива смужка
+// і кейс.
+
+---
+
+<Layout
+  title="yesmcp: ваш бізнес у ШІ-чатах"
+  description="Попросіть ШІ-асистента забронювати щось у вашому бізнесі: сьогодні він не зможе. yesmcp будує і супроводжує конектор, з яким ваші клієнти бронюють, замовляють і отримують відповіді просто в Claude і ChatGPT."
+  path="/ua/"
+  lang="uk"
+  ogImage="/assets/og/home-ua.png"
+  alternates={{ en: "/", uk: "/ua/" }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <!-- ── nav ─────────────────────────────────── -->
+  <header class="fixed inset-x-0 top-0 z-40 border-b border-ink/10 bg-paper/80 backdrop-blur-md">
+    <nav class="relative mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
+      <a href="#" aria-label="yesmcp">
+        <SiteLogo className="h-[22px] w-auto" />
+      </a>
+      <div class="flex items-center gap-5 text-sm text-ink-soft sm:gap-7">
+        <a href="#build" class="link-und hidden sm:inline">Що ми будуємо</a>
+        <a href="#cases" class="link-und hidden sm:inline">Сценарії</a>
+        <a href="#proof" class="link-und hidden sm:inline">Докази</a>
+        <a href="/ua/connect/" class="link-und text-yes-deep">Спробуйте</a>
+        <a href="/ua/writing/" class="link-und">Нотатки</a>
+        <a href="/ua/about/" class="link-und">Про нас</a>
+        <a href="/ua/scenario-map/"
+          class="hidden rounded-full bg-ink px-4 py-1.5 font-medium text-paper transition-all hover:-translate-y-0.5 hover:bg-yes-deep sm:inline-block">
+          Отримати мапу
+        </a>
+      </div>
+      <LangTag target="en" href="/" />
+    </nav>
+  </header>
+  <main>
+
+  <!-- ── hero ────────────────────────────────── -->
+  <section
+    class="relative mx-auto flex max-w-6xl flex-col justify-center px-5 pt-28 pb-14 sm:pt-32 lg:min-h-svh lg:pt-24 lg:pb-12">
+    <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12 xl:gap-16">
+      <div>
+        <p class="rise font-mono text-xs text-ink-faint" style="--i:0">
+          ваш бізнес · <span class="text-yes-deep">усередині claude і chatgpt</span>
+        </p>
+
+        <h1 class="rise mt-3 font-display text-[clamp(1.9rem,4.2vw,3.1rem)] leading-[1.1] font-800" style="--i:1">
+          Попросіть ШІ-асистента забронювати<br />
+          щось у вашому бізнесі.<br />
+          <span class="text-yes">Сьогодні він не&nbsp;зможе.</span>
+        </h1>
+
+        <p class="rise mt-5 max-w-xl leading-relaxed text-ink-soft sm:text-lg" style="--i:2">
+          <strong class="text-ink">yesmcp</strong> будує і супроводжує
+          конектор, з яким ваші клієнти бронюють, замовляють і отримують
+          відповіді від вашого бізнесу просто в Claude чи ChatGPT. Як у цьому
+          чаті: він справжній, і його можна спробувати.
+        </p>
+        <div class="rise mt-10" style="--i:3">
+          <div class="flex flex-wrap items-center gap-3">
+            <a href="/ua/connect/"
+              class="inline-block rounded-full bg-yes-deep px-6 py-3 font-medium text-white shadow-[0_8px_24px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+              Побачити наживо у своєму Claude →
+            </a>
+            <a href="/ua/scenario-map/"
+              class="inline-block rounded-full border border-ink/20 px-6 py-3 font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-yes-deep hover:text-yes-deep">
+              Отримати мапу сценаріїв →
+            </a>
+          </div>
+          <p class="mt-2 font-mono text-meta text-ink-faint">
+            демо: одне посилання, будь-який план claude, безкоштовний теж · мапа: безкоштовно, до жодного контракту
+          </p>
+          <p class="mt-5 font-mono text-meta text-ink-soft">
+            будує і веде <a href="/ua/about/" class="link-und text-ink">Сергій Кравченко</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="rise" style="--i:4">
+        <HeroChatStories lang="uk" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── hosts ticker ────────────────────────── -->
+  <div class="border-y border-ink/10 bg-paper-deep py-3">
+    <div class="overflow-hidden" aria-hidden="true">
+      <div class="ticker flex w-max gap-10 font-mono text-xs tracking-widest text-ink-soft uppercase">
+        {[...customerHosts, ...customerHosts, ...customerHosts].map((h) => (
+          <span class="flex items-center gap-1.5 whitespace-nowrap">
+            {h.icon && <BrandIcon name={h.icon} class="h-3.5 w-3.5 shrink-0" />}{h.name}
+            <span class="rounded bg-ink/5 px-1.5 py-0.5 text-stamp normal-case tracking-normal text-ink-soft">{h.note}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+    <p class="mx-auto mt-2 max-w-6xl px-5 text-center text-mini text-ink-faint">
+      доступність на платформах різна і змінюється швидко: ми стежимо за цим замість вас<span class="font-mono text-meta text-ink-soft"> · перевірено {hostsCheckedAt}</span>
+    </p>
+  </div>
+
+  <!-- ── why now: the bridge ─────────────────── -->
+  <section class="mx-auto max-w-6xl px-5 py-24">
+    <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">чому саме зараз</p>
+    <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.4rem,3.4vw,2.4rem)] leading-tight font-600">
+      Сайт у 1998. Застосунок у 2008. <span class="text-yes">Місце в ШІ-чатах у 2026.</span>
+    </h2>
+    <div class="mt-10 grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
+      <div class="reveal">
+        <p class="font-display text-[clamp(2.5rem,6vw,4.3rem)] leading-none font-800 tracking-tight">
+          900 000 000
+        </p>
+        <p class="mt-3 font-mono text-meta text-ink-faint">
+          людей щотижня розмовляють із ChatGPT · власні дані OpenAI, лютий 2026 ·
+          і це ще без Claude і Gemini
+        </p>
+
+        <div class="mt-8">
+          <div class="flex items-end justify-between font-mono text-meta text-ink-soft">
+            <span class="rounded-lg border border-ink/15 bg-white/40 px-2.5 py-1.5">
+              <span class="pulse-dot mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-yes align-middle"></span>ШІ-чати
+            </span>
+            <span class="rounded-lg border border-yes/40 bg-white/60 px-2.5 py-1.5 text-yes-deep">ваш бізнес</span>
+          </div>
+          <svg viewBox="0 0 640 130" fill="none" class="mt-2 w-full" role="img"
+            aria-label="ШІ-асистенти, які говорять мовою MCP, переходять міст від ШІ-чатів до вашого бізнесу, попереду маскот Claude Code">
+            <defs>
+              <linearGradient id="bridge-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="var(--color-ink)" stop-opacity="0.18" />
+                <stop offset="55%" stop-color="var(--color-yes)" stop-opacity="0.42" />
+                <stop offset="100%" stop-color="var(--color-yes-deep)" stop-opacity="0.8" />
+              </linearGradient>
+            </defs>
+            <path id="bridge-path" class="bridge-path-flow" d="M22,112 Q320,14 618,112"
+              stroke="url(#bridge-grad)" stroke-width="2"
+              stroke-dasharray="2 8" stroke-linecap="round" />
+            <circle cx="22" cy="112" r="4" fill="var(--color-ink)" fill-opacity="0.35" />
+            <circle cx="618" cy="112" r="5" fill="var(--color-yes-deep)" />
+            <g class="bridge-traveler">
+              <g class="bridge-hop">
+                <g transform="translate(-16.8,-32) scale(1.4)">
+                  <path d={siClaudecode.path} fill="var(--color-claude)" />
+                  <rect x="27" y="8" width="2.5" height="9" fill="var(--color-claude)">
+                    <animate attributeName="opacity" values="1;0;1" dur="1.1s" repeatCount="indefinite" />
+                  </rect>
+                </g>
+              </g>
+              <animateMotion dur={BRIDGE_DUR} begin="-5.2s" repeatCount="indefinite"><mpath href="#bridge-path" /></animateMotion>
+            </g>
+            {bridgeAgents.map((a) => (
+              <g class="bridge-traveler" opacity="0.85">
+                <g class="bridge-hop" style={`--hop:${a.hop}`}>
+                  <g transform={`translate(${-12 * a.scale},${0.2 - 24 * a.scale}) scale(${a.scale})`}>
+                    <path d={a.icon.path} fill={"#" + a.icon.hex} />
+                  </g>
+                </g>
+                <animateMotion dur={BRIDGE_DUR} begin={a.begin} repeatCount="indefinite"><mpath href="#bridge-path" /></animateMotion>
+              </g>
+            ))}
+            <g class="bridge-payout">
+              <circle cx="618" cy="112" r="5" fill="none" stroke="var(--color-yes)" stroke-width="2" opacity="0">
+                <animate attributeName="r" values="5;17;17" keyTimes="0;0.45;1" dur="1.3s" begin="1.3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.9;0;0" keyTimes="0;0.45;1" dur="1.3s" begin="1.3s" repeatCount="indefinite" />
+              </circle>
+              <g opacity="0">
+                <text x="618" y="103" text-anchor="middle" class="font-mono" font-size="19" font-weight="500" fill="var(--color-yes-deep)">+$</text>
+                <animateTransform attributeName="transform" type="translate" values="-4,4;-11,-18;-11,-18" keyTimes="0;0.27;1" dur="2.6s" begin="1.3s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.08;0.27;1" dur="2.6s" begin="1.3s" repeatCount="indefinite" />
+              </g>
+              <g opacity="0">
+                <text x="618" y="103" text-anchor="middle" class="font-mono" font-size="19" font-weight="500" fill="var(--color-yes-deep)">+$</text>
+                <animateTransform attributeName="transform" type="translate" values="4,4;12,-16;12,-16" keyTimes="0;0.27;1" dur="2.6s" begin="2.6s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.08;0.27;1" dur="2.6s" begin="2.6s" repeatCount="indefinite" />
+              </g>
+            </g>
+          </svg>
+          <p class="mt-2 text-center font-mono text-meta text-ink-faint">
+            асистенти, якими ваші клієнти вже користуються · кожен із них говорить цією мовою · помаранчевий: claude code, наша власна бригада
+          </p>
+        </div>
+      </div>
+      <div class="reveal space-y-4 text-ink-soft" style="--r:0.1s">
+        <p>
+          Пізно ввечері клієнт хоче записатися або перенести візит. Сьогодні
+          це чекає ранкової зміни, і дехто вже не повертається. <span class="text-ink">З конектором
+          асистент вирішує це одразу, з вашого ж календаря.</span>
+        </p>
+        <p>
+          Ваші клієнти більше не відкривають десять сайтів: вони питають свого
+          асистента. Конектор будується один раз, на відкритому стандарті,
+          який творці асистентів передали нейтральному фонду Linux Foundation
+          (грудень 2025). Встановлення і схвалення у кожного асистента свої,
+          і цю частину ми беремо на себе.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── what we build ───────────────────────── -->
+  <section id="build" class="border-t border-ink/10">
+    <div class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">що ми будуємо</p>
+      <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        Ми будуємо одне: <span class="text-yes">вітрину вашого бізнесу в ШІ-чатах</span>
+      </h2>
+      <p class="reveal mt-4 max-w-2xl leading-relaxed text-ink-soft">
+        Дві роботи, один конектор: ваша команда перестає копатися у вкладках,
+        а ваші клієнти перестають чекати, поки хтось відповість.
+      </p>
+
+      <div class="mt-12">
+        <TwoFaces lang="uk" />
+      </div>
+
+      <p class="reveal mt-6 max-w-3xl text-sm leading-relaxed text-ink-soft">
+        <span class="font-semibold text-ink">Текстом навмисно:</span> так той самий сценарій
+        читається в будь-якому асистенті. У Claude конектор у моменти, які вирішують продаж,
+        ще й малює живі картки просто в чаті. Демо вгорі сторінки наше, воно працює просто зараз.
+      </p>
+      <p class="reveal mt-2 font-mono text-meta text-ink-faint">
+        lingua studio: вигадана школа · читайте як свій бізнес
+      </p>
+
+      <ol class="reveal mt-12 grid gap-6 border-t border-ink/10 pt-8 md:grid-cols-3">
+        {steps.map((s, i) => (
+          <li class="flex gap-3">
+            <span
+              aria-hidden="true"
+              class={`mt-1 block h-3 w-3 shrink-0 rounded-full ${i === steps.length - 1 ? "bg-yes" : "border border-yes/70"}`}
+            ></span>
+            <div>
+              <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">{s.n} · {s.cost}</p>
+              <p class="mt-1 text-sm font-semibold">{s.title}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ── cases ───────────────────────────────── -->
+  <section id="cases" class="border-t border-ink/10 bg-paper-deep">
+    <div class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">сценарії</p>
+      <h2 class="reveal mt-3 font-display text-[clamp(1.5rem,3.5vw,2.6rem)] font-600">
+        Ваша рецепція і ваш бек-офіс, у чаті
+      </h2>
+      <p class="reveal mt-4 text-sm text-ink-faint">Ведете професійну практику чи агенцію? <a href="/ua/for/professional-services/" class="link-und text-yes-deep">Сторінка для вашої сфери →</a></p>
+      <div class="reveal mt-12 overflow-hidden rounded-3xl border border-ink/15 shadow-[0_28px_60px_-40px_rgba(23,20,14,0.6)]">
+      {caseShelves.map((shelf, si) => (
+        <>
+        {si > 0 && (
+          <div aria-hidden="true" class="relative bg-paper-deep">
+            <div class="coin-edge h-10"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="rounded-full border border-ink/15 bg-paper-deep px-3.5 py-1 font-mono text-stamp tracking-widest text-ink-faint uppercase">один конектор · два боки</span>
+            </div>
+          </div>
+        )}
+        <div class={`px-5 py-10 sm:px-8 ${shelf.dark ? "bg-ink" : "bg-paper"}`}>
+          <p class={`reveal flex items-center gap-2 font-mono text-xs tracking-widest uppercase ${shelf.dark ? "text-paper/50" : "text-ink-faint"}`}>
+            <span aria-hidden="true" class={`h-2 w-2 shrink-0 rounded-full ${shelf.dark ? "bg-yes-bright" : "border border-yes-deep"}`}></span>
+            {shelf.label}
+            <span class={shelf.dark ? "text-paper/55" : "text-ink-faint"}>· {shelf.status}</span>
+          </p>
+          {shelf.note && <p class={`reveal mt-3 max-w-2xl text-sm leading-relaxed ${shelf.dark ? "text-paper/60" : "text-ink-soft"}`}>{shelf.note}</p>}
+          {shelf.strip && (
+            <div class="reveal mt-4 flex flex-wrap items-center gap-2 font-mono text-meta text-paper/70">
+              {[["hubspot", "HubSpot"], ["jira", "Jira"], ["quickbooks", "QuickBooks"], ["gcal", "Google Calendar"], ["zendesk", "Zendesk"]].map(([n, l]) => (
+                <span class="flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2 py-1"><BrandIcon name={n} />{l}</span>
+              ))}
+              <span class="rounded-md border border-dashed border-white/25 px-2 py-1">{"{ }"} ваші власні системи</span>
+              <span class="text-paper/55">→</span>
+              <span class="flex items-center gap-1.5 rounded-md border border-yes-bright/40 bg-yes-bright/10 px-2 py-1 text-yes-bright"><BrandIcon name="mcp" />один конектор</span>
+            </div>
+          )}
+          <div class="mt-6 -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+            {shelf.cards.map((c, i) => (
+              <article
+                id={c.id}
+                class={`reveal group flex w-[84%] shrink-0 snap-start flex-col rounded-2xl border p-6 transition-all hover:-translate-y-1 sm:w-auto sm:shrink ${
+                  shelf.dark
+                    ? "border-white/10 bg-white/[0.04] hover:border-yes-bright/45 hover:bg-white/[0.07] hover:shadow-[0_16px_40px_-16px_rgba(46,194,126,0.3)]"
+                    : "border-ink/10 bg-white/40 hover:border-yes/40 hover:shadow-[0_16px_40px_-16px_rgba(11,157,78,0.35)]"
+                }`}
+                style={`--r:${(i % 3) * 0.1}s`}>
+                <p class={`font-mono text-meta ${shelf.dark ? "text-paper/55" : "text-ink-faint"}`}>{c.tag}</p>
+                <p class={`mt-3 ${shelf.dark ? "text-paper" : "text-ink"}`}>«{c.quote}»</p>
+                <p class={`mt-3 font-mono text-meta ${shelf.dark ? "text-yes-bright" : "text-yes-deep"}`}>→ {c.tool}</p>
+                <p class={`mt-3 text-sm leading-relaxed ${shelf.dark ? "text-paper/60" : "text-ink-soft"}`}>{c.result}</p>
+                <div class={`mt-auto flex flex-wrap gap-1.5 pt-4 font-mono text-stamp ${shelf.dark ? "text-paper/70" : "text-ink-soft"}`}>
+                  {c.services.map(([n, l]) => (
+                    n
+                      ? <span class={`flex items-center gap-1.5 rounded-md border px-2 py-1 ${shelf.dark ? "border-white/15 bg-white/5" : "border-ink/10 bg-white/60"}`}><BrandIcon name={n} />{l}</span>
+                      : <span class={`rounded-md border border-dashed px-2 py-1 ${shelf.dark ? "border-white/25" : "border-ink/25"}`}>{"{ }"} {l}</span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+        </>
+      ))}
+      <div id={yourScenario.id} class="border-t border-ink/10 bg-paper px-5 py-8 sm:px-8">
+        <div class="reveal flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="max-w-2xl">
+            <p class="font-mono text-meta text-ink-faint">{yourScenario.tag}</p>
+            <p class="mt-2 text-ink">“{yourScenario.quote}”</p>
+            <p class="mt-1 text-sm leading-relaxed text-ink-soft">{yourScenario.result}</p>
+          </div>
+          <span class="shrink-0 self-start rounded-md border border-dashed border-ink/25 px-2 py-1 font-mono text-stamp text-ink-soft sm:self-center">{"{ }"} {yourScenario.chip}</span>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── quiet beat ──────────────────────────── -->
+  <div class="border-t border-ink/10 bg-paper-deep">
+    <div class="mx-auto flex max-w-2xl flex-col items-center px-5 py-16 text-center">
+      <span aria-hidden="true" class="flex w-full max-w-[14rem] items-center gap-2">
+        <span class="h-px flex-1 border-t border-dashed border-ink/25"></span>
+        <span class="h-2 w-2 rounded-full bg-yes"></span>
+      </span>
+      <p class="reveal mt-6 leading-relaxed text-ink-soft">
+        Усе вище це те, що конектор уміє. <span class="text-ink">Усе нижче це те, що наш уже робить.</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── proof ───────────────────────────────── -->
+  <section id="proof" class="mx-auto max-w-6xl px-5 py-24">
+    <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">докази, які можна перевірити</p>
+    <h2 class="reveal mt-3 font-display text-[clamp(1.5rem,3.5vw,2.6rem)] font-600">
+      Не вірте на слово. Воно працює просто зараз.
+    </h2>
+
+    <div class="reveal mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-ink/10 bg-paper px-6 py-5">
+      <span class="flex items-center gap-2 font-mono text-sm">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-yes opacity-60"></span>
+          <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-yes"></span>
+        </span>
+        <span class="font-semibold text-ink">працює в claude.ai</span>
+      </span>
+      <span class="font-mono text-sm text-ink-soft"><strong class="text-ink" data-live="tools">{liveFallback.tools}</strong> інструментів обслуговують клієнтів</span>
+      <span class="font-mono text-sm text-ink-soft">кожна відповідь із <strong class="text-ink">ваших власних даних</strong></span>
+    </div>
+
+    <div class="mt-6 grid items-stretch gap-4 md:grid-cols-2">
+      <div class="reveal flex flex-col rounded-2xl border border-ink/10 bg-paper p-6">
+        <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">інженер</p>
+        <h3 class="mt-2 font-semibold">Сергій Кравченко · AI-інженер, засновник</h3>
+        <p class="mt-2 text-note leading-relaxed text-ink-soft">
+          Кожен сценарій тут спроєктував, протестував і супроводжує той, з ким
+          ви й розмовлятимете. <span class="text-ink">Ви працюєте з будівельником, а не з
+          акаунт-менеджером.</span>
+        </p>
+        <p class="mt-3 text-note leading-relaxed text-ink-soft">
+          Рутину веде команда ШІ-агентів, яку збудував Сергій: тому за вашим
+          конектором дивляться щодня, а не в будні з 9 до 18.
+        </p>
+        <p class="mt-auto pt-3"><a href="/ua/about/" class="link-und text-sm text-yes-deep">більше про Сергія →</a></p>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="reveal flex flex-col rounded-2xl border border-ink/10 bg-paper p-6" style="--r:0.1s">
+          <p class="font-mono text-meta tracking-widest text-ink-faint uppercase">перевірте нас за хвилину</p>
+          <p class="mt-2 text-note leading-relaxed text-ink-soft">
+            Відкрийте наш конектор у своєму Claude і забронюйте дзвінок просто
+            в чаті: саме так це виглядатиме для ваших клієнтів.
+          </p>
+          <a href="/ua/connect/" class="mt-3 block rounded-full border border-yes-deep px-5 py-2 text-center text-sm font-medium text-yes-deep transition-colors hover:bg-yes-deep hover:text-white sm:inline-block sm:self-start sm:text-left">
+            Відкрити наш конектор у Claude →
+          </a>
+          <p class="mt-2 font-mono text-meta text-ink-faint">одне посилання · будь-який тариф claude, і безкоштовний теж</p>
+        </div>
+
+        <div class="reveal flex flex-col rounded-2xl border border-ink/10 bg-paper p-6" style="--r:0.2s">
+          <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">кейс №1 · ми самі</p>
+          <h3 class="mt-2 font-semibold">Ми свій перший клієнт</h3>
+          <p class="mt-2 text-note leading-relaxed text-ink-soft">
+            Дзвінки-оцінки для самого yesmcp бронюють, переносять і скасовують
+            через цей самий конектор із 21 серпня 2026. <span class="text-ink">Чат є одними з
+            трьох дверей до одного календаря.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p class="reveal mt-5 font-mono text-meta text-ink-soft">
+      щотижня ми вручну рахуємо каталог конекторів claude: <a href="/ua/writing/claude-connectors-for-business/" class="link-und text-yes-deep">читати перепис →</a>
+      <span class="mx-1 text-ink-faint">·</span>
+      <a href="/data/directory.json" class="link-und">відкритий датасет, CC BY 4.0</a>
+    </p>
+
+    <script is:inline type="module" src="/js/live-status.js"></script>
+  </section>
+
+  <!-- ── faq ─────────────────────────────────── -->
+  <section id="faq" class="border-t border-ink/10 bg-paper-deep">
+    <div class="mx-auto max-w-3xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">перш ніж написати</p>
+      <h2 class="reveal mt-3 font-display text-[clamp(1.5rem,3.5vw,2.6rem)] font-600">
+        Чесні запитання
+      </h2>
+      <div class="mt-10 space-y-4">
+        {faqs.map((f, i) => (
+          <details class="reveal group rounded-2xl border border-ink/10 bg-white/40 px-6 py-4" style={`--r:${i * 0.06}s`}>
+            <summary class="cursor-pointer list-none font-semibold marker:content-none">
+              <span class="mr-2 font-mono text-yes-deep">→</span>{f.q}
+            </summary>
+            <p class="mt-3 text-sm leading-relaxed text-ink-soft">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── cta ─────────────────────────────────── -->
+  <section id="contact" class="mx-auto max-w-6xl px-5 py-28 text-center">
+    <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">наступний крок</p>
+    <p class="reveal mt-3 font-display text-[clamp(3rem,10vw,7rem)] leading-none font-800">
+      скажіть&nbsp;<span class="text-yes">yes</span><span class="text-ink-faint">.</span>
+    </p>
+    <p class="reveal mx-auto mt-6 max-w-md text-ink-soft">
+      Розкажіть, чим займається ваш бізнес. Одного дзвінка досить, щоб ми
+      запропонували сценарії конектора і точну ціну.
+    </p>
+    <div class="reveal mt-9">
+      <a href="/ua/book/"
+        class="inline-block rounded-full bg-yes-deep px-8 py-4 font-medium text-white shadow-[0_12px_32px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+        Обрати час для розмови →
+      </a>
+      <p class="mt-4 text-sm text-ink-faint">
+        Зручніше в чаті? <a href="https://t.me/yesmcp_bot?start=site_cta_ua" class="link-und text-yes-deep">Напишіть нам у Telegram</a>
+      </p>
+      <p class="mt-2 text-sm text-ink-faint">
+        Не готові говорити? Почніть із <a href="/ua/scenario-map/" class="link-und text-yes-deep">мапи сценаріїв</a>: оберіть бізнес, дайте відповідь на два питання і побачите свої сценарії.
+      </p>
+      <p class="mt-2 text-sm text-ink-faint">
+        Зручніше поштою? <a href="mailto:yes@yesmcp.com?subject=MCP-конектор для мого бізнесу"
+          class="link-und">yes@yesmcp.com</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ── footer (shared component — see the EN twin's note) ─── -->
+  </main>
+  <SiteFooter width="max-w-6xl" lang="uk" switchHref="/" />
+  <BelieverGate lang="uk" />
+</Layout>

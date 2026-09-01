@@ -1,0 +1,549 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import SiteNav from "../../../components/SiteNav.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+
+// Ukrainian twin of src/pages/for/professional-services.astro — the two mirror
+// each other section by section, so edit both in the same commit. Copy comes
+// from the reviewed draft in docs/seo/drafts/for-professional-services-uk.md.
+//
+// Same two owner decisions as the English page: no price anywhere (quoted per
+// firm at the free diagnosis, 2026-08-27), and no foreign product named or
+// hinted at (BRAND.md, 2026-08-26) — the draft's comparison section and its
+// table were removed whole.
+//
+// After any edit here: bun run build && bun run check:uk.
+
+const clientCases = [
+  {
+    quote: "На якому ми етапі з проєктом?",
+    tool: "project.status",
+    result:
+      "Що зроблено цього тижня і що чекає на їхньому боці, прочитане з вашого трекера, а не з пам'яті менеджера.",
+  },
+  {
+    quote: "Можна двадцять хвилин з тим, хто веде наш акаунт?",
+    tool: "calendar.book",
+    result:
+      "Дзвінок зі своїм менеджером у реальні вікна команди, заброньований просто в чаті, а не листуванням зі спільною скринькою.",
+  },
+  {
+    quote: "Що саме входить у нашу місячну угоду і який рахунок відкритий?",
+    tool: "billing.summary",
+    result:
+      "Питання про гроші без незручного листа: що входить в угоду, які рахунки відкриті, коли наступний.",
+  },
+  {
+    quote: "Чого ви чекаєте від нас?",
+    tool: "blockers.list",
+    result:
+      "Доступ, файл або погодження, яке тримає роботу, назване вголос, і підтверджене тієї миті, коли воно надійшло.",
+  },
+  {
+    quote: "Що входить у діагностичний етап?",
+    tool: "services.explain",
+    result:
+      "Обсяг, терміни й те, що лишається поза ними, з ваших власних описів послуг і у ваших формулюваннях.",
+  },
+];
+
+const teamCases = [
+  {
+    quote: "Відкрий мій тиждень.",
+    tool: "week.open",
+    result:
+      "Активні проєкти, дедлайни цього тижня і клієнти, які давно нічого від вас не чули.",
+  },
+  {
+    quote: "Що потребує уваги?",
+    tool: "crm.read · tracker.read · books.read",
+    result:
+      "Застиглі пропозиції, години, які ще не пішли в рахунок, і прострочені рахунки в одній відповіді замість трьох вкладок.",
+  },
+  {
+    quote: "Контекст цього клієнта перед дзвінком.",
+    tool: "client.context",
+    result:
+      "Історія, відкриті пункти, останні рахунки й хто що пообіцяв, замість гортання трьох листувань.",
+  },
+  {
+    quote: "Запиши це й нагадай бухгалтерії.",
+    tool: "followup.create",
+    result:
+      "Задача, нотатка на клієнті, нагадування в бухгалтерію, і кожна зміна підтверджується, перш ніж відбутися.",
+  },
+];
+
+const risks = [
+  {
+    q: "Чи побачить він більше, ніж має?",
+    a: "Межі визначаються до того, як щось збудовано. Інструменти, звернені до клієнта, бачать лише те, що ви написали б у листі про стан справ. Внутрішні нотатки, маржу й розмови команди не приховує жодна інструкція: вони просто лежать поза досяжністю цих інструментів.",
+  },
+  {
+    q: "Чи може він змінити щось самостійно?",
+    a: "Читання і запис це різні інструменти, і кожен запис підтверджується, перш ніж відбутися. У нашому власному конекторі бронь не фіксується, доки не піде підтвердження, тому речення, яке лише звучить як прохання, не змінює нічого.",
+  },
+  {
+    q: "А якщо у файлі від клієнта буде інструкція для асистента?",
+    a: "Це справжня загроза, і ми опублікували власні висновки про неї: результат виклику інструмента модель читає як текст, за яким слід діяти, тому будь-що надіслане клієнтом може виявитися інструкцією. Захист тут структурний. Інструмент, який читає документ клієнта, взагалі не має права запису, тому інструкція всередині документа не має що викликати.",
+    href: "/writing/tool-results-read-as-injection/",
+    linkText: "Читати нотатку (англійською)",
+  },
+  {
+    q: "Хто бачить, що відбувалося?",
+    a: "Кожен виклик інструмента ваш конектор пише в журнал на інфраструктурі, яку ми для вас тримаємо: який інструмент, з якими аргументами, скільки тривав, що повернув. Сьогодні ці журнали читаємо ми, а ви можете їх запитати.",
+  },
+  {
+    q: "Чи змінює це наш договір з клієнтом?",
+    a: "Дані клієнта лишаються у ваших системах і ніколи не йдуть на навчання моделей. Доступ розмежовується за клієнтом, і це проєктне зобов'язання на кожен проєкт, а не перемикач: перший сценарій визначає, що саме бачить кожен клієнт, і інструменти не можуть вийти за ці межі. OAuth 2.1 ми тримаємо наживо на власному сервісі за логіном. Якщо вашому договору потрібні окремі формулювання, ця розмова відбувається на діагностиці, до того як щось збудовано.",
+  },
+];
+
+const requirements = [
+  "Хоч би де жила ваша робота з клієнтами, CRM, трекер проєктів, бухгалтерія чи таблиці, їй потрібен API або невеликий місток до нього. Відповіді, які збирають кілька систем разом, це мета, до якої ми проєктуємо, і ми прямо кажемо, які ваші системи це витягнуть уже сьогодні, а які ні.",
+  "Чітка межа того, що бачить клієнт. Її визначаєте ви, і конектор не може її перетнути.",
+  "Рішення про впізнання людини. Щоб відповідати на загальні питання, не потрібно нічого; щоб показати конкретному клієнту його проєкти й рахунки, потрібен крок з логіном.",
+  "Рішення про те, що асистент може обіцяти. Розповісти про стан справ безпечно. Пообіцяти дедлайн чи знижку ні, і ми проєктуємо інструменти так, щоб цю межу не можна було перетнути випадково.",
+  "Приблизно година однієї людини, яка знає ваші системи. У першій фазі це весь ваш час.",
+];
+
+const faqs = [
+  {
+    q: "Що потрібно моєму клієнтові, щоб цим скористатися?",
+    a: "Claude, будь-який тариф, зокрема безкоштовний. Клієнт додає ваш конектор один раз, за посиланням, яке ви надсилаєте, і далі просто пише в чат.",
+  },
+  {
+    q: "Чи працює це в ChatGPT?",
+    a: "Той самий конектор побудований за відкритим стандартом, яким говорять обидві платформи. Claude приймає власні конектори за посиланням уже сьогодні, шлях ChatGPT це його каталог, і ми будуємо так, щоб один конектор обслуговував обидві платформи, щойно він відкриється.",
+  },
+  {
+    q: "Чи треба міняти нашу CRM?",
+    a: "Ні. Конектор читає з того, що у вас уже працює. Заміна інструментів це протилежність того, для чого все це робиться.",
+  },
+  {
+    q: "А якщо платформа перестане малювати інтерактивні картки?",
+    a: "Той самий сценарій далі працює текстом. Ми не керуємо функціями платформ, тому проєктуємо так, щоб зникнення однієї не ламало сценарій.",
+  },
+  {
+    q: "Чи можна почати з боку команди, а не клієнтів?",
+    a: "Так. Той самий конектор, другі двері. Фірмам часто легше погодити внутрішній бік, бо жоден клієнт не бачить його, поки ви розумієте, яким він має бути.",
+  },
+  {
+    q: "Кому належить конектор?",
+    a: "Вам. Він працює на інфраструктурі, якою ми керуємо, код і сценарії ваші, і утримуємо вас якістю роботи, а не ключами від конектора.",
+  },
+  {
+    q: "Скільки часу до запуску першого сценарію?",
+    a: "Приблизно два тижні, якщо система, у якій лежать дані, має API. Якщо не має, місток до неї це перше, що ми оцінюємо, і кажемо вам про це на діагностиці, а не посеред роботи.",
+  },
+  {
+    q: "Чому на цій сторінці немає ціни?",
+    a: "Бо чесне число залежить від того, що ваші системи вже віддають назовні, а ми радше назвемо справжнє, ніж безпечне. Діагностика безкоштовна, це два питання; число саме для вашої фірми ми називаємо на розмові, яка теж безкоштовна.",
+  },
+];
+
+const censusCheckedAt = "24 серпня 2026 року";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://yesmcp.com/ua/for/professional-services/#service",
+      name: "MCP-конектори для професійних послуг та агенцій",
+      serviceType: "Проєктування та обслуговування MCP-конекторів",
+      description:
+        "Проєктування, побудова і обслуговування MCP-конектора для професійної практики чи агенції: клієнти фірми питають власного ШІ-асистента про стан проєкту, бронювання, рахунки і блокери, а відповідь приходить з CRM, трекера і бухгалтерії фірми в межах, які фірма задала.",
+      provider: { "@id": "https://yesmcp.com/#organization" },
+      audience: {
+        "@type": "Audience",
+        audienceType:
+          "професійні практики, агенції, юридичні фірми, бухгалтерські практики, консалтинг",
+      },
+      areaServed: "Worldwide",
+      availableChannel: {
+        "@type": "ServiceChannel",
+        serviceUrl: "https://yesmcp.com/ua/scenario-map/",
+        name: "Безкоштовна мапа сценаріїв",
+      },
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://yesmcp.com/ua/for/professional-services/#webpage",
+      url: "https://yesmcp.com/ua/for/professional-services/",
+      name: "Ваша агенція у ШІ-чатах ваших клієнтів",
+      isPartOf: { "@id": "https://yesmcp.com/#website" },
+      about: { "@id": "https://yesmcp.com/ua/for/professional-services/#service" },
+      inLanguage: "uk",
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://yesmcp.com/ua/for/professional-services/#faq",
+      isPartOf: { "@id": "https://yesmcp.com/ua/for/professional-services/#webpage" },
+      inLanguage: "uk",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+};
+---
+
+<Layout
+  lang="uk"
+  title="ШІ-конектори для професійних послуг та агенцій | yesmcp"
+  description="Ваші клієнти питають власного ШІ-асистента, на якому етапі проєкт, що входить у місячну угоду і який рахунок відкритий. Ми будуємо конектор, який відповідає їм з вашої CRM, трекера і бухгалтерії, у межах, які задали ви."
+  ogTitle="Ваша агенція у ШІ-чатах ваших клієнтів"
+  ogDescription="Стан проєкту, бронювання, рахунки і блокери просто в чаті вашого клієнта, з ваших власних систем. Спершу безкоштовна мапа сценаріїв."
+  ogImage="/assets/og/for-professional-services-ua.png"
+  path="/ua/for/professional-services/"
+  alternates={{
+    en: "/for/professional-services/",
+    uk: "/ua/for/professional-services/",
+  }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav width="max-w-6xl" lang="uk" switchHref="/for/professional-services/" />
+
+  <main>
+    <section class="mx-auto max-w-6xl px-5 pt-28 pb-16 sm:pt-32">
+      <p class="rise font-mono text-xs tracking-widest text-ink-faint uppercase" style="--i:0">
+        для професійних послуг та агенцій
+      </p>
+      <h1 class="rise mt-4 max-w-3xl font-display text-[clamp(1.9rem,4.2vw,3.1rem)] leading-[1.1] font-800" style="--i:1">
+        Ваша агенція у <span class="text-yes">ШІ-чатах ваших клієнтів</span>
+      </h1>
+      <p class="rise mt-6 max-w-2xl leading-relaxed text-ink-soft sm:text-lg" style="--i:2">
+        Сьогодні клієнт пише вам листа, щоб дізнатися, на якому етапі його проєкт, що
+        входить у місячну угоду і який рахунок ще відкритий. З конектором він питає
+        свого асистента, і відповідь приходить з вашої CRM, вашого трекера і вашої
+        бухгалтерії, у межах, які ви задали. Свої системи ви не міняєте. Перший крок
+        це два питання і безкоштовна діагностика.
+      </p>
+      <div class="rise mt-9" style="--i:3">
+        <a href="/ua/scenario-map/"
+          class="inline-block rounded-full bg-yes-deep px-6 py-3 font-medium text-white shadow-[0_8px_24px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+          Отримати мапу сценаріїв →
+        </a>
+        <p class="mt-2 font-mono text-meta text-ink-faint">
+          два питання · безкоштовно · до будь-якого договору
+        </p>
+      </div>
+    </section>
+
+    <section class="border-y border-ink/10 bg-paper-deep">
+      <div class="mx-auto max-w-6xl px-5 py-16">
+        <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+          повідомлення, на які ви відповідаєте руками
+        </p>
+        <div class="mt-7 grid gap-3 sm:grid-cols-3">
+          {[
+            "Коротке питання: на якому ми етапі з редизайном?",
+            "Чи входить у місячну угоду ще одна сторінка?",
+            "Який рахунок ще відкритий з нашого боку?",
+          ].map((m, i) => (
+            <p class="reveal rounded-2xl rounded-bl-sm border border-ink/10 bg-white/50 px-4 py-3 text-note leading-relaxed text-ink-soft" style={`--r:${i * 0.08}s`}>
+              «{m}»
+            </p>
+          ))}
+        </div>
+        <p class="reveal mt-6 max-w-2xl leading-relaxed text-ink-soft">
+          Кожне з них потрапляє до менеджера, який відкриває три вкладки, щоб
+          відповісти. <span class="text-ink">Клієнт не просить зустрічі, він просить факт.</span> Юридична фірма і
+          бухгалтерська практика мають той самий перелік іншими словами: справи замість
+          проєктів, звіти замість результатів.
+        </p>
+      </div>
+    </section>
+
+    <section id="clients" class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        ваші клієнти
+      </p>
+      <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        Що ваші клієнти роблять у чаті
+      </h2>
+      <p class="reveal mt-4 max-w-2xl leading-relaxed text-ink-soft">
+        Вони пишуть в асистента, яким уже користуються. Ваш конектор відповідає з ваших
+        систем, і для питань, яким логін не потрібен, його немає.
+      </p>
+
+      <div class="mt-10 -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+        {clientCases.map((c, i) => (
+          <article
+            class="reveal flex w-[84%] shrink-0 snap-start flex-col rounded-2xl border border-ink/10 bg-white/40 p-6 transition-all hover:-translate-y-1 hover:border-yes/40 hover:shadow-[0_16px_40px_-16px_rgba(11,157,78,0.35)] sm:w-auto sm:shrink"
+            style={`--r:${(i % 3) * 0.1}s`}>
+            <p class="text-ink">«{c.quote}»</p>
+            <p class="mt-3 font-mono text-meta text-yes-deep">→ {c.tool}</p>
+            <p class="mt-3 text-sm leading-relaxed text-ink-soft">{c.result}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="team" class="border-y border-ink/10 bg-ink text-paper">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="reveal flex items-center gap-2 font-mono text-xs tracking-widest text-paper/55 uppercase">
+          <span aria-hidden="true" class="h-2 w-2 shrink-0 rounded-full bg-yes-bright"></span>
+          ваша команда · за логіном
+        </p>
+        <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+          Той самий конектор, другі двері
+        </h2>
+        <p class="reveal mt-4 max-w-2xl leading-relaxed text-paper/70">
+          За логіном, на тих самих клієнтських даних, ваші менеджери й партнери бачать
+          бік, якого клієнти не бачать ніколи.
+        </p>
+
+        <div class="mt-10 -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
+          {teamCases.map((c, i) => (
+            <article
+              class="reveal flex w-[84%] shrink-0 snap-start flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:border-yes-bright/45 hover:bg-white/[0.07] sm:w-auto sm:shrink"
+              style={`--r:${(i % 2) * 0.1}s`}>
+              <p class="text-paper">«{c.quote}»</p>
+              <p class="mt-3 font-mono text-meta text-yes-bright">→ {c.tool}</p>
+              <p class="mt-3 text-sm leading-relaxed text-paper/70">{c.result}</p>
+            </article>
+          ))}
+        </div>
+
+        <p class="reveal mt-12 max-w-2xl leading-relaxed text-paper/70">
+          Ваша команда змінює це у своєму трекері. <span class="text-paper">Клієнт бачить зміну у власному чаті, без жодного кроку між цим.</span>
+        </p>
+
+        <div class="reveal mt-6 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 lg:grid-cols-[1fr_auto_1fr]">
+          <div class="bg-ink p-5 sm:p-6">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">ваш трекер, змінено сьогодні</p>
+            <div class="mt-4 font-mono text-mini">
+              <p class="flex justify-between gap-4 border-b border-white/10 pb-2 text-paper/55">
+                <span>задача</span><span>стан</span>
+              </p>
+              <p class="flex justify-between gap-4 border-b border-white/5 py-2 text-paper/70">
+                <span>Аудит бренду</span><span>готово</span>
+              </p>
+              <p class="flex justify-between gap-4 border-b border-white/5 py-2 text-paper">
+                <span>Тексти головної</span><span>на погодженні <span class="text-paper/50 line-through">пишемо</span></span>
+              </p>
+              <p class="flex justify-between gap-4 py-2 text-paper/70">
+                <span>Налаштування аналітики</span><span>блокує доступ</span>
+              </p>
+            </div>
+          </div>
+          <div aria-hidden="true" class="hidden items-center justify-center bg-ink px-4 text-paper/55 lg:flex">
+            <span class="font-mono text-lg">→</span>
+          </div>
+          <div class="bg-chat-raised p-5 sm:p-6">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">чат вашого клієнта, за кілька секунд</p>
+            <div class="mt-4">
+              <p class="ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-white/10 px-3 py-1.5 text-note">На якому ми етапі з редизайном?</p>
+              <p class="mt-2 font-mono text-meta text-yes-bright">▸ north &amp; partners · project.status</p>
+              <p class="mt-2 w-fit max-w-[90%] rounded-lg rounded-bl-sm border border-white/10 px-3 py-1.5 text-note text-paper/70">
+                Тексти головної <span class="text-paper">на погодженні</span> у вас. Налаштування аналітики чекає на доступ до вашого акаунта.
+              </p>
+            </div>
+            <p class="mt-4 font-mono text-meta text-paper/55">без вивантажень і без щотижневого листа про стан справ</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="proof" class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        доказ, який можна перевірити
+      </p>
+      <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        Звідки нам знати, що ви це вмієте?
+      </h2>
+      <div class="mt-8 grid items-stretch gap-4 md:grid-cols-2">
+        <div class="reveal flex flex-col rounded-2xl border border-ink/10 bg-paper p-6">
+          <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">скористайтеся до розмови з нами</p>
+          <p class="mt-2 text-note leading-relaxed text-ink-soft">
+            Ми продаємо yesmcp через власний конектор. Він працює наживо, на будь-якому
+            тарифі Claude, і бронює справжню консультацію в справжньому календарі.
+            Ламайте, якщо хочете: ми читаємо логи.
+          </p>
+          <a href="/ua/connect/" class="mt-auto block rounded-full border border-yes-deep px-5 py-2 text-center text-sm font-medium text-yes-deep transition-colors hover:bg-yes-deep hover:text-white sm:inline-block sm:self-start sm:text-left">
+            Відкрити наш конектор у Claude →
+          </a>
+          <p class="mt-2 font-mono text-meta text-ink-faint">одне натискання · будь-який тариф Claude, зокрема безкоштовний</p>
+        </div>
+        <div class="reveal flex flex-col rounded-2xl border border-ink/10 bg-paper p-6" style="--r:0.1s">
+          <p class="font-mono text-meta tracking-widest text-ink-faint uppercase">ми самі така сама практика</p>
+          <p class="mt-2 text-note leading-relaxed text-ink-soft">
+            Ми самі професійна практика, тому ця сторінка описує ваш тиждень точно. <span class="text-ink">Конектор, який ви купуєте, це той самий конектор, на якому працює наш власний бізнес.</span>
+          </p>
+          <p class="mt-4 text-note leading-relaxed text-ink-soft">
+            Ми порахували каталог конекторів Claude руками {censusCheckedAt}: <strong class="text-ink">2105 конекторів, з них 94 у категорії legal та 26 у health.</strong> Категорії
+            для професійної практики немає взагалі, бо каталог побудовано навколо
+            постачальників софту, а не навколо фірм на кшталт вашої.
+          </p>
+          <p class="mt-3 font-mono text-meta">
+            <a href="/ua/writing/claude-connectors-for-business/" class="link-und text-ink-soft">щотижневий перепис →</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="risks" class="border-y border-ink/10 bg-paper-deep">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+          питання про ризик
+        </p>
+        <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+          А що з ризиками?
+        </h2>
+        <p class="reveal mt-4 max-w-2xl leading-relaxed text-ink-soft">
+          Ризик це правильне питання, і саме тому більшість цієї роботи це продумування,
+          а не код.
+        </p>
+        <div class="mt-10 grid gap-4 md:grid-cols-2">
+          {risks.map((r, i) => (
+            /* П'ять карток у дві колонки лишають останню саму проти половини
+               порожнього екрана, тому непарна остання займає весь рядок. */
+            <div class={`reveal flex flex-col rounded-2xl border border-ink/10 bg-white/40 p-6 ${i === risks.length - 1 && risks.length % 2 === 1 ? "md:col-span-2" : ""}`} style={`--r:${(i % 2) * 0.1}s`}>
+              <h3 class="font-semibold text-ink">{r.q}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink-soft">{r.a}</p>
+              {r.href && (
+                <p class="mt-3 font-mono text-meta">
+                  <a href={r.href} class="link-und text-yes-deep">{r.linkText} →</a>
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="from-you" class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        ваш бік роботи
+      </p>
+      <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        Що потрібно з вашого боку?
+      </h2>
+      <ul class="mt-9 max-w-3xl space-y-4">
+        {requirements.map((r, i) => (
+          <li class="reveal flex gap-4 text-ink-soft" style={`--r:${i * 0.06}s`}>
+            <span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-yes"></span>
+            <span class="leading-relaxed">{r}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="cost" class="border-y border-ink/10 bg-ink text-paper">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="reveal font-mono text-xs tracking-widest text-paper/55 uppercase">
+          ціна і час
+        </p>
+        <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+          Скільки це коштує і скільки триває?
+        </h2>
+
+        <div class="mt-10 grid gap-4 md:grid-cols-3">
+          <div class="reveal flex flex-col rounded-2xl border border-yes-bright/40 bg-yes-bright/10 p-6">
+            <p class="font-mono text-meta tracking-widest text-yes-bright uppercase">крок нуль · безкоштовно</p>
+            <h3 class="mt-2 font-semibold">Діагностика не коштує нічого</h3>
+            <p class="mt-2 text-sm leading-relaxed text-paper/70">
+              Два питання в чаті, і ви отримуєте мапу: які сценарії варто будувати саме
+              вашій фірмі, в якому порядку і які з них ваші системи витримають уже
+              сьогодні. Число ви почуєте на розмові, коли ми побачимо, що ті системи
+              віддають насправді. Розмова теж безкоштовна.
+            </p>
+          </div>
+          <div class="reveal flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6" style="--r:0.1s">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">перший сценарій</p>
+            <h3 class="mt-2 font-semibold">Фіксована ціна, порахована для вас</h3>
+            <p class="mt-2 text-sm leading-relaxed text-paper/70">
+              Ми рахуємо її для кожної фірми окремо, бо число залежить від того, чого
+              сторінка вгадати не може: що ваші системи вже віддають назовні. Трекер із
+              чистим API та таблиця, у якій лежить справжня правда про обсяг робіт, це
+              різні роботи. <span class="text-paper">Фіксована означає фіксована: обсяг записаний, і ціна за ним не повзе.</span>
+            </p>
+          </div>
+          <div class="reveal flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6" style="--r:0.2s">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">робота конектора</p>
+            <h3 class="mt-2 font-semibold">Місячний рядок, поруч із першим числом</h3>
+            <p class="mt-2 text-sm leading-relaxed text-paper/70">
+              Конектор це не разова робота, яку здали й забули. Ми його тримаємо, стежимо
+              за ним і підтримуємо, поки платформи змінюються. Це число ви отримуєте
+              разом із першим, тож бачите обидва ще до того, як щось вирішуєте.
+            </p>
+          </div>
+        </div>
+
+        <div class="reveal mt-6 grid gap-4 md:grid-cols-2">
+          <p class="rounded-2xl border border-dashed border-white/25 px-6 py-5 text-sm leading-relaxed text-paper/70">
+            <span class="font-semibold text-paper">Якщо перший сценарій виявився не тим, ми будуємо наступний з вашої мапи без доплати.</span> Мапа
+            й існує для того, щоб цей вибір не був здогадом.
+          </p>
+          <p class="rounded-2xl border border-dashed border-white/25 px-6 py-5 text-sm leading-relaxed text-paper/70">
+            <span class="font-semibold text-paper">Приблизно два тижні</span> на перший сценарій проти системи з API. На
+            діагностиці ми прямо кажемо, які ваші системи витягнуть це вже сьогодні, а
+            які ні.
+          </p>
+        </div>
+
+        <p class="reveal mt-6 text-sm leading-relaxed text-paper/70">
+          <span class="text-paper">Перший сценарій ми зазвичай будуємо для вашої команди, а не для клієнтів.</span> Це
+          свідомо: результат видно в ті самі два тижні, і він не чекає, поки хтось поза фірмою
+          змінить звичку. Клієнтський бік живе на тому самому конекторі й іде наступним, коли
+          перший уже показав себе.
+        </p>
+
+        <p class="reveal mt-9 text-sm text-paper/70">
+          Крок нуль безкоштовний і займає два питання: <a href="/ua/scenario-map/" class="link-und text-yes">отримати мапу сценаріїв →</a>
+        </p>
+      </div>
+    </section>
+
+    <section id="faq" class="mx-auto max-w-3xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        перш ніж писати
+      </p>
+      <h2 class="reveal mt-3 font-display text-[clamp(1.5rem,3.5vw,2.6rem)] font-600">
+        Що питають професійні практики
+      </h2>
+      <div class="mt-10 space-y-4">
+        {faqs.map((f, i) => (
+          <details class="reveal group rounded-2xl border border-ink/10 bg-white/40 px-6 py-4" style={`--r:${i * 0.06}s`}>
+            <summary class="cursor-pointer list-none font-semibold marker:content-none">
+              <span class="mr-2 font-mono text-yes-deep">→</span>{f.q}
+            </summary>
+            <p class="mt-3 text-sm leading-relaxed text-ink-soft">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section id="contact" class="mx-auto max-w-6xl px-5 pb-28 text-center">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">наступний крок</p>
+      <h2 class="reveal mx-auto mt-3 max-w-2xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        Почніть з мапи, а не з договору
+      </h2>
+      <p class="reveal mx-auto mt-4 max-w-md leading-relaxed text-ink-soft">
+        Два питання про вашу практику, і ви бачите, які сценарії варто будувати, в якому
+        порядку і що ваші системи витримають уже сьогодні.
+      </p>
+      <div class="reveal mt-9">
+        <a href="/ua/scenario-map/"
+          class="inline-block rounded-full bg-yes-deep px-8 py-4 font-medium text-white shadow-[0_12px_32px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+          Отримати мапу сценаріїв →
+        </a>
+        <p class="mt-4 text-sm text-ink-faint">
+          Краще поговорити з людиною? <a href="https://t.me/yesmcp_bot?start=for_professional_services_ua" class="link-und text-yes-deep">Напишіть нам у Telegram</a> або на <a href="mailto:yes@yesmcp.com?subject=Конектор для нашої практики" class="link-und">yes@yesmcp.com</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter width="max-w-6xl" lang="uk" switchHref="/for/professional-services/" />
+</Layout>

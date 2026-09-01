@@ -1,0 +1,39 @@
+---
+/**
+ * Language switcher styled as a miniature swing tag hanging off the fixed
+ * header. Shows the TARGET language (its flag + code) plus a ⇄ glyph, so it
+ * reads as "switch to", not as country identity. Styles: global.css .lang-tag.
+ * Place inside a `relative` <nav>; it anchors itself to the container's right.
+ */
+interface Props {
+  /** Language this tag switches TO. */
+  target: "en" | "uk";
+  href: string;
+}
+const { target, href } = Astro.props;
+const code = target === "uk" ? "UA" : "EN";
+// The accessible name must contain the visible label text (WCAG 2.5.3).
+const label = target === "uk" ? "UA · українська версія" : "EN · English version";
+---
+
+<a class="lang-tag" href={href} title={label} aria-label={label}>
+  <span class="lang-tag-hole" aria-hidden="true"></span>
+  <span class="lang-tag-sw" aria-hidden="true">⇄</span>
+  {target === "uk" ? (
+    <svg class="lang-tag-flag" viewBox="0 0 12 9" aria-hidden="true">
+      <rect width="12" height="4.5" fill="#005BBB" />
+      <rect y="4.5" width="12" height="4.5" fill="#FFD500" />
+    </svg>
+  ) : (
+    <svg class="lang-tag-flag" viewBox="0 0 12 9" aria-hidden="true">
+      <rect width="12" height="9" fill="#012169" />
+      <path d="M0 0 L12 9 M12 0 L0 9" stroke="#fff" stroke-width="1.8" />
+      <path d="M0 0 L12 9 M12 0 L0 9" stroke="#C8102E" stroke-width="0.8" />
+      <rect x="4.9" width="2.2" height="9" fill="#fff" />
+      <rect y="3.4" width="12" height="2.2" fill="#fff" />
+      <rect x="5.4" width="1.2" height="9" fill="#C8102E" />
+      <rect y="3.9" width="12" height="1.2" fill="#C8102E" />
+    </svg>
+  )}
+  <span>{code}</span>
+</a>

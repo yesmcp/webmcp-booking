@@ -1,0 +1,99 @@
+---
+// End-of-article block: zero-JS share links (plain intent URLs, no widgets,
+// no trackers — the footer promise «no cookies, no analytics» stays true) +
+// the subscribe/CTA outro. Comments and likes are deliberate non-features
+// (decision 2026-08-24): discussion lives on the distribution channels.
+interface Props {
+  lang?: "en" | "uk";
+  /** Absolute URL of the article. */
+  url: string;
+  /** Share text, usually the headline. */
+  title: string;
+}
+const { lang = "en", url, title } = Astro.props;
+
+const eu = encodeURIComponent(url);
+const et = encodeURIComponent(title);
+const shares = [
+  { name: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${eu}` },
+  { name: "X", href: `https://twitter.com/intent/tweet?url=${eu}&text=${et}` },
+  { name: "Telegram", href: `https://t.me/share/url?url=${eu}&text=${et}` },
+  { name: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${eu}` },
+];
+
+const t =
+  lang === "uk"
+    ? {
+        share: "поділитися",
+        // Honest cadence: the census is weekly by construction; notes ship when
+        // production teaches something. «Виходять регулярно» was a promise the
+        // abolished publishing schedule no longer backs (board catch, 30.08).
+        outroLead: "Перепис каталогу оновлюється щотижня, а нова нотатка з'являється тоді, коли жива збірка чогось навчить.",
+        authorName: "Сергій Кравченко",
+        author:
+          "Я будую і веду конектори, з яких ці нотатки народжуються. Наш власний працює наживо в Claude і бронює справжні консультації: його можна додати собі за хвилину.",
+        aboutLabel: "Хто я →",
+        aboutHref: "/ua/about/",
+        tryLabel: "Спробувати конектор →",
+        tryHref: "/ua/connect/",
+        channel: "Стежити в Telegram",
+        channelHref: "https://t.me/yesmcp",
+        rss: "RSS",
+        rssHref: "/ua/rss.xml",
+        biz: "Є бізнес, який варто привести в ШІ-чати? Розкажіть, одного дзвінка досить.",
+        bot: "Написати нам у Telegram",
+        botHref: "https://t.me/yesmcp_bot?start=article",
+      }
+    : {
+        share: "share",
+        outroLead: "The directory census updates weekly, and a new note ships whenever a live build teaches something.",
+        authorName: "Serhii Kravchenko",
+        author:
+          "I build and run the connectors these notes come from. Our own one is live in Claude and books real consultations: you can add it to yours in a minute.",
+        aboutLabel: "Who I am →",
+        aboutHref: "/about/",
+        tryLabel: "Try the connector →",
+        tryHref: "/connect/",
+        channel: "Follow on Telegram",
+        channelHref: "https://t.me/yesmcp",
+        rss: "RSS",
+        rssHref: "/rss.xml",
+        biz: "Run a business worth putting inside AI chats? Tell us, one call is enough.",
+        bot: "Chat with us on Telegram",
+        botHref: "https://t.me/yesmcp_bot?start=article",
+      };
+---
+
+<p class="mt-12 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-xs text-ink-faint"
+  data-share data-url={url} data-title={title}>
+  <span class="tracking-widest uppercase">{t.share}:</span>
+  <button data-share-native hidden
+    class="cursor-pointer rounded-full border border-ink/20 px-3 py-1 text-ink-soft transition-colors hover:border-yes/50 hover:text-ink">
+    {lang === "uk" ? "Системне вікно…" : "Share…"}
+  </button>
+  {shares.map((s) => (
+    <a href={s.href} target="_blank" rel="noopener" data-share-link class="link-und text-ink-soft">{s.name}</a>
+  ))}
+</p>
+<script is:inline type="module" src="/js/share.js"></script>
+
+<aside class="mt-8 rounded-2xl border border-ink/10 bg-white/40 p-6 sm:p-7">
+  <p class="font-mono text-meta tracking-widest text-ink-faint uppercase">{t.authorName}</p>
+  <p class="mt-2 text-sm leading-relaxed text-ink-soft">{t.author}</p>
+  <p class="mt-3 font-mono text-sm">
+    <a href={t.aboutHref} class="link-und text-ink">{t.aboutLabel}</a>
+    <span class="mx-2 text-ink-faint">·</span>
+    <a href={t.tryHref} class="link-und text-yes-deep">{t.tryLabel}</a>
+  </p>
+  <p class="mt-5 border-t border-ink/10 pt-5 text-sm leading-relaxed text-ink-soft">{t.outroLead}</p>
+  <p class="mt-3 font-mono text-sm">
+    <a href={t.channelHref} class="link-und text-ink">{t.channel}</a>
+    <span class="mx-2 text-ink-faint">·</span>
+    <a href={t.rssHref} class="link-und text-ink-soft">{t.rss}</a>
+  </p>
+  <p class="mt-5 border-t border-ink/10 pt-5 text-sm leading-relaxed text-ink-soft">{t.biz}</p>
+  <a href={t.botHref}
+    class="mt-3 inline-block rounded-full bg-yes-deep px-6 py-2.5 text-sm font-medium text-white shadow-[0_8px_24px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+    {t.bot}
+  </a>
+</aside>

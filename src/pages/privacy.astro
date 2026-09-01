@@ -1,0 +1,354 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+// ── Source of truth ─────────────────────────────────────────────────────────
+// The text below mirrors `docs/submissions/privacy-policy.md` in the
+// yesmcp-connector repo. Directory reviewers compare the submitted privacy URL
+// against what the connector actually does — if the two drift, that is a
+// rejection cause, not a nit. Edit the source file first, then this page.
+
+// ── Owner decisions, all three in one place ─────────────────────────────────
+// Settled 2026-08-21 (owner delegated; verified: Cloudflare Email Routing
+// catch-all on yesmcp.com delivers privacy@/yes@ to the owner's inbox).
+// 1. Retention.
+const retention = "24 months";
+// 2. The address privacy requests go to. It MUST exist and be monitored.
+const privacyEmail = "privacy@yesmcp.com";
+// 3. Effective date — set, so the DRAFT banner is off and the page is live text.
+const effectiveDate: string | null = "21 August 2026";
+
+const contactEmail = "yes@yesmcp.com";
+
+// Structured data. Same @id nodes as the home page and /about/ — one graph
+// across the site, so Organization/Person are merged rather than duplicated.
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://yesmcp.com/#organization",
+      name: "Yes MCP",
+      alternateName: "yesmcp",
+      url: "https://yesmcp.com/",
+      email: contactEmail,
+      founder: { "@id": "https://yesmcp.com/#serhii" },
+      sameAs: ["https://www.linkedin.com/company/yesmcp/"],
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://yesmcp.com/privacy/#page",
+      url: "https://yesmcp.com/privacy/",
+      name: "Privacy",
+      description:
+        "What this site and the yesmcp connector collect: nothing on the site; three fields when you book a consultation.",
+      isPartOf: { "@id": "https://yesmcp.com/#website" },
+      publisher: { "@id": "https://yesmcp.com/#organization" },
+      inLanguage: "en",
+      ...(effectiveDate ? { datePublished: "2026-08-21" } : {}),
+    },
+  ],
+};
+---
+
+<Layout
+  title="Privacy | yesmcp"
+  description="No cookies, no analytics, no trackers on this site, and exactly three fields (name, email, topic) if you book a consultation through the yesmcp connector."
+  ogTitle="Privacy | yesmcp"
+  ogDescription="No cookies, no analytics, no trackers. What happens to an email you send, and what the connector collects."
+  path="/privacy/"
+  alternates={{ en: "/privacy/", uk: "/ua/privacy/" }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav switchHref="/ua/privacy/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-24 sm:pt-36">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">privacy</p>
+    <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+      What this site and the<br />yesmcp connector know about you
+    </h1>
+
+    {effectiveDate ? (
+      <p class="mt-5 font-mono text-xs text-ink-faint">Effective {effectiveDate}</p>
+    ) : (
+      <p class="mt-6 rounded-2xl border border-amber/50 bg-amber/10 px-5 py-4 font-mono text-xs leading-relaxed text-ink-soft">
+        <strong class="text-ink">DRAFT: not yet in effect.</strong> This page has no
+        effective date set. Set it in <code>src/pages/privacy.astro</code> before
+        submitting the connector to any directory.
+      </p>
+    )}
+
+    <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+      Short version: this website collects <strong class="text-ink">nothing at all</strong>,
+      and the connector collects <strong class="text-ink">three things</strong>: your
+      name, your email address, and the one-line topic you give when you book a
+      consultation. Nothing else. No account, no tracking, no payments.
+    </p>
+
+    <div class="mt-12 space-y-11">
+      <!-- the site itself -->
+      <section>
+        <h2 class="font-display text-xl font-600">This website</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          This is a static site. It sets <strong class="text-ink">no cookies</strong>, runs
+          no analytics, and embeds no trackers. We collect nothing about your visit.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          <strong class="text-ink">Nothing on these pages is loaded from a third-party
+          domain, with one named exception below.</strong> The typefaces are served from this domain, not from Google
+          Fonts, so your browser makes no request to anyone but us. Every script here is
+          ours and served from this domain: the scroll animation, the chat demo, the
+          scenario map, the booking page, and the one-question checkpoint on the front
+          page. The scenario map keeps the two answers you gave it in your browser's
+          session storage, so that leaving the page and coming back does not make you
+          fill it in again. That stays inside your browser, belongs to that one tab, and
+          is gone when you close it. The checkpoint keeps one word in your browser's
+          local storage once you have answered, so it never asks you twice; that word
+          says nothing about you and never leaves your browser. The front page also asks
+          our own connector for its public status counters.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          <strong class="text-ink">One page is different, and it is the booking page.</strong>
+          <a href="/book/" class="link-und text-yes-deep">/book/</a> asks our connector which
+          windows are open, and that request carries nothing about you. When you fill the
+          form in and press the button, it sends the same three fields any booking needs:
+          your name, your email address and the sentence you wrote. Nothing is stored in your
+          browser, and nothing leaves it until you press that button. What happens to those
+          three fields afterwards is the rest of this page, and it is identical whether you
+          booked from here or from inside an AI chat.
+        </p>
+      </section>
+
+      <!-- the telegram mini app -->
+      <section>
+        <h2 class="font-display text-xl font-600">Booking from inside Telegram</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          The same booking page has a Telegram version, opened from our Telegram bot rather
+          than typed into a browser. It is the <strong class="text-ink">one place on this
+          site that loads a file from someone else's domain</strong>: Telegram's own
+          <code class="font-mono text-note text-yes-deep">telegram-web-app.js</code>, which is
+          what lets a page run as a Telegram Mini App at all.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          Inside it, Telegram hands the page your <strong class="text-ink">Telegram profile
+          data</strong>: your numeric Telegram id, your first and last name, your username if
+          you have one, and your interface language. The name fills the form in for you, the
+          language picks which of the two languages the page speaks, and the id and username
+          travel with the booking so we know which Telegram account it belongs to. That is the
+          whole use. It is not sold, not shared, not used for marketing, and not turned into a
+          profile of you. Your email is still required and still typed by you, because the
+          confirmation email is what actually holds the meeting. Nothing is stored in your
+          browser, and nothing leaves the page until you press the button.
+        </p>
+      </section>
+
+      <!-- what the host sees -->
+      <section>
+        <h2 class="font-display text-xl font-600">What the host sees</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          The site is served by <strong class="text-ink">Cloudflare Pages</strong>. Like any
+          web host, Cloudflare handles the technical request data needed to deliver a page:
+          IP address, user agent, the URL you asked for. We may see aggregate traffic counts
+          in their dashboard. We do not have a profile of any individual visitor, and we are
+          not building one.
+        </p>
+      </section>
+
+      <!-- if you email us -->
+      <section>
+        <h2 class="font-display text-xl font-600">If you email us</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Mail to <a href={`mailto:${contactEmail}`} class="link-und text-ink">{contactEmail}</a> is forwarded to a personal mailbox and read by a person. We keep the correspondence
+          for as long as the conversation is useful, use it only to answer you, and never add
+          anyone to a list or pass an address to a third party. Ask and we will delete the
+          thread.
+        </p>
+      </section>
+
+      <!-- what this covers -->
+      <section>
+        <h2 class="font-display text-xl font-600">What the rest of this covers</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Everything below covers the <strong class="text-ink">yesmcp MCP connector</strong>,
+          the tools yesmcp exposes inside AI assistants such as Claude and ChatGPT
+          (all ten of them: <code class="font-mono text-note text-yes-deep">list_availability</code>, <code class="font-mono text-note text-yes-deep">book_consult</code>, <code class="font-mono text-note text-yes-deep">cancel_booking</code>, <code class="font-mono text-note text-yes-deep">reschedule_booking</code>, <code class="font-mono text-note text-yes-deep">get_services</code>, <code class="font-mono text-note text-yes-deep">advise_scenarios</code>, <code class="font-mono text-note text-yes-deep">demo_walkthrough</code>, <code class="font-mono text-note text-yes-deep">directory_census</code>, and the two that draw the cards you see in the chat, <code class="font-mono text-note text-yes-deep">booking_widget</code> and <code class="font-mono text-note text-yes-deep">services_widget</code>).
+          It does not cover the assistant itself: your conversation with Claude or
+          ChatGPT is governed by that provider's own privacy policy, and yesmcp
+          neither receives nor stores it.
+        </p>
+      </section>
+
+      <!-- what we collect -->
+      <section>
+        <h2 class="font-display text-xl font-600">What we collect</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          We collect data in exactly one place: when you <strong class="text-ink">book a
+          consultation</strong>. Three fields, all of them given by you, in the
+          conversation, at that moment.
+        </p>
+        <div class="mt-5 grid gap-px overflow-hidden rounded-2xl border border-ink/10 bg-ink/10 sm:grid-cols-3">
+          {[
+            ["Name", "so we know who we are meeting"],
+            ["Email address", "to send the confirmation, and to be reachable about the meeting"],
+            ["Topic", "one line on what you want to discuss, so the call is not spent on discovery"],
+          ].map(([field, why]) => (
+            <div class="bg-paper p-5">
+              <p class="font-mono text-meta text-yes-deep">{field}</p>
+              <p class="mt-2 text-sm leading-relaxed text-ink-soft">{why}</p>
+            </div>
+          ))}
+        </div>
+        <p class="mt-5 leading-relaxed text-ink-soft">
+          <strong class="text-ink">That is the entire list</strong> for a booking made on the
+          web or inside an AI chat. A booking made inside Telegram adds two fields and only
+          two, both handed over by Telegram itself: your Telegram id and your username, so the
+          booking is attached to the account that made it. The connector does
+          not ask for, and has no way to receive, a phone number, a company, a
+          payment method, an address, or an account of any other kind.
+        </p>
+      </section>
+
+      <!-- what we don't collect -->
+      <section>
+        <h2 class="font-display text-xl font-600">What we do not collect</h2>
+        <ul class="mt-4 space-y-3">
+          {[
+            ["No account, no login.", "Every tool works as a guest. There is no password, no OAuth, no profile."],
+            ["No conversation content.", "Every tool that does not manage a booking is read-only. Nothing you say to the assistant reaches us except the three fields you supply when booking. The business type you mention to get scenario advice picks a playbook; it appears in the operational tool-call log described below, with no name or contact attached, and nowhere else."],
+            ["No payments.", "No financial transaction happens inside the chat, and no payment details are ever requested there. If a paid engagement follows, it is arranged separately, outside the connector."],
+            ["No tracking.", "No cookies, no analytics, no advertising identifiers, no device fingerprinting, no third-party trackers."],
+            ["No IP address stored with your booking.", "We rate-limit the booking endpoint to protect it from abuse, and that check lives in memory only. There is one exception, stated plainly: if a request is rejected for exceeding the limit, the originating IP address is written to our abuse log so the abuse can be investigated. A booking that goes through leaves no IP behind."],
+          ].map(([head, body]) => (
+            <li class="flex gap-3">
+              <span class="mt-0.5 text-yes-deep">✓</span>
+              <p class="leading-relaxed text-ink-soft">
+                <strong class="text-ink">{head}</strong> {body}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- why -->
+      <section>
+        <h2 class="font-display text-xl font-600">Why we use it</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Solely to <strong class="text-ink">arrange and hold the consultation you asked
+          for</strong>, and to contact you about it. We do not use your data for
+          marketing, we do not add you to a mailing list, we do not profile you, and
+          there is no automated decision-making.
+        </p>
+      </section>
+
+      <!-- where it goes -->
+      <section>
+        <h2 class="font-display text-xl font-600">Where it goes</h2>
+        <ul class="mt-4 space-y-3 leading-relaxed text-ink-soft">
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span><strong class="text-ink">Our own database</strong>, on a server yesmcp controls.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span>
+              <strong class="text-ink">Our email provider</strong> (<a href="https://resend.com" class="link-und text-ink" rel="noopener">Resend</a>),
+              which delivers your confirmation email on our behalf.
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span><strong class="text-ink">The owner's Telegram</strong>, which receives a notification with your name, the time, and your topic, so a person actually sees the booking.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span><strong class="text-ink">Our operational log.</strong> Tool calls are logged for reliability and abuse investigation; for a booking, that log line contains the same three fields and nothing more.</span>
+          </li>
+        </ul>
+        <p class="mt-5 leading-relaxed text-ink-soft">
+          We do <strong class="text-ink">not</strong> sell your data, share it with
+          advertisers, or pass it to anyone beyond the processors named above.
+        </p>
+      </section>
+
+      <!-- retention -->
+      <section>
+        <h2 class="font-display text-xl font-600">How long we keep it</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          We keep booking records, including the log entries described above, for <strong class="text-ink">{retention}</strong> from the date of the booking, and
+          then delete them. Two years is chosen so we can honour a follow-up
+          conversation started a year later, without retaining anything indefinitely.
+        </p>
+      </section>
+
+      <!-- deletion -->
+      <section id="delete" class="rounded-2xl border border-ink/10 bg-white/40 p-7">
+        <h2 class="font-display text-xl font-600">Deleting your data</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Email <a href={`mailto:${privacyEmail}?subject=Data deletion request`}
+            class="link-und font-medium text-ink">{privacyEmail}</a> from the address you
+          booked with, and we will delete your booking record. We handle these by
+          hand. yesmcp is a small operation, there is no self-service delete button,
+          and we would rather say that plainly than pretend otherwise. Expect
+          confirmation within 30 days, in practice much sooner. You can ask for a copy
+          of what we hold, or for a correction, the same way.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          Cancelling or rescheduling a booking is done by <strong class="text-ink">replying to the confirmation email</strong>, and a person
+          reads it.
+        </p>
+      </section>
+
+      <!-- test bookings -->
+      <section>
+        <h2 class="font-display text-xl font-600">Test bookings</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Bookings made against the reviewer test windows, used by app-directory
+          reviewers, are marked <code class="font-mono text-note text-yes-deep">[TEST]</code> and are deleted on the same schedule as everything else. They are real
+          records, because a test booking is a real tool call, and are treated identically.
+        </p>
+      </section>
+
+      <!-- if we work together -->
+      <section>
+        <h2 class="font-display text-xl font-600">If we work together</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          An engagement is a different matter, and it gets its own written agreement before
+          anything starts. That covers who controls the data your system holds, where it
+          goes, and what happens to access credentials when the work ends. Nothing on this
+          site creates that agreement.
+        </p>
+      </section>
+
+      <!-- children / changes -->
+      <section>
+        <h2 class="font-display text-xl font-600">Children, and changes</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          The connector is a business-to-business tool and is not directed at
+          children. If this policy changes materially, the effective date at the top
+          changes with it, and the updated text is published at this same URL.
+        </p>
+      </section>
+
+      <!-- contact -->
+      <section>
+        <h2 class="font-display text-xl font-600">Contact</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          yesmcp · <a href={`mailto:${contactEmail}`} class="link-und text-ink">{contactEmail}</a>{" · "}privacy requests: <a href={`mailto:${privacyEmail}`} class="link-und text-ink">{privacyEmail}</a>
+        </p>
+      </section>
+    </div>
+
+    <p class="mt-14 border-t border-ink/10 pt-7 font-mono text-sm">
+      <a href="/" class="link-und text-ink-soft">← Back to the front page</a>
+    </p>
+  </main>
+
+  <SiteFooter switchHref="/ua/privacy/" />
+</Layout>

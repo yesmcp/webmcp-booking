@@ -1,0 +1,153 @@
+---
+import { Picture } from "astro:assets";
+import stepDialog from "../assets/connect/step2-dialog-prefilled.jpg";
+import stepConnected from "../assets/connect/step3-connected.jpg";
+import stepChatEn from "../assets/connect/step4-chat-en.jpg";
+import stepSlotsEn from "../assets/connect/step5-slots-en.jpg";
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+const MCP_URL = "https://mcp.yesmcp.com/mcp";
+// Documented install link: opens the Add custom connector dialog with both
+// fields prefilled (claude.com/docs/connectors/building/directory-vs-custom).
+const CLAUDE_ADD_URL = `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=yesmcp&connectorUrl=${encodeURIComponent(MCP_URL)}`;
+---
+
+<Layout
+  title="Try the yesmcp connector in Claude | yesmcp"
+  description="Add the yesmcp connector to your Claude in under a minute: paste one URL, no sign-up, no login. Ask what an MCP connector could do for your business and book a consultation without leaving the chat."
+  ogTitle="Try the yesmcp connector in your Claude"
+  ogDescription="One URL, no login. Our own business, live inside Claude: services, scenarios for your industry, and real consultation booking."
+  path="/connect/"
+  alternates={{ en: "/connect/", uk: "/ua/connect/" }}
+>
+  <Fragment slot="head">
+    {/* Warm up the connection before the Add to Claude click — saves DNS+TLS on the jump. */}
+    <link rel="preconnect" href="https://claude.ai" crossorigin />
+    <link rel="dns-prefetch" href="https://claude.ai" />
+  </Fragment>
+
+  <SiteNav switchHref="/ua/connect/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-24 sm:pt-36">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">try it live</p>
+    <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+      Try our connector<br />in your Claude
+    </h1>
+
+    <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+      We sell MCP connectors, so we run one ourselves. Add it to your Claude in
+      under a minute: no sign-up, no login, nothing to install. It works
+      on any Claude plan, including the free one. You will see exactly what your
+      own customers would see if your business lived inside an AI chat.
+    </p>
+
+    <div class="mt-12 space-y-11">
+      <section>
+        <h2 class="font-display text-xl font-600">1. Add the connector</h2>
+        <div class="mt-4 space-y-4">
+          <div class="rounded-2xl border border-yes-deep/25 bg-white/40 p-5">
+            <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">one click · computer or phone</p>
+            <a href={CLAUDE_ADD_URL} class="mt-4 inline-block rounded-full bg-yes-deep px-6 py-3 font-medium text-white shadow-[0_8px_24px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">Add to Claude</a>
+            <ol class="mt-4 list-decimal space-y-1.5 pl-5 leading-relaxed text-ink-soft">
+              <li>Press the button. Claude opens the add-connector form with the name and URL <strong class="text-ink">already filled in</strong>, like on the screenshot below.</li>
+              <li>Check the fields and press <strong class="text-ink">Add</strong>. Done.</li>
+            </ol>
+            <p class="mt-3 text-sm leading-relaxed text-ink-faint">On a phone Claude can take a few seconds to load, so give the form a moment to appear. Not signed in to Claude yet? It asks you to log in first, then shows the same filled form.</p>
+          </div>
+          <div class="rounded-2xl border border-ink/10 bg-white/40 p-5">
+            <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">if the button opened a plain chat instead</p>
+            <p class="mt-2 text-sm leading-relaxed text-ink-faint">That happens when the link lands in the Claude app rather than the browser. Two steps by hand:</p>
+            <ol class="mt-2 list-decimal space-y-1.5 pl-5 leading-relaxed text-ink-soft">
+              <li>In Claude: your profile → <strong class="text-ink">Settings → Connectors</strong>.</li>
+              <li>Press <strong class="text-ink">Add custom connector</strong>, paste the URL below and confirm.</li>
+            </ol>
+          </div>
+        </div>
+        <p class="mt-4 leading-relaxed text-ink-soft">The connector URL for adding it manually (the button above fills it in for you):</p>
+        <div class="mt-4 flex items-center justify-between gap-4 rounded-2xl border border-ink/10 bg-white/40 px-5 py-4" data-copy={MCP_URL}>
+          <span class="font-mono text-sm text-yes-deep select-all break-all">{MCP_URL}</span>
+          <button type="button" data-copy-btn data-done="Copied ✓" hidden
+            class="shrink-0 cursor-pointer rounded-full border border-yes-deep/40 px-4 py-1.5 font-mono text-xs text-yes-deep transition-colors hover:bg-yes-deep hover:text-paper">
+            Copy
+          </button>
+        </div>
+        <div class="mt-5 flex items-center gap-5 rounded-2xl border border-ink/10 bg-white/40 p-5">
+          <img src="/assets/qr/connect-en.svg" alt="QR code opening this page" width="104" height="104" loading="lazy" />
+          <p class="text-sm leading-relaxed text-ink-soft">
+            Reading this on a laptop, but Claude lives on your phone? Scan the
+            code: it opens this page there, with the URL ready to copy.
+          </p>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-ink-faint">
+          Works on claude.ai, in the mobile apps and in Claude Desktop, on the
+          free plan too. ChatGPT users: our app-directory submission is in
+          preparation; for now the connector runs in Claude.
+        </p>
+        <Picture src={stepDialog} formats={["avif", "webp"]} alt="The Add custom connector dialog opened by the button: name and URL already filled in"
+          widths={[536, 1072]} sizes="(min-width: 640px) 28rem, 100vw" loading="lazy" decoding="async"
+          class="mt-5 w-full max-w-md rounded-2xl border border-ink/10" />
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">2. Allow the tools</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          After adding, press <strong class="text-ink">Connect</strong> on the connector card.
+          The permissions screen opens: set <strong class="text-ink">Read-only tools</strong> to <strong class="text-ink">Always allow</strong> so Claude stops asking before every read.
+          Leave booking on confirmation: Claude will check with you before it books, which is
+          exactly right.
+        </p>
+        <Picture src={stepConnected} formats={["avif", "webp"]} alt="The yesmcp connector card with tool permissions"
+          widths={[640, 960, 1200]} sizes="(min-width: 768px) 44rem, 100vw" loading="lazy" decoding="async"
+          class="mt-5 w-full rounded-2xl border border-ink/10" />
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">3. Ask it something</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">Start a new chat and try any of these:</p>
+        <ul class="mt-4 space-y-3">
+          <li class="rounded-2xl border border-ink/10 bg-white/40 px-5 py-3 text-ink-soft">“What could an MCP connector do for a <strong class="text-ink">dental clinic</strong>?”</li>
+          <li class="rounded-2xl border border-ink/10 bg-white/40 px-5 py-3 text-ink-soft">“What does <strong class="text-ink">yesmcp</strong> actually build, and how does an engagement run?”</li>
+          <li class="rounded-2xl border border-ink/10 bg-white/40 px-5 py-3 text-ink-soft">“Show me yesmcp's free consultation slots and <strong class="text-ink">book one</strong> for me.”</li>
+        </ul>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          Here is what it looks like in the chat: Claude calls the connector's
+          tools itself and answers from live data.
+        </p>
+        <Picture src={stepChatEn} formats={["avif", "webp"]} alt="Claude chat: the connector answering about yesmcp services"
+          widths={[640, 960, 1200]} sizes="(min-width: 768px) 44rem, 100vw" loading="lazy" decoding="async"
+          class="mt-4 w-full rounded-2xl border border-ink/10" />
+        <Picture src={stepSlotsEn} formats={["avif", "webp"]} alt="Claude chat: live consultation slots with timezones"
+          widths={[640, 960, 1200]} sizes="(min-width: 768px) 44rem, 100vw" loading="lazy" decoding="async"
+          class="mt-4 w-full rounded-2xl border border-ink/10" />
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          The booking is real: you pick a live slot, get a confirmation email
+          immediately, and we meet you there. Every answer comes from our own
+          published content, so the assistant cannot invent prices or promises.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">What it knows about you</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Nothing, until you book. A booking stores exactly three things: your
+          name, your email address, and the topic you want to discuss. Details in
+          our <a href="/privacy/" class="link-und text-ink">privacy policy</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="font-display text-xl font-600">Want one of these for your business?</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          This page is the product demo: what you just tried is what we build
+          for clients, wired to their real schedule, catalog and orders. Book a
+          call right in the chat above, or write to us: <a href="https://t.me/yesmcp_bot?start=connect" class="link-und text-ink">@yesmcp_bot</a>{" · "}<a href="mailto:yes@yesmcp.com" class="link-und text-ink">yes@yesmcp.com</a>
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <SiteFooter switchHref="/ua/connect/" />
+  <script is:inline type="module" src="/js/copy-url.js"></script>
+</Layout>

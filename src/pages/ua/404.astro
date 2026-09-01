@@ -1,0 +1,42 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+
+// Cloudflare Pages serves the CLOSEST 404.html walking up from the requested
+// path, so this file is what a broken /ua/* URL lands on. Without it a
+// Ukrainian visitor who followed a Ukrainian link got the English page with no
+// way back into their own locale (site audit, 2026-08-29).
+---
+
+<Layout
+  title="Сторінку не знайдено | yesmcp"
+  description="Цієї сторінки тут немає. Або вона переїхала, або її ніколи не було."
+  path="/ua/404.html"
+  lang="uk"
+  noindex={true}
+>
+  <SiteNav lang="uk" switchHref="/404.html" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-32 pb-24 sm:pt-44">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">404</p>
+    <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+      Цієї сторінки тут немає
+    </h1>
+    <p class="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
+      Або вона переїхала, або її ніколи не було. Усе, що існує, за одне посилання звідси.
+    </p>
+    <div class="mt-9 flex flex-wrap items-center gap-4">
+      <a
+        href="/ua/"
+        class="rounded-full bg-yes-deep px-6 py-3 font-medium text-white shadow-[0_8px_24px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5"
+      >
+        Головна
+      </a>
+      <a href="/ua/writing/" class="link-und text-ink-soft">Нотатки</a>
+      <a href="/ua/about/" class="link-und text-ink-soft">Про нас</a>
+    </div>
+  </main>
+
+  <SiteFooter lang="uk" switchHref="/404.html" />
+</Layout>

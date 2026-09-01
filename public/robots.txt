@@ -1,0 +1,9 @@
+# Everything is allowed, deliberately ,  including AI training crawlers.
+# Rationale (research carried over from the awrshift playbook, 2026-07): blocking
+# training bots correlates with a traffic loss and does not reliably prevent
+# citation. This site exists to be read, quoted and cited by machines as well as
+# people. Revisit only with an explicit owner decision.
+User-agent: *
+Allow: /
+
+Sitemap: https://yesmcp.com/sitemap.xml

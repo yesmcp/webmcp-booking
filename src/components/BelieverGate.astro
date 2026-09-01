@@ -1,0 +1,884 @@
+---
+// BelieverGate: the one-question comedy checkpoint on the front door.
+// v3 (owner's pick 2026-08-31): back to the original Moon gag, polished.
+// The skeptic assembles part by part, a terracotta boot winds up and punts
+// him to the Moon; his cap stays behind and lands a beat later. The Moon
+// then zooms in so the tiny resident is actually visible. YES gets the
+// rubber stamp and the doors.
+//
+// Shown once, and only to visitors ARRIVING from outside (direct hit or an
+// external referrer): a person mid-session clicking the logo must not meet a
+// checkpoint in the hallway. The answer stores one word in localStorage (KEY
+// in the script), which is why /privacy/ and /ua/privacy/ name this storage.
+// The whole thing exists only after JS runs: crawlers, no-JS visitors and
+// every later visit never see an overlay at all. A click anywhere during
+// either animation skips to its end; nobody is ever actually locked out.
+interface Props {
+  lang?: "en" | "uk";
+}
+const { lang = "en" } = Astro.props;
+
+const t =
+  lang === "uk"
+    ? {
+        eyebrow: "контроль на вході",
+        q: "Ви вірите, що ШІ змінить світ?",
+        yes: "Так, звісно",
+        no: "Ні",
+        stamp: "правильно",
+        skip: "пропустити",
+        noteTitle: "заходьте.",
+        noteMeta: "агент 04 · чергування біля дверей",
+        deniedTitle: "Доступ закрито.",
+        deniedBody:
+          "Спокійно, не вам. Вашому внутрішньому скептику: він відповів «ні», дістав стусана і тепер на Місяці. Звідти якраз чудово видно, як ШІ змінює світ.",
+        deniedNote: "З ним усе гаразд. На Місяці немає дедлайнів.",
+        believe: "Гаразд, я вже вірю",
+      }
+    : {
+        eyebrow: "entrance check",
+        q: "Do you believe AI will change the world?",
+        yes: "Yes, obviously",
+        no: "No",
+        stamp: "correct",
+        skip: "skip",
+        noteTitle: "come in.",
+        noteMeta: "agent 04 · door duty",
+        deniedTitle: "Access denied.",
+        deniedBody:
+          "Relax, not for you. For your inner skeptic: they answered no, got the boot, and are now on the Moon. The view of AI changing the world is excellent from up there.",
+        deniedNote: "They are fine. The Moon has no deadlines.",
+        believe: "Fine, I believe now",
+      };
+---
+
+<div id="bgate" class="bgate fixed inset-0 z-[45]" hidden>
+  <div class="bgate-door bgate-door-l" aria-hidden="true"></div>
+  <div class="bgate-door bgate-door-r" aria-hidden="true"></div>
+
+  <div
+    class="bgate-inner relative flex h-full flex-col items-center justify-center px-6 text-center"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="bgate-q"
+    aria-label={t.eyebrow}
+  >
+    <section id="bgate-ask" class="max-w-md">
+      <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">{t.eyebrow}</p>
+      <h2 id="bgate-q" class="mt-4 font-display text-2xl font-800 sm:text-3xl">{t.q}</h2>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <button
+          id="bgate-yes"
+          type="button"
+          class="rounded-full bg-yes-deep px-8 py-3.5 font-600 text-paper transition-transform hover:-translate-y-0.5"
+          >{t.yes}</button
+        >
+        <button
+          id="bgate-no"
+          type="button"
+          class="rounded-full border border-ink/25 px-8 py-3.5 font-600 text-ink transition-transform hover:-translate-y-0.5"
+          >{t.no}</button
+        >
+      </div>
+    </section>
+
+    <svg class="bgate-walk-stage" viewBox="0 0 110 150" aria-hidden="true">
+      <ellipse class="bgate-ground" cx="52" cy="140" rx="36" ry="5" />
+      <g class="bgate-walker">
+        <text class="bgate-walker-sigh" x="76" y="34">...</text>
+        <g class="bgate-walker-legs">
+          <rect class="bgate-walker-leg bgate-walker-leg-l bgate-ink" x="44" y="112" width="6" height="24" rx="3" />
+          <rect class="bgate-walker-leg bgate-walker-leg-r bgate-ink" x="55" y="112" width="6" height="24" rx="3" />
+        </g>
+        <g class="bgate-walker-body">
+          <rect class="bgate-tee" x="37" y="78" width="31" height="38" rx="10" />
+          <g class="bgate-walker-note">
+            <rect class="bgate-note-paper" x="14" y="86" width="18" height="13" rx="1.5" transform="rotate(-8 23 92)" />
+            <path class="bgate-line-thin" d="M18 90 h9 M18 94 h7" transform="rotate(-8 23 92)" />
+          </g>
+          <circle class="bgate-skin" cx="52" cy="60" r="17" />
+          <path class="bgate-line" d="M44 58 h6 M56 58 h6" />
+          <path class="bgate-line-thin" d="M48 69 h9" />
+          <path class="bgate-walker-cap-top" d="M38 54 a14 14 0 0 1 28 0 z" />
+          <rect class="bgate-cap-brim" x="35" y="52" width="27" height="4" rx="2" />
+        </g>
+      </g>
+    </svg>
+
+    <div class="bgate-note" aria-hidden="true">
+      <p class="bgate-note-title font-display font-800">{t.noteTitle}</p>
+      <p class="bgate-note-meta font-mono">{t.noteMeta}</p>
+    </div>
+
+    <div class="bgate-stamp font-mono" aria-hidden="true">{t.stamp}</div>
+
+    <svg class="bgate-stage" viewBox="0 0 320 230" aria-hidden="true">
+      <circle class="bgate-star" cx="42" cy="38" r="2" />
+      <circle class="bgate-star" cx="92" cy="16" r="1.5" />
+      <circle class="bgate-star" cx="196" cy="20" r="2" />
+      <circle class="bgate-star" cx="300" cy="110" r="1.5" />
+
+      <g class="bgate-moon-g">
+        <circle class="bgate-moon" cx="256" cy="50" r="28" />
+        <circle class="bgate-crater" cx="246" cy="44" r="5" />
+        <circle class="bgate-crater" cx="266" cy="60" r="4" />
+        <circle class="bgate-crater" cx="262" cy="36" r="2.5" />
+        <g class="bgate-moonguy">
+          <circle class="bgate-skin" cx="248" cy="19" r="5.5" />
+          <rect class="bgate-tee" x="242.5" y="24" width="11" height="10" rx="3.5" />
+          <path class="bgate-line-thin" d="M245 16 l4 -1.5 M251 14.5 l4 1.5" />
+          <path class="bgate-line-thin" d="M245.5 21.5 q2.5 2 5 0" />
+        </g>
+        <g class="bgate-moon-dust">
+          <circle class="bgate-crater" cx="239" cy="23" r="3" />
+          <circle class="bgate-crater" cx="249" cy="15" r="3.5" />
+          <circle class="bgate-crater" cx="258" cy="24" r="2.5" />
+        </g>
+      </g>
+
+      <ellipse class="bgate-ground" cx="152" cy="212" rx="96" ry="7" />
+
+      <g class="bgate-guy">
+        <rect class="bgate-part bgate-leg-l bgate-ink" x="138" y="162" width="9" height="36" rx="4.5" />
+        <rect class="bgate-part bgate-leg-r bgate-ink" x="155" y="162" width="9" height="36" rx="4.5" />
+        <rect class="bgate-part bgate-torso bgate-tee" x="129" y="120" width="44" height="50" rx="13" />
+        <rect class="bgate-part bgate-arm-l bgate-tee" x="116" y="126" width="10" height="34" rx="5" />
+        <rect class="bgate-part bgate-arm-r bgate-tee" x="176" y="126" width="10" height="34" rx="5" />
+        <g class="bgate-part bgate-head">
+          <circle class="bgate-skin" cx="151" cy="98" r="22" />
+          <circle class="bgate-ink" cx="143" cy="96" r="2.5" />
+          <circle class="bgate-ink" cx="159" cy="96" r="2.5" />
+          <path class="bgate-line" d="M138 88 l9 -3 M155 85 l9 3" />
+          <path class="bgate-line" d="M143 109 q8 -6 16 0" />
+        </g>
+      </g>
+
+      <g class="bgate-cap bgate-part">
+        <path class="bgate-cap-top" d="M133 82 a18 18 0 0 1 36 0 z" />
+        <rect class="bgate-cap-brim" x="129" y="80" width="34" height="5" rx="2.5" />
+      </g>
+
+      <g class="bgate-dust">
+        <circle class="bgate-crater" cx="128" cy="200" r="4" />
+        <circle class="bgate-crater" cx="146" cy="206" r="5" />
+        <circle class="bgate-crater" cx="166" cy="201" r="4" />
+      </g>
+
+      <defs>
+        <clipPath id="bgate-portal-clip">
+          <rect x="58" y="126" width="262" height="84" />
+        </clipPath>
+      </defs>
+      <g class="bgate-portal-g">
+        <ellipse class="bgate-portal" cx="58" cy="170" rx="14" ry="36" />
+        <ellipse class="bgate-portal-rim" cx="58" cy="170" rx="19" ry="42" />
+      </g>
+      <g clip-path="url(#bgate-portal-clip)">
+        <g class="bgate-boot">
+          <rect class="bgate-ink" x="0" y="164" width="58" height="13" rx="6.5" />
+          <path class="bgate-boot-body" d="M56 150 q0 -5 5 -5 h16 q5 0 5 5 v18 h14 q10 1 13 8 q2 6 -5 7 h-42 q-6 0 -6 -6 z" />
+          <rect class="bgate-boot-sole" x="54" y="183" width="52" height="5" rx="2.5" />
+        </g>
+      </g>
+    </svg>
+
+    <section id="bgate-denied" class="max-w-md">
+      <h2 id="bgate-denied-title" tabindex="-1" class="font-display text-2xl font-800 sm:text-3xl">{t.deniedTitle}</h2>
+      <p class="mt-4 text-base leading-relaxed text-ink-soft">{t.deniedBody}</p>
+      <p class="mt-2 text-sm text-ink-faint">{t.deniedNote}</p>
+      <button
+        id="bgate-believe"
+        type="button"
+        class="mt-7 rounded-full bg-yes-deep px-8 py-3.5 font-600 text-paper transition-transform hover:-translate-y-0.5"
+        >{t.believe}</button
+      >
+    </section>
+
+    <button id="bgate-skip" type="button" class="bgate-skip font-mono">{t.skip} →</button>
+  </div>
+</div>
+
+<style>
+  /* The column must be scrollable when it outgrows a short landscape
+     viewport, or the "Fine, I believe now" button becomes unreachable.
+     `safe center` falls back to flex-start when overflowing; engines that
+     do not know `safe` keep the plain centering from the utility class. */
+  .bgate-inner {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    justify-content: safe center;
+  }
+
+  .bgate-door {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50.5%;
+    background: var(--color-paper);
+  }
+  .bgate-door-l {
+    left: 0;
+    border-right: 1px dashed color-mix(in srgb, var(--color-ink) 18%, transparent);
+  }
+  .bgate-door-r {
+    right: 0;
+  }
+  .play-enter .bgate-door-l {
+    animation: bgate-door-l 0.7s cubic-bezier(0.5, 0, 0.7, 0.4) 3.95s forwards;
+  }
+  .play-enter .bgate-door-r {
+    animation: bgate-door-r 0.7s cubic-bezier(0.5, 0, 0.7, 0.4) 3.95s forwards;
+  }
+  @keyframes bgate-door-l {
+    to {
+      transform: translateX(-102%);
+    }
+  }
+  @keyframes bgate-door-r {
+    to {
+      transform: translateX(102%);
+    }
+  }
+
+  /* the question leaves the flow at once so the walker owns the centre;
+     pointer-events dies with it, or the invisible Yes/No keep swallowing
+     the clicks that are supposed to skip the scene (board, 2026-08-31) */
+  .play-enter #bgate-ask,
+  .play-enter #bgate-denied {
+    position: absolute;
+    pointer-events: none;
+    animation: bgate-fade-out 0.3s ease forwards;
+  }
+  @keyframes bgate-fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  .play-deny #bgate-ask {
+    display: none;
+  }
+
+  /* The denied panel takes its place in the column INVISIBLY for the whole
+     scene, so the final frame does not jump when the text arrives, and the
+     column's full height is known from the start (small landscape screens
+     scroll instead of clipping the button). */
+  #bgate-denied {
+    display: none;
+  }
+  .play-deny #bgate-denied {
+    display: block;
+    visibility: hidden;
+  }
+  .play-deny.is-denied #bgate-denied {
+    visibility: visible;
+  }
+  #bgate-denied-title:focus-visible {
+    outline: none;
+  }
+
+  /* the visible way out during either scene */
+  .bgate-skip {
+    display: none;
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.1rem;
+    font-size: var(--text-mini);
+    letter-spacing: 0.08em;
+    color: var(--color-ink-faint);
+    opacity: 0;
+    cursor: pointer;
+  }
+  .play-enter .bgate-skip,
+  .play-deny:not(.is-denied) .bgate-skip {
+    display: block;
+    animation: bgate-appear 0.4s ease 0.8s forwards;
+  }
+  .bgate-skip:hover {
+    color: var(--color-ink);
+  }
+
+  /* the rubber stamp that lands on a correct answer */
+  /* Centred with left/right + margin auto, offsets baked into the transform
+     chain: the standalone `translate` property gets stripped by the prod CSS
+     minifier (found live 2026-08-31 — the card sat 50% off-screen on phones),
+     so nothing here may rely on it. */
+  .bgate-stamp {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    width: max-content;
+    bottom: calc(50% - 34px);
+    border: 3px solid var(--color-yes-deep);
+    color: var(--color-yes-deep);
+    border-radius: 0.6rem;
+    padding: 0.3rem 0.9rem;
+    font-size: 1.25rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(60px) rotate(-8deg) scale(3);
+  }
+  .play-enter .bgate-stamp {
+    animation:
+      bgate-stamp 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) 3.25s forwards,
+      bgate-fade-out 0.35s ease 3.95s forwards;
+  }
+  @keyframes bgate-stamp {
+    0% {
+      opacity: 0;
+      transform: translateX(60px) rotate(-8deg) scale(3);
+    }
+    45% {
+      opacity: 0.5;
+      transform: translateX(60px) rotate(-8deg) scale(1.9);
+    }
+    60% {
+      opacity: 0.5;
+      transform: translateX(60px) rotate(-8deg) scale(1.9);
+    }
+    85% {
+      opacity: 1;
+      transform: translateX(60px) rotate(-8deg) scale(0.92);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(60px) rotate(-8deg) scale(1);
+    }
+  }
+
+  /* ── the tired courier (YES) ───────────────────────────────────────────
+     He crosses the REAL screen, right edge to centre, at a deliberately
+     unhurried pace: the walk is the joke, so it gets the time. The svg is
+     the moving element; vw units make the entrance start off-screen on any
+     viewport. */
+  .bgate-walk-stage {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 26%;
+    width: 104px;
+    height: auto;
+    transform: translateX(60vw);
+  }
+  .play-enter .bgate-walk-stage {
+    display: block;
+    animation:
+      bgate-walk-in 2.5s linear 0.25s forwards,
+      bgate-walk-out 1.4s ease-in 3.95s forwards;
+  }
+  @keyframes bgate-walk-in {
+    from {
+      transform: translateX(60vw);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes bgate-walk-out {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(60vw);
+    }
+  }
+  /* Explicit view-box origins everywhere something rotates or scales:
+     Safari's used value for fill-box on SVG groups still diverges from
+     Chromium (board finding, MDN compat report), and pinning the pivot in
+     user units removes the ambiguity entirely. */
+  .bgate-walker-body {
+    transform-box: view-box;
+    transform-origin: 52px 116px;
+  }
+  .play-enter .bgate-walker-body {
+    animation:
+      bgate-waddle 0.42s ease-in-out 0.25s 6 alternate,
+      bgate-waddle 0.42s ease-in-out 3.95s 4 alternate;
+  }
+  @keyframes bgate-waddle {
+    from {
+      transform: rotate(4deg);
+    }
+    to {
+      transform: rotate(-4deg);
+    }
+  }
+  .bgate-walker-leg {
+    transform-box: view-box;
+  }
+  .bgate-walker-leg-l {
+    transform-origin: 47px 112px;
+  }
+  .bgate-walker-leg-r {
+    transform-origin: 58px 112px;
+  }
+  .play-enter .bgate-walker-leg-l {
+    animation:
+      bgate-shuffle 0.42s ease-in-out 0.25s 6 alternate,
+      bgate-shuffle 0.42s ease-in-out 3.95s 4 alternate;
+  }
+  .play-enter .bgate-walker-leg-r {
+    animation:
+      bgate-shuffle 0.42s ease-in-out 0.25s 6 alternate-reverse,
+      bgate-shuffle 0.42s ease-in-out 3.95s 4 alternate-reverse;
+  }
+  @keyframes bgate-shuffle {
+    from {
+      transform: rotate(12deg);
+    }
+    to {
+      transform: rotate(-12deg);
+    }
+  }
+  .bgate-walker-sigh {
+    fill: var(--color-ink-faint);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    opacity: 0;
+  }
+  .play-enter .bgate-walker-sigh {
+    animation: bgate-sigh 1s ease-in-out 1s;
+  }
+  @keyframes bgate-sigh {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    40%,
+    70% {
+      opacity: 1;
+    }
+  }
+  .bgate-note-paper {
+    fill: var(--color-paper);
+    stroke: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  }
+  /* the little note leaves his hand the moment the big one appears */
+  .play-enter .bgate-walker-note {
+    animation: bgate-fade-out 0.15s ease 2.78s forwards;
+  }
+
+  /* the handed-over note, grown to readable size */
+  /* same minifier constraint as the stamp: no `translate` property */
+  .bgate-note {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    bottom: calc(50% - 18px);
+    width: min(270px, 74vw);
+    padding: 1.3rem 1.4rem 1.1rem;
+    background: var(--color-paper);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+    border-radius: 0.5rem;
+    box-shadow: 0 18px 40px -18px rgba(23, 20, 14, 0.45);
+    transform: rotate(-2deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .play-enter .bgate-note {
+    animation:
+      bgate-note-in 0.4s cubic-bezier(0.2, 0.8, 0.25, 1.15) 2.8s forwards,
+      bgate-fade-out 0.35s ease 3.95s forwards;
+  }
+  @keyframes bgate-note-in {
+    0% {
+      opacity: 0;
+      transform: rotate(-2deg) translateY(70px) scale(0.25);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(-2deg) translateY(0) scale(1);
+    }
+  }
+  .bgate-note-title {
+    font-size: 1.75rem;
+    line-height: 1.1;
+  }
+  .bgate-note-meta {
+    margin-top: 0.6rem;
+    font-size: var(--text-meta);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  /* ── the stage ─────────────────────────────────────────────────────── */
+  .bgate-stage {
+    display: none;
+    width: min(440px, 90vw);
+    height: auto;
+  }
+  .play-deny .bgate-stage {
+    display: block;
+  }
+
+  .bgate-ink {
+    fill: var(--color-ink);
+  }
+  .bgate-tee {
+    fill: var(--color-yes-deep);
+  }
+  .bgate-skin {
+    fill: var(--color-paper);
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+  .bgate-line {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .bgate-line-thin {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+  .bgate-moon {
+    fill: var(--color-paper-deep);
+    stroke: color-mix(in srgb, var(--color-ink) 25%, transparent);
+    stroke-width: 1.5;
+  }
+  .bgate-crater {
+    fill: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  }
+  .bgate-ground {
+    fill: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  }
+  .bgate-star {
+    fill: var(--color-amber);
+    opacity: 0;
+  }
+  .bgate-boot-body {
+    fill: var(--color-claude);
+  }
+  .bgate-boot-sole {
+    fill: var(--color-ink);
+  }
+  .bgate-cap-top,
+  .bgate-walker-cap-top {
+    fill: var(--color-amber);
+  }
+  .bgate-cap-brim {
+    fill: var(--color-ink);
+  }
+
+  /* the skeptic assembles part by part, the cap arrives last */
+  .bgate-part {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .play-deny .bgate-part {
+    animation: bgate-drop 0.4s cubic-bezier(0.2, 0.8, 0.25, 1.15) forwards;
+  }
+  .play-deny .bgate-torso {
+    animation-delay: 0.1s;
+  }
+  .play-deny .bgate-head {
+    animation-delay: 0.35s;
+  }
+  .play-deny .bgate-arm-l {
+    animation-delay: 0.55s;
+  }
+  .play-deny .bgate-arm-r {
+    animation-delay: 0.7s;
+  }
+  .play-deny .bgate-leg-l {
+    animation-delay: 0.85s;
+  }
+  .play-deny .bgate-leg-r {
+    animation-delay: 1s;
+  }
+  @keyframes bgate-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-70px);
+    }
+    70% {
+      opacity: 1;
+      transform: translateY(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* the rift from another reality: pops open, lets the leg out, snaps shut */
+  .bgate-portal {
+    fill: var(--color-ink);
+  }
+  .bgate-portal-rim {
+    fill: none;
+    stroke: var(--color-claude);
+    stroke-width: 2;
+    stroke-dasharray: 4 5;
+    stroke-linecap: round;
+  }
+  .bgate-portal-g {
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 58px 170px;
+  }
+  .play-deny .bgate-portal-g {
+    animation:
+      bgate-portal-open 0.35s cubic-bezier(0.2, 0.8, 0.25, 1.2) 1.25s forwards,
+      bgate-portal-close 0.3s ease-in 2.5s forwards;
+  }
+  @keyframes bgate-portal-open {
+    0% {
+      opacity: 0;
+      transform: scale(0.15, 0.02);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.15, 1.08);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes bgate-portal-close {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    45% {
+      opacity: 1;
+      transform: scale(1.12, 0.55);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.1, 0.02);
+    }
+  }
+
+  /* the boot: out of the rift, wind up, hold the wind-up, kick, retreat */
+  .bgate-boot {
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 0px 166px;
+  }
+  .play-deny .bgate-boot {
+    animation: bgate-kick 0.9s cubic-bezier(0.3, 0, 0.6, 1) 1.45s forwards;
+  }
+  @keyframes bgate-kick {
+    0% {
+      opacity: 0;
+      transform: translateX(-140px);
+    }
+    30% {
+      opacity: 1;
+      transform: translateX(-14px) rotate(0deg);
+    }
+    45% {
+      opacity: 1;
+      transform: translateX(-26px) rotate(16deg);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(-26px) rotate(16deg);
+    }
+    70% {
+      opacity: 1;
+      transform: translateX(22px) rotate(-14deg);
+    }
+    82% {
+      opacity: 1;
+      transform: translateX(12px) rotate(-8deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-150px) rotate(0deg);
+    }
+  }
+
+  .bgate-dust {
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 147px 203px;
+  }
+  .play-deny .bgate-dust {
+    animation: bgate-dust 0.6s ease-out 2.1s forwards;
+  }
+  @keyframes bgate-dust {
+    0% {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    35% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.6) translateY(-6px);
+    }
+  }
+
+  /* liftoff: spin, shrink, land on the Moon */
+  .bgate-guy {
+    transform-box: view-box;
+    transform-origin: 151px 137px;
+  }
+  /* The spin decelerates with distance (farther away reads slower): most of
+     the rotation happens in the first third, the last stretch barely turns.
+     The easing is baked into the keyframe spacing, so the timing function
+     stays linear. */
+  .play-deny .bgate-guy {
+    animation: bgate-fly 1.05s linear 2.09s forwards;
+  }
+  @keyframes bgate-fly {
+    0% {
+      opacity: 1;
+      transform: none;
+    }
+    35% {
+      opacity: 1;
+      transform: translate(40px, -52px) rotate(430deg) scale(0.55);
+    }
+    70% {
+      opacity: 1;
+      transform: translate(80px, -78px) rotate(590deg) scale(0.28);
+    }
+    92% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(105px, -90px) rotate(660deg) scale(0.12);
+    }
+  }
+
+  /* the cap stays where the owner was, hangs for a beat, then lands */
+  .bgate-cap {
+    transform-box: view-box;
+    transform-origin: 149px 75px;
+  }
+  .play-deny .bgate-cap {
+    animation:
+      bgate-drop 0.4s cubic-bezier(0.2, 0.8, 0.25, 1.15) 1.15s forwards,
+      bgate-cap-fall 0.75s cubic-bezier(0.4, 0, 0.7, 1) 2.35s forwards;
+  }
+  @keyframes bgate-cap-fall {
+    0% {
+      transform: none;
+    }
+    20% {
+      transform: translateY(-12px) rotate(-12deg);
+    }
+    70% {
+      transform: translateY(124px) rotate(10deg);
+    }
+    82% {
+      transform: translateY(116px) rotate(-6deg);
+    }
+    100% {
+      transform: translateY(122px) rotate(3deg);
+    }
+  }
+
+  /* touchdown: the Moon takes the hit (jolt + squash), dust kicks up at the
+     landing spot, and only then the new resident sits up */
+  .bgate-moon-dust {
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 248px 21px;
+  }
+  .play-deny .bgate-moon-dust {
+    animation: bgate-moon-dust 0.5s ease-out 3.12s forwards;
+  }
+  @keyframes bgate-moon-dust {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    30% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.6) translateY(-5px);
+    }
+  }
+  .bgate-moonguy {
+    opacity: 0;
+    transform-box: view-box;
+  }
+  .play-deny .bgate-moonguy {
+    animation: bgate-moonguy-in 0.35s cubic-bezier(0.2, 0.8, 0.25, 1.15) 3.32s forwards;
+  }
+  @keyframes bgate-moonguy-in {
+    0% {
+      opacity: 0;
+      transform: translateY(7px);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .play-deny .bgate-star {
+    animation: bgate-appear 0.4s ease-out 3.5s forwards;
+  }
+  @keyframes bgate-appear {
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* the camera leans toward the Moon so the new resident is visible */
+  .bgate-moon-g {
+    transform-box: view-box;
+    transform-origin: 256px 46px;
+  }
+  .play-deny .bgate-moon-g {
+    animation:
+      bgate-moon-shake 0.35s ease-out 3.12s,
+      bgate-moon-zoom 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 3.55s forwards;
+  }
+  @keyframes bgate-moon-shake {
+    0% {
+      transform: none;
+    }
+    25% {
+      transform: translate(2px, 3px) scale(1.03, 0.96);
+    }
+    55% {
+      transform: translate(-1.5px, -1px);
+    }
+    80% {
+      transform: translate(1px, 1px);
+    }
+    100% {
+      transform: none;
+    }
+  }
+  @keyframes bgate-moon-zoom {
+    to {
+      transform: translate(-14px, 12px) scale(1.45);
+    }
+  }
+
+  /* JS skips straight to the final panels when motion is reduced; this
+     blanket rule guards against ANY keyframe firing anyway (a hand-kept
+     element list here went stale twice in one day). */
+  @media (prefers-reduced-motion: reduce) {
+    .bgate,
+    .bgate * {
+      animation: none !important;
+    }
+  }
+</style>
+
+<script is:inline type="module" src="/js/gate.js"></script>

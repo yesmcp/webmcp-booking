@@ -1,0 +1,328 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { bookEn, bookUk } from "../../i18n/book";
+
+// The Telegram door onto the same calendar as /book/ and /ua/book/.
+//
+// One URL serves both languages, because a Mini App has exactly one URL: the
+// language is chosen at runtime from the Telegram user's own language_code.
+// Both string sets therefore ship in this markup, and the copy is the copy from
+// the two web pages, imported (i18n) or duplicated verbatim (the headings and
+// cards) rather than rewritten.
+//
+// It carries no site nav and no footer on purpose: inside Telegram the chrome
+// belongs to Telegram, and the back button is theirs. It is an app surface, so
+// it stays out of the index, out of sitemap.xml and out of llms.txt.
+const API = "https://mcp.yesmcp.com";
+---
+
+<Layout
+  title="Book a call with yesmcp"
+  description="Pick a time and book a 30-minute call with yesmcp, inside Telegram."
+  path="/book/tg/"
+  noindex={true}
+>
+  <script slot="head" is:inline src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <main class="mx-auto max-w-3xl px-5 pt-8 pb-16">
+    <p
+      class="font-mono text-xs tracking-widest text-ink-faint uppercase"
+      data-en="book a call"
+      data-uk="запис на розмову"
+    >book a call</p>
+
+    <div id="book-head">
+      <div data-lang="en">
+        <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+          Pick a time<br />that suits you
+        </h1>
+
+        <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+          Thirty minutes, free, and you leave it knowing what a connector would do for your
+          business and what it would cost. Nothing to install and no account to create: pick a
+          window, leave your name and email, and the confirmation arrives with the meeting link.
+        </p>
+      </div>
+
+      <div data-lang="uk">
+        <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+          Оберіть час,<br />який вам зручний
+        </h1>
+
+        <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+          Тридцять хвилин, безкоштовно, і ви виходите з розумінням, що конектор дасть саме
+          вашому бізнесу і скільки це коштує. Нічого встановлювати й не треба реєструватися:
+          оберіть вікно, залиште ім'я та пошту, і підтвердження прийде разом із посиланням на
+          зустріч.
+        </p>
+      </div>
+    </div>
+
+    <div id="book-head-done" class="hidden">
+      <div data-lang="en">
+        <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+          You're booked.<br />One thing before the call
+        </h1>
+
+        <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+          The half hour pays off most when you arrive with one question: the one your clients
+          ask you most often. Bring it, and we leave the call with a scenario map for exactly
+          that. Meanwhile, see the connector do the same job live: <a href="/connect/" class="link-und text-yes-deep">try it in your AI chat →</a>
+        </p>
+      </div>
+
+      <div data-lang="uk">
+        <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+          Вас записано.<br />Одна річ до розмови
+        </h1>
+
+        <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+          Пів години дадуть найбільше, коли ви прийдете з одним питанням: тим, яке клієнти
+          ставлять вам найчастіше. Візьміть його з собою, і з розмови ми вийдемо з картою
+          сценарію саме під нього. А поки подивіться, як конектор робить те саме наживо: <a href="/connect/" class="link-und text-yes-deep">спробуйте його у своєму ШІ-чаті →</a>
+        </p>
+      </div>
+    </div>
+
+    <div
+      id="book-app"
+      class="mt-10"
+      data-endpoint={API}
+      data-locale="en"
+      data-i18n-en={JSON.stringify(bookEn)}
+      data-i18n-uk={JSON.stringify(bookUk)}
+    >
+      <p id="book-status" class="text-sm text-ink-soft"></p>
+
+      <div id="book-picker" class="book-picker hidden mt-4">
+        <div>
+          <div class="book-cal-head">
+            <button
+              id="book-prev"
+              type="button"
+              class="book-nav"
+              aria-label="Previous month"
+              data-aria-en="Previous month"
+              data-aria-uk="Попередній місяць"
+            >←</button>
+            <p id="book-month" class="book-month" aria-live="polite"></p>
+            <button
+              id="book-next"
+              type="button"
+              class="book-nav"
+              aria-label="Next month"
+              data-aria-en="Next month"
+              data-aria-uk="Наступний місяць"
+            >→</button>
+          </div>
+
+          <table id="book-grid" class="book-grid">
+            <caption
+              class="sr-only"
+              data-en="Days with open windows"
+              data-uk="Дні, у яких є вільні вікна"
+            >Days with open windows</caption>
+            <thead id="book-grid-head"></thead>
+            <tbody id="book-grid-body"></tbody>
+          </table>
+
+          <div class="book-tz">
+            <label
+              class="block text-meta text-ink-soft"
+              for="book-tz"
+              data-en="Times shown in"
+              data-uk="Час показуємо в зоні"
+            >Times shown in</label>
+            <select id="book-tz"></select>
+          </div>
+        </div>
+
+        <div>
+          <h2 id="book-day-head" class="book-day-head font-semibold"></h2>
+          <div id="book-slots" class="book-slots"></div>
+        </div>
+      </div>
+
+      <form id="book-form" class="hidden mt-10 rounded-2xl border border-ink/10 bg-paper-deep p-6">
+        <p
+          class="font-mono text-meta tracking-widest text-ink-faint uppercase"
+          data-en="your window"
+          data-uk="ваше вікно"
+        >your window</p>
+        <p id="book-chosen" class="mt-1 font-semibold"></p>
+
+        <label
+          class="mt-6 block text-sm font-semibold"
+          for="book-name"
+          data-en="Your name"
+          data-uk="Ваше ім'я"
+        >Your name</label>
+        <input
+          id="book-name"
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+        />
+
+        <label
+          class="mt-4 block text-sm font-semibold"
+          for="book-email"
+          data-en="Email"
+          data-uk="Пошта"
+        >Email</label>
+        <input
+          id="book-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+        />
+        <p
+          class="mt-1 text-meta text-ink-soft"
+          data-en="The confirmation and the meeting link go here."
+          data-uk="Сюди прийде підтвердження і посилання на зустріч."
+        >The confirmation and the meeting link go here.</p>
+
+        <label
+          class="mt-4 block text-sm font-semibold"
+          for="book-topic"
+          data-en="What would you like to discuss?"
+          data-uk="Про що хочете поговорити?"
+        >What would you like to discuss?</label>
+        <textarea
+          id="book-topic"
+          name="topic"
+          required
+          rows="3"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+          data-ph-en="A sentence is enough: what your clients ask you most often, or which system holds the answer."
+          data-ph-uk="Досить одного речення: що клієнти питають вас найчастіше або в якій системі лежить відповідь."
+          placeholder="A sentence is enough: what your clients ask you most often, or which system holds the answer."></textarea>
+
+        <button
+          id="book-submit"
+          type="submit"
+          class="mt-6 rounded-full bg-yes-deep px-6 py-3 font-semibold text-paper"
+          data-en="Book this time"
+          data-uk="Записатися на цей час"
+        >Book this time</button>
+
+        <p id="book-error" class="mt-3 text-sm text-ink" role="alert"></p>
+
+        <div class="mt-4 text-meta text-ink-soft">
+          <p data-lang="en">
+            We store your name, your email and this sentence, and nothing else: enough to hold the
+            window and prepare for the call. <a href="/privacy/" class="link-und">How we handle it →</a>
+          </p>
+          <p data-lang="uk">
+            Ми зберігаємо ваше ім'я, пошту й це речення, і більше нічого: рівно стільки, щоб
+            тримати вікно й підготуватися до розмови. <a href="/ua/privacy/" class="link-und">Як ми з цим поводимось →</a>
+          </p>
+        </div>
+      </form>
+
+      <div
+        id="book-done"
+        class="hidden mt-10 rounded-2xl border border-yes/40 bg-yes/5 p-6"
+        role="status"
+      >
+        <div data-lang="en">
+          <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">confirmed</p>
+          <h2 class="mt-2 text-xl font-semibold">All set</h2>
+          <p class="mt-3 text-ink-soft"><strong data-when></strong></p>
+          <p class="mt-3 text-ink-soft">
+            We meet here: <a data-room class="link-und text-yes-deep" rel="noopener"></a>
+          </p>
+          <p class="mt-3 text-sm text-ink-soft">
+            A confirmation is on its way to <strong data-email></strong>. Your
+            reference: <code data-ref class="font-mono"></code>. To cancel or move the call, reply to that email.
+          </p>
+        </div>
+
+        <div data-lang="uk">
+          <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">підтверджено</p>
+          <h2 class="mt-2 text-xl font-semibold">Усе готово</h2>
+          <p class="mt-3 text-ink-soft"><strong data-when></strong></p>
+          <p class="mt-3 text-ink-soft">
+            Зустрічаємось тут: <a data-room class="link-und text-yes-deep" rel="noopener"></a>
+          </p>
+          <p class="mt-3 text-sm text-ink-soft">
+            Підтвердження вже летить на <strong data-email></strong>. Ваш номер
+            запису: <code data-ref class="font-mono"></code>. Щоб скасувати або перенести, відповідайте на той лист.
+          </p>
+        </div>
+      </div>
+
+      <div id="book-fallback" class="hidden mt-8 rounded-2xl border border-dashed border-ink/25 p-6">
+        <p data-lang="en" class="text-sm leading-relaxed text-ink-soft">
+          You can also book inside an AI chat, where our own connector does it in a
+          sentence: <a href="/connect/" class="link-und text-yes-deep">try the connector →</a>
+        </p>
+        <p data-lang="uk" class="text-sm leading-relaxed text-ink-soft">
+          Записатися можна й усередині ШІ-чату, де наш конектор робить це одним
+          реченням: <a href="/ua/connect/" class="link-und text-yes-deep">спробувати конектор →</a>
+        </p>
+      </div>
+    </div>
+
+    <div id="tg-fallback" class="hidden mt-10 rounded-2xl border border-dashed border-ink/25 p-6">
+      <p data-lang="en" class="text-sm leading-relaxed text-ink-soft">
+        This is the Telegram version of the booking page, and it needs Telegram around it.
+        Open it from our bot, or pick your time on the web: <a href="/book/" class="link-und text-yes-deep">book a call →</a>
+      </p>
+      <p data-lang="uk" class="text-sm leading-relaxed text-ink-soft">
+        Це телеграмна версія сторінки запису, і їй потрібен Telegram навколо. Відкрийте її з
+        нашого бота або оберіть час у вебі: <a href="/ua/book/" class="link-und text-yes-deep">записатися на розмову →</a>
+      </p>
+    </div>
+
+    <noscript>
+      <div class="mt-10 rounded-2xl border border-dashed border-ink/25 p-6">
+        <p class="text-sm leading-relaxed text-ink-soft">
+          Picking a time needs JavaScript, which is off in this browser. Two ways round
+          it: <a href="/book/" class="link-und text-yes-deep">book on the web</a> or write to us
+          and we will arrange a time by hand.
+        </p>
+      </div>
+    </noscript>
+  </main>
+
+  <script is:inline src="/js/book-tg.js" defer></script>
+  <script is:inline src="/js/book.js" defer></script>
+</Layout>
+
+<style is:global>
+  /* Telegram gives the app a stable height that is NOT the visual viewport:
+     100vh inside a Mini App is a promise the client cannot keep once the
+     keyboard or the header moves. book-tg.js writes the measured value here. */
+  html.tg-app,
+  html.tg-app body {
+    min-height: var(--tg-viewport, 100%);
+  }
+
+  /* Inside Telegram the MainButton is the submit button. The in-form one stays
+     in the DOM (the script still writes its "Booking…" state, and that state is
+     what drives the MainButton's progress spinner) but it is not shown twice. */
+  html.tg-app #book-submit {
+    display: none;
+  }
+
+  /* Room for the MainButton, which floats over the bottom of the viewport. */
+  html.tg-app main {
+    padding-bottom: 6rem;
+  }
+
+  /* Both language blocks are in the markup and exactly one survives the script.
+     Between parse and that script there is a window where both would paint, so
+     with JavaScript on they start hidden and are revealed once one is gone.
+     With JavaScript off the guard never applies and the English text stands. */
+  html.js [data-lang] {
+    display: none;
+  }
+  html.lang-ready [data-lang] {
+    display: block;
+  }
+</style>

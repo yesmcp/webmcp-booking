@@ -1,0 +1,132 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import { expandDataTokens } from "../../../lib/census";
+import ArticleFooter from "../../../components/ArticleFooter.astro";
+import Layout from "../../../layouts/Layout.astro";
+import SiteNav from "../../../components/SiteNav.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+
+// Ukrainian article page. An article id here always equals its English twin's
+// id (enforced by convention, see content.config.ts) — that is what makes the
+// bidirectional hreflang pair below correct.
+export async function getStaticPaths() {
+  const posts = await getCollection("writingUa");
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: CollectionEntry<"writingUa">;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+const path = `/ua/writing/${post.id}/`;
+const enPath = `/writing/${post.id}/`;
+const url = `https://yesmcp.com${path}`;
+
+// {{census:...}} tokens in frontmatter expand from the dataset (src/lib/census.ts).
+const [description, ogDescription, schemaDescription, lede, provenance] =
+  await Promise.all(
+    [d.description, d.ogDescription, d.schemaDescription, d.lede, d.provenance].map(
+      (s) => expandDataTokens(s, "uk")
+    )
+  );
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": `${url}#article`,
+      headline: d.headline,
+      description: schemaDescription,
+      datePublished: d.date,
+      dateModified: d.dateModified,
+      url,
+      mainEntityOfPage: { "@id": url },
+      author: { "@id": "https://yesmcp.com/#serhii" },
+      publisher: { "@id": "https://yesmcp.com/#organization" },
+      inLanguage: "uk",
+      isAccessibleForFree: true,
+    },
+    {
+      "@type": "Person",
+      "@id": "https://yesmcp.com/#serhii",
+      name: "Serhii Kravchenko",
+      jobTitle: "AI engineer",
+      url: "https://yesmcp.com/about/",
+      sameAs: [
+        "https://www.linkedin.com/in/awrshift/",
+        "https://x.com/awrshift",
+        "https://github.com/awrshift",
+      ],
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://yesmcp.com/#organization",
+      name: "Yes MCP",
+      url: "https://yesmcp.com/",
+      sameAs: ["https://www.linkedin.com/company/yesmcp/"],
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${url}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Головна", item: "https://yesmcp.com/ua/" },
+        { "@type": "ListItem", position: 2, name: "Нотатки", item: "https://yesmcp.com/ua/writing/" },
+        { "@type": "ListItem", position: 3, name: d.headline },
+      ],
+    },
+  ],
+};
+---
+
+<Layout
+  title={`${d.title} | yesmcp`}
+  description={description}
+  ogTitle={d.ogTitle}
+  ogDescription={ogDescription}
+  ogImage={d.ogImage}
+  ogType="article"
+  path={path}
+  lang="uk"
+  alternates={{ en: enPath, uk: path }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav lang="uk" switchHref={enPath} />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-20 sm:pt-36">
+    <article>
+      <p class="font-mono text-xs text-ink-faint">
+        Автор: <a href="/ua/about/" class="link-und text-ink-soft">Сергій Кравченко</a> · <time datetime={d.date}>{d.date}</time> · {provenance}
+      </p>
+
+      <h1 class="mt-4 font-display text-[clamp(1.7rem,4.6vw,2.8rem)] leading-tight font-800">
+        {d.headline}
+      </h1>
+
+      <p class="mt-7 text-lg leading-relaxed text-ink-soft">
+        <strong class="font-normal text-ink">{lede}</strong>
+      </p>
+
+      <div class="prose-ink mt-10">
+        <Content />
+      </div>
+    </article>
+
+    <ArticleFooter lang="uk" url={url} title={d.headline} />
+
+    <p class="mt-14 border-t border-ink/10 pt-7 font-mono text-sm">
+      <a href="/ua/writing/" class="link-und text-ink-soft">← Усі нотатки</a>
+    </p>
+  </main>
+
+  <SiteFooter lang="uk" switchHref={enPath} />
+</Layout>

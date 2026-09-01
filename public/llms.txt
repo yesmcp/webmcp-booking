@@ -1,0 +1,126 @@
+# yesmcp
+
+> yesmcp designs, ships and runs Model Context Protocol connectors for businesses,
+> so a company's own customers can book, order, check status and get support right
+> inside an AI chat (Claude, ChatGPT). Custom servers over existing APIs and legacy
+> systems, OAuth 2.1 and authorisation review, readiness for the 2026-07-28
+> specification, and interactive UI (MCP Apps) inside the assistant.
+
+The evidence offered is our own connector, which runs in production in claude.ai,
+and a weekly hand-counted census of the Claude connector directory published as an
+open dataset. Every number published here was measured on a real system and is
+dated. Built and run by Serhii Kravchenko (AI engineer); articles are written in
+the first person and signed. Founding clients get founding terms and a
+co-published case study.
+
+## Pages
+
+- [Home](https://yesmcp.com/): what a connector is, how the three-step build works,
+  what has been shipped and tested, and the scenarios a business can put into a chat.
+- [Writing](https://yesmcp.com/writing/): first-person notes from a production MCP
+  server, plus the weekly directory census.
+- [About](https://yesmcp.com/about/): who is behind yesmcp — AI engineer Serhii
+  Kravchenko, running the routine on a team of AI agents he built. What has been
+  built and verified (a production MCP server with OAuth 2.1 serving a live user
+  through Claude on web, mobile and desktop; MCP Apps views rendering with real
+  data), and how these notes are produced.
+- [Privacy](https://yesmcp.com/privacy/): the site collects nothing; what the
+  connector collects and logs is described there in full.
+- [Connect](https://yesmcp.com/connect/): add the yesmcp connector to your own
+  Claude in under a minute (one URL, no login) and book a real consultation
+  from inside the chat.
+- [Book a call](https://yesmcp.com/book/): pick a day in the calendar, pick a
+  half-hour in your own timezone and book a free 30-minute call. No account and
+  no AI chat needed; the same availability the connector's `list_availability`
+  tool serves inside Claude.
+- [Scenario map](https://yesmcp.com/scenario-map/): pick one of eight business
+  types (clinics, online shops, local services, private education, professional
+  services and agencies, restaurants, SaaS support, salons), answer two
+  questions, and get the concrete scenarios
+  your customers and your team could run inside an AI chat, with a feasibility
+  verdict on your current systems. The same diagnostic the connector's
+  `advise_scenarios` tool runs inside Claude, mirrored here with no install.
+
+- [For professional services and agencies](https://yesmcp.com/for/professional-services/):
+  the vertical page for law firms, accounting practices, consultancies and agencies.
+  What a firm's own clients can do inside their AI chat (project status, booking the
+  right person, billing questions, blockers, what a service covers), what the team gets
+  behind a login, the five risk questions answered one by one (scope, writes,
+  prompt injection through client files, audit log, contract exposure), what the firm
+  has to provide, and how cost and time work: the diagnosis is free, the first scenario
+  is a fixed price quoted per firm, running it is a monthly line, a wrong first scenario
+  is replaced from the map at no extra cost, and a first scenario against a system with
+  an API takes about two weeks. No prices are published: every engagement is quoted
+  individually at the free diagnosis.
+
+## Ukrainian version (українською)
+
+- [Головна](https://yesmcp.com/ua/): що таке MCP-конектор, як працює побудова у
+  три кроки і які сценарії бізнес може дати клієнтам у чаті.
+- [Про нас](https://yesmcp.com/ua/about/): хто за yesmcp — AI-інженер Сергій Кравченко, рутину веде команда AI-агентів.
+- [Нотатки](https://yesmcp.com/ua/writing/): український архів нотаток; перша стаття: [Конектори Claude для бізнесу](https://yesmcp.com/ua/writing/claude-connectors-for-business/) зі щотижневим переписом каталогу конекторів.
+- [Приватність](https://yesmcp.com/ua/privacy/): сайт не збирає нічого; що збирає
+  і журналює конектор, описано там повністю.
+- [Підключення](https://yesmcp.com/ua/connect/): додайте конектор yesmcp у свій
+  Claude за хвилину (одне посилання, без логіна) і забронюйте консультацію
+  просто в чаті.
+- [Запис на розмову](https://yesmcp.com/ua/book/): оберіть день у календарі,
+  оберіть півгодини у своїй часовій зоні і запишіться на безкоштовну 30-хвилинну
+  розмову. Без акаунта і без ШІ-чату; той самий вільний час, який конектор віддає
+  інструментом `list_availability` у Claude.
+- [Мапа сценаріїв](https://yesmcp.com/ua/scenario-map/): оберіть один із восьми
+  типів бізнесу (клініки, інтернет-магазини, локальні послуги, приватна освіта,
+  професійні послуги та агенції, ресторани, підтримка SaaS, салони), дайте
+  відповідь на два запитання і
+  отримайте конкретні сценарії для ваших клієнтів і вашої команди у ШІ-чаті
+  разом з оцінкою готовності ваших систем.
+
+- [Для професійних послуг та агенцій](https://yesmcp.com/ua/for/professional-services/):
+  сторінка вертикалі для юридичних фірм, бухгалтерських практик, консалтингу та агенцій.
+  Що клієнти фірми роблять у власному ШІ-чаті, що бачить команда за логіном, п'ять
+  питань про ризик з відповідями, що потрібно з боку фірми, і як влаштовані ціна й час:
+  діагностика безкоштовна, перший сценарій це фіксована ціна, порахована для конкретної
+  фірми, робота конектора це місячний рядок, не той сценарій міняється на наступний з
+  мапи без доплати, а перший сценарій проти системи з API займає приблизно два тижні.
+  Цін на сайті немає: кожен проєкт рахується окремо на безкоштовній діагностиці.
+
+## Writing
+
+- [Claude connectors for business](https://yesmcp.com/writing/claude-connectors-for-business/): the owner-side guide to the claude.ai connector directory, with a first-party weekly census (per-category counts and week-over-week change), the client install path, the custom-connector pattern, and the ChatGPT directory path. Ukrainian version: https://yesmcp.com/ua/writing/claude-connectors-for-business/
+- [The MCP spec shipped one day after its SDK](https://yesmcp.com/writing/spec-shipped-after-its-sdk/): the 2026-07-28 stateless rewrite started a twelve-month migration clock; the TypeScript SDK was published 2026-07-27 and supports protocol versions only up to 2025-11-25, so the migration cannot be executed yet.
+- [Your tool results are being read as an attack](https://yesmcp.com/writing/tool-results-read-as-injection/): imperative instructions inside a tool result match the tool-poisoning signature; a host warned a real user about our own connector. How we split the channels, and what it saved (frame 1043 → 509 characters, ~130 tokens per call).
+- [What the host doesn't deliver](https://yesmcp.com/writing/what-the-host-does-not-deliver/): the server `instructions` field never reaches the model; a deferred tool's description is unreachable until the tool loads; a new MCP session opens on nearly every call; the tool list is re-sent before every call (5698 bytes).
+
+## Connector
+
+- MCP endpoint: https://mcp.yesmcp.com/mcp
+- Ten tools. Read-only: `list_availability` (open consultation windows),
+  `get_services` (what yesmcp builds and how an engagement runs),
+  `advise_scenarios` (two questions → a scenario map for a business type),
+  `demo_walkthrough` (a guided tour of the connector), `directory_census`
+  (live counts from our weekly hand census of the Claude connector directory),
+  and the two that draw interactive cards in the chat, `booking_widget` and
+  `services_widget`. Booking management: `book_consult`, `cancel_booking`,
+  `reschedule_booking`.
+- What is stored: a booking stores three fields you give at that moment — name,
+  email, topic (a booking made inside Telegram adds the Telegram id and username,
+  handed over by Telegram itself). Tool calls are logged for reliability and
+  abuse investigation; for a booking, that log line contains the same three
+  fields and nothing more. Records are kept 24 months. Full text:
+  https://yesmcp.com/privacy/
+
+## Open data
+
+- Directory census dataset (Claude connector directory: totals and per-category
+  counts, snapshot history, CC BY 4.0): https://yesmcp.com/data/directory.json
+
+## Author
+
+- Serhii Kravchenko, AI engineer — https://yesmcp.com/about/ ·
+  https://www.linkedin.com/in/awrshift/ · https://github.com/awrshift ·
+  https://x.com/awrshift
+
+## Contact
+
+- yes@yesmcp.com
+- privacy requests: privacy@yesmcp.com

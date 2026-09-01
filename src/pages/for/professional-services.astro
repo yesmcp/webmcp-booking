@@ -1,0 +1,559 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+
+// First page of the /for/<vertical>/ section. Frame, research and build order:
+// docs/plans/2026-08-26-vertical-landing-pages.md. Copy comes from the
+// board-reviewed draft in docs/seo/drafts/for-professional-services-en.md.
+//
+// Two owner decisions shape what is NOT here. There is no price and no range
+// anywhere on the page: every engagement is quoted individually (2026-08-27),
+// so the section promises the number at the end of the free diagnosis instead,
+// and an FAQ entry says plainly why the number is not printed. And no foreign
+// product is named or hinted at (BRAND.md, 2026-08-26): the draft's comparison
+// section and its table were removed whole rather than paraphrased.
+//
+// Mirrors src/pages/ua/for/professional-services.astro — edit both in the
+// same commit.
+
+const clientCases = [
+  {
+    quote: "Where are we on the project?",
+    tool: "project.status",
+    result:
+      "What shipped this week, what is waiting on their side, read from your tracker instead of an account manager's memory.",
+  },
+  {
+    quote: "Can I get twenty minutes with whoever runs our account?",
+    tool: "calendar.book",
+    result:
+      "A call with their own account manager against the team's real availability, booked in the chat rather than in a thread with a shared inbox.",
+  },
+  {
+    quote: "What does our retainer actually cover, and what is open?",
+    tool: "billing.summary",
+    result:
+      "The money question answered without an awkward email: what the retainer includes, which invoices are open, when the next one lands.",
+  },
+  {
+    quote: "What are you waiting on from us?",
+    tool: "blockers.list",
+    result:
+      "The access, file or approval that is holding the work, named out loud, and confirmed the moment it arrives.",
+  },
+  {
+    quote: "What does a discovery engagement involve?",
+    tool: "services.explain",
+    result:
+      "Scope, timeline and what falls outside it, answered from your own service descriptions and framed the way you frame them.",
+  },
+];
+
+const teamCases = [
+  {
+    quote: "Open my week.",
+    tool: "week.open",
+    result:
+      "Active projects, deadlines this week, and which clients have not heard from you lately.",
+  },
+  {
+    quote: "What needs attention?",
+    tool: "crm.read · tracker.read · books.read",
+    result:
+      "Stale proposals, unbilled work and overdue invoices in one answer instead of three tabs.",
+  },
+  {
+    quote: "Context on this client before the call.",
+    tool: "client.context",
+    result:
+      "History, open items, last invoices and who promised what, instead of scrolling three threads.",
+  },
+  {
+    quote: "Log that and nudge billing.",
+    tool: "followup.create",
+    result:
+      "A follow-up task, a note on the account, a nudge to billing, each change confirmed before it fires.",
+  },
+];
+
+// One block per objection. The injection answer carries a link to our own
+// published field note — the only one of the five where we have evidence
+// rather than a promise, which is exactly why it is the one that links out.
+const risks = [
+  {
+    q: "Will it see more than it should?",
+    a: "Scope is decided before anything is built. The client-facing tools only ever see what you would put in a status email. Internal notes, margins and team chatter are not hidden by an instruction, they sit outside the tools' reach entirely.",
+  },
+  {
+    q: "Can it change things on its own?",
+    a: "Reads and writes are separate tools, and every write is confirmed before it fires. On our own connector a booking is not committed until the confirmation goes out, so a sentence that merely sounds like a request changes nothing.",
+  },
+  {
+    q: "What if a client's file carries an instruction to the assistant?",
+    a: "This is real, and we published our own findings on it: a tool result is read by the model as text it should act on, which makes anything a client sends a possible instruction. The defence is structural. A tool that reads a client's document has no write capability at all, so an instruction hidden inside that document has nothing to call.",
+    href: "/writing/tool-results-read-as-injection/",
+    linkText: "Read the field note",
+  },
+  {
+    q: "Who can see what happened?",
+    a: "Every tool call your connector serves is written to an audit log on infrastructure we run for you: which tool, which arguments, how long it took, what it returned. Today those logs are ours to read and yours to ask for.",
+  },
+  {
+    q: "Does this change our client contract?",
+    a: "Client data stays in your systems and is never used for training. Access is scoped per client, which is a design commitment we make per engagement rather than a switch we flip: your first scenario defines what each client may see, and the tools cannot exceed it. OAuth 2.1 is the pattern we run in production on our own login-gated service. If your engagement letter needs specific language, that conversation happens in the diagnosis, before anything is built.",
+  },
+];
+
+const requirements = [
+  "Wherever your client work lives, a CRM, a project tracker, an accounting tool or spreadsheets, needs an API or a small bridge to one. Answers that span several of them are the goal we design toward, and we say plainly which of your systems can carry that today and which cannot.",
+  "A clear client-visible boundary, decided by you, so the connector cannot cross it.",
+  "A decision on identity. Answering general questions needs nothing; showing a specific client their own projects and invoices needs a login step.",
+  "A decision on what the assistant may promise. Sharing a status is safe. Committing to a deadline or a discount is not, and we design the tools so that boundary cannot be crossed by accident.",
+  "About an hour of one person who knows your systems. First phase, that is the whole ask.",
+];
+
+// The FAQ array is the single home for these facts: the accordion below and
+// the FAQPage node are both generated from it, so they cannot drift apart.
+const faqs = [
+  {
+    q: "What does my client need to use this?",
+    a: "Claude, on any plan, including the free one. They add your connector once, from a link you send, and from then on they just type in the chat.",
+  },
+  {
+    q: "Does this work in ChatGPT too?",
+    a: "The same connector is built to the open standard both platforms speak. Claude accepts custom connectors by link today; ChatGPT's route is its directory, and we build so that one connector serves both as that opens.",
+  },
+  {
+    q: "Do we have to replace our CRM?",
+    a: "No. The connector reads from what you already run. Replacing tools is the opposite of what this is for.",
+  },
+  {
+    q: "What if a platform stops rendering the interactive cards?",
+    a: "The same scenario keeps working as text. We do not control platform features, so we design for one going away without the scenario breaking.",
+  },
+  {
+    q: "Can we start with the team side instead of clients?",
+    a: "Yes. Same connector, a second door. Firms often find the internal side easier to approve, because no client sees it while you learn what it should do.",
+  },
+  {
+    q: "Who owns the connector?",
+    a: "You do. It runs on infrastructure we manage, the code and the scenarios are yours, and we keep you by doing the work rather than by holding the keys.",
+  },
+  {
+    q: "How long until the first scenario is live?",
+    a: "About two weeks, when the system holding the data has an API. If it does not, the bridge to it is the first thing we scope, and we tell you that at the diagnosis rather than halfway through.",
+  },
+  {
+    q: "Why is there no price on this page?",
+    a: "Because the honest number depends on what your systems already expose, and we would rather tell you the real one than a safe one. The diagnosis is free and takes two questions; the figure for your firm we name on the call that follows, which is free as well.",
+  },
+];
+
+// The directory count is our own first-party measurement, taken by hand on the
+// date below and published in the census article. It is not an estimate and
+// must not be refreshed from memory — re-count before changing it.
+const censusCheckedAt = "24 August 2026";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://yesmcp.com/for/professional-services/#service",
+      name: "MCP connectors for professional-services firms and agencies",
+      serviceType: "MCP connector design and operation",
+      description:
+        "Design, build and operation of a Model Context Protocol connector for a professional-services firm or agency: the firm's clients ask their own AI assistant about project status, bookings, billing and blockers, answered from the firm's CRM, tracker and books inside a scope the firm sets.",
+      provider: { "@id": "https://yesmcp.com/#organization" },
+      audience: {
+        "@type": "Audience",
+        audienceType:
+          "professional-services firms, agencies, law firms, accounting practices, consultancies",
+      },
+      areaServed: "Worldwide",
+      availableChannel: {
+        "@type": "ServiceChannel",
+        serviceUrl: "https://yesmcp.com/scenario-map/",
+        name: "Free scenario map",
+      },
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://yesmcp.com/for/professional-services/#webpage",
+      url: "https://yesmcp.com/for/professional-services/",
+      name: "Your agency, inside your clients' AI chats",
+      isPartOf: { "@id": "https://yesmcp.com/#website" },
+      about: { "@id": "https://yesmcp.com/for/professional-services/#service" },
+      inLanguage: "en",
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://yesmcp.com/for/professional-services/#faq",
+      isPartOf: { "@id": "https://yesmcp.com/for/professional-services/#webpage" },
+      inLanguage: "en",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+};
+---
+
+<Layout
+  title="AI connectors for professional-services firms and agencies | yesmcp"
+  description="Your clients ask their own AI assistant where the project stands, what the retainer covers and which invoice is open. We build the connector that answers them from your CRM, tracker and books, inside the boundary you set."
+  ogTitle="Your agency, inside your clients' AI chats"
+  ogDescription="Project status, bookings, billing and blockers, answered inside your client's own chat from your own systems. Free scenario map first."
+  ogImage="/assets/og/for-professional-services.png"
+  path="/for/professional-services/"
+  alternates={{
+    en: "/for/professional-services/",
+    uk: "/ua/for/professional-services/",
+  }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav width="max-w-6xl" switchHref="/ua/for/professional-services/" />
+
+  <main>
+    <section class="mx-auto max-w-6xl px-5 pt-28 pb-16 sm:pt-32">
+      <p class="rise font-mono text-xs tracking-widest text-ink-faint uppercase" style="--i:0">
+        for professional services and agencies
+      </p>
+      <h1 class="rise mt-4 max-w-3xl font-display text-[clamp(1.9rem,4.2vw,3.1rem)] leading-[1.1] font-800" style="--i:1">
+        Your agency, inside <span class="text-yes">your clients' AI chats</span>
+      </h1>
+      <p class="rise mt-6 max-w-2xl leading-relaxed text-ink-soft sm:text-lg" style="--i:2">
+        Today a client emails to ask where their project stands, what the retainer
+        covers and which invoice is open. With a connector, they ask their own
+        assistant, and the answer comes from your CRM, your tracker and your books,
+        inside the boundary you set. You keep the systems you already have. The
+        first step is two questions and a free diagnosis.
+      </p>
+      <div class="rise mt-9" style="--i:3">
+        <a href="/scenario-map/"
+          class="inline-block rounded-full bg-yes-deep px-6 py-3 font-medium text-white shadow-[0_8px_24px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+          Get your scenario map →
+        </a>
+        <p class="mt-2 font-mono text-meta text-ink-faint">
+          two questions · free · before any contract
+        </p>
+      </div>
+    </section>
+
+    <section class="border-y border-ink/10 bg-paper-deep">
+      <div class="mx-auto max-w-6xl px-5 py-16">
+        <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+          the messages you answer by hand
+        </p>
+        <div class="mt-7 grid gap-3 sm:grid-cols-3">
+          {[
+            "Quick one: where are we on the redesign?",
+            "Does the retainer cover the extra landing page?",
+            "Which invoice is still open on our side?",
+          ].map((m, i) => (
+            <p class="reveal rounded-2xl rounded-bl-sm border border-ink/10 bg-white/50 px-4 py-3 text-note leading-relaxed text-ink-soft" style={`--r:${i * 0.08}s`}>
+              “{m}”
+            </p>
+          ))}
+        </div>
+        <p class="reveal mt-6 max-w-2xl leading-relaxed text-ink-soft">
+          Every one of them lands on an account manager who then opens three tabs to
+          answer it. <span class="text-ink">The client is not asking for a meeting, they are asking for a fact.</span> A law
+          firm and an accounting practice run the same list with different nouns:
+          matters instead of projects, filings instead of deliverables.
+        </p>
+      </div>
+    </section>
+
+    <section id="clients" class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        your clients
+      </p>
+      <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        What your clients do in the chat
+      </h2>
+      <p class="reveal mt-4 max-w-2xl leading-relaxed text-ink-soft">
+        They type in the assistant they already use. Your connector answers from your
+        systems, with no login for the questions that need none.
+      </p>
+
+      <div class="mt-10 -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+        {clientCases.map((c, i) => (
+          <article
+            class="reveal flex w-[84%] shrink-0 snap-start flex-col rounded-2xl border border-ink/10 bg-white/40 p-6 transition-all hover:-translate-y-1 hover:border-yes/40 hover:shadow-[0_16px_40px_-16px_rgba(11,157,78,0.35)] sm:w-auto sm:shrink"
+            style={`--r:${(i % 3) * 0.1}s`}>
+            <p class="text-ink">“{c.quote}”</p>
+            <p class="mt-3 font-mono text-meta text-yes-deep">→ {c.tool}</p>
+            <p class="mt-3 text-sm leading-relaxed text-ink-soft">{c.result}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="team" class="border-y border-ink/10 bg-ink text-paper">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="reveal flex items-center gap-2 font-mono text-xs tracking-widest text-paper/55 uppercase">
+          <span aria-hidden="true" class="h-2 w-2 shrink-0 rounded-full bg-yes-bright"></span>
+          your team · signed in
+        </p>
+        <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+          Same connector, a second door
+        </h2>
+        <p class="reveal mt-4 max-w-2xl leading-relaxed text-paper/70">
+          Behind a login, against the same client data, your account managers and
+          partners see the side clients never do.
+        </p>
+
+        <div class="mt-10 -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0">
+          {teamCases.map((c, i) => (
+            <article
+              class="reveal flex w-[84%] shrink-0 snap-start flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:border-yes-bright/45 hover:bg-white/[0.07] sm:w-auto sm:shrink"
+              style={`--r:${(i % 2) * 0.1}s`}>
+              <p class="text-paper">“{c.quote}”</p>
+              <p class="mt-3 font-mono text-meta text-yes-bright">→ {c.tool}</p>
+              <p class="mt-3 text-sm leading-relaxed text-paper/70">{c.result}</p>
+            </article>
+          ))}
+        </div>
+
+        <p class="reveal mt-12 max-w-2xl leading-relaxed text-paper/70">
+          Your team edits in your tracker. <span class="text-paper">Your client sees it in their own chat, with no step in between.</span>
+        </p>
+
+        <div class="reveal mt-6 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 lg:grid-cols-[1fr_auto_1fr]">
+          <div class="bg-ink p-5 sm:p-6">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">your tracker, edited today</p>
+            <div class="mt-4 font-mono text-mini">
+              <p class="flex justify-between gap-4 border-b border-white/10 pb-2 text-paper/55">
+                <span>task</span><span>state</span>
+              </p>
+              <p class="flex justify-between gap-4 border-b border-white/5 py-2 text-paper/70">
+                <span>Brand audit</span><span>done</span>
+              </p>
+              <p class="flex justify-between gap-4 border-b border-white/5 py-2 text-paper">
+                <span>Homepage copy</span><span>in review <span class="text-paper/50 line-through">drafting</span></span>
+              </p>
+              <p class="flex justify-between gap-4 py-2 text-paper/70">
+                <span>Analytics setup</span><span>blocked: access</span>
+              </p>
+            </div>
+          </div>
+          <div aria-hidden="true" class="hidden items-center justify-center bg-ink px-4 text-paper/55 lg:flex">
+            <span class="font-mono text-lg">→</span>
+          </div>
+          <div class="bg-chat-raised p-5 sm:p-6">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">your client's chat, seconds later</p>
+            <div class="mt-4">
+              <p class="ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-white/10 px-3 py-1.5 text-note">Where are we on the redesign?</p>
+              <p class="mt-2 font-mono text-meta text-yes-bright">▸ north &amp; partners · project.status</p>
+              <p class="mt-2 w-fit max-w-[90%] rounded-lg rounded-bl-sm border border-white/10 px-3 py-1.5 text-note text-paper/70">
+                Homepage copy is <span class="text-paper">in review</span> with you. Analytics setup is waiting on your account access.
+              </p>
+            </div>
+            <p class="mt-4 font-mono text-meta text-paper/55">no export, no weekly status email to write</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="proof" class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        proof you can check
+      </p>
+      <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        How do we know you can do this?
+      </h2>
+      <div class="mt-8 grid items-stretch gap-4 md:grid-cols-2">
+        <div class="reveal flex flex-col rounded-2xl border border-ink/10 bg-paper p-6">
+          <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">use it before you talk to us</p>
+          <p class="mt-2 text-note leading-relaxed text-ink-soft">
+            We sell yesmcp through our own connector. It is live, it works on any Claude
+            plan, and it books a real consultation in a real calendar. Break it if you
+            like: we read the logs.
+          </p>
+          <a href="/connect/" class="mt-auto block rounded-full border border-yes-deep px-5 py-2 text-center text-sm font-medium text-yes-deep transition-colors hover:bg-yes-deep hover:text-white sm:inline-block sm:self-start sm:text-left">
+            Open our connector in Claude →
+          </a>
+          <p class="mt-2 font-mono text-meta text-ink-faint">one click · any claude plan, free included</p>
+        </div>
+        <div class="reveal flex flex-col rounded-2xl border border-ink/10 bg-paper p-6" style="--r:0.1s">
+          <p class="font-mono text-meta tracking-widest text-ink-faint uppercase">we are one of you</p>
+          <p class="mt-2 text-note leading-relaxed text-ink-soft">
+            We are a professional-services practice ourselves, which is why this page
+            describes your week accurately. <span class="text-ink">The connector you would buy is the one we run on our own business.</span>
+          </p>
+          <p class="mt-4 text-note leading-relaxed text-ink-soft">
+            We counted the Claude connector directory by hand on {censusCheckedAt}: <strong class="text-ink">2105 connectors, 94 of them filed under legal, 26 under health.</strong> There
+            is no category for a professional practice at all, because the directory is
+            organised around software vendors rather than around firms like yours.
+          </p>
+          <p class="mt-3 font-mono text-meta">
+            <a href="/writing/claude-connectors-for-business/" class="link-und text-ink-soft">the weekly census →</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="risks" class="border-y border-ink/10 bg-paper-deep">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+          the risk question
+        </p>
+        <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+          What about the risks?
+        </h2>
+        <p class="reveal mt-4 max-w-2xl leading-relaxed text-ink-soft">
+          Risk is the right question. Most of this work is design rather than code,
+          precisely because of it.
+        </p>
+        <div class="mt-10 grid gap-4 md:grid-cols-2">
+          {risks.map((r, i) => (
+            /* Five cards in two columns leave the last one alone beside half a
+               screen of nothing, so the odd one out spans the row. */
+            <div class={`reveal flex flex-col rounded-2xl border border-ink/10 bg-white/40 p-6 ${i === risks.length - 1 && risks.length % 2 === 1 ? "md:col-span-2" : ""}`} style={`--r:${(i % 2) * 0.1}s`}>
+              <h3 class="font-semibold text-ink">{r.q}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-ink-soft">{r.a}</p>
+              {r.href && (
+                <p class="mt-3 font-mono text-meta">
+                  <a href={r.href} class="link-und text-yes-deep">{r.linkText} →</a>
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="from-you" class="mx-auto max-w-6xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        your side of it
+      </p>
+      <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        What does it take from your side?
+      </h2>
+      <ul class="mt-9 max-w-3xl space-y-4">
+        {requirements.map((r, i) => (
+          <li class="reveal flex gap-4 text-ink-soft" style={`--r:${i * 0.06}s`}>
+            <span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-yes"></span>
+            <span class="leading-relaxed">{r}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="cost" class="border-y border-ink/10 bg-ink text-paper">
+      <div class="mx-auto max-w-6xl px-5 py-24">
+        <p class="reveal font-mono text-xs tracking-widest text-paper/55 uppercase">
+          cost and time
+        </p>
+        <h2 class="reveal mt-3 max-w-3xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+          What does it cost and how long does it take?
+        </h2>
+
+        <div class="mt-10 grid gap-4 md:grid-cols-3">
+          <div class="reveal flex flex-col rounded-2xl border border-yes-bright/40 bg-yes-bright/10 p-6">
+            <p class="font-mono text-meta tracking-widest text-yes-bright uppercase">step zero · free</p>
+            <h3 class="mt-2 font-semibold">The diagnosis costs nothing</h3>
+            <p class="mt-2 text-sm leading-relaxed text-paper/70">
+              Two questions in a chat, and you get a map of which scenarios are worth
+              building for your firm, in what order, and which of them your systems can
+              carry today. The figure follows on the call, once we have seen what those
+              systems actually hold. That call is free too.
+            </p>
+          </div>
+          <div class="reveal flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6" style="--r:0.1s">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">the first scenario</p>
+            <h3 class="mt-2 font-semibold">A fixed price, quoted for your firm</h3>
+            <p class="mt-2 text-sm leading-relaxed text-paper/70">
+              We quote per firm, because the number turns on the one thing a web page
+              cannot guess: what your systems already expose. A tracker with a clean API
+              and a spreadsheet that holds the real truth about scope are different jobs. <span class="text-paper">Fixed means fixed: the scope is written down, and the price does not move with it.</span>
+            </p>
+          </div>
+          <div class="reveal flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6" style="--r:0.2s">
+            <p class="font-mono text-meta tracking-widest text-paper/55 uppercase">running it</p>
+            <h3 class="mt-2 font-semibold">A monthly line, quoted with the first</h3>
+            <p class="mt-2 text-sm leading-relaxed text-paper/70">
+              A connector is not a delivery. We host it, watch it, and keep it working as
+              the platforms change. That number comes with the first one, so you see both
+              before you decide anything.
+            </p>
+          </div>
+        </div>
+
+        <div class="reveal mt-6 grid gap-4 md:grid-cols-2">
+          <p class="rounded-2xl border border-dashed border-white/25 px-6 py-5 text-sm leading-relaxed text-paper/70">
+            <span class="font-semibold text-paper">If the first scenario turns out to be the wrong one, we build the next one from your map at no extra cost.</span> The
+            map exists precisely so that the choice is not a guess.
+          </p>
+          <p class="rounded-2xl border border-dashed border-white/25 px-6 py-5 text-sm leading-relaxed text-paper/70">
+            <span class="font-semibold text-paper">About two weeks</span> for a first scenario against a system with an
+            API. At the diagnosis we say plainly which of your systems can carry that
+            today and which cannot.
+          </p>
+        </div>
+
+        <p class="reveal mt-6 text-sm leading-relaxed text-paper/70">
+          <span class="text-paper">The first scenario is usually the one your own team uses, not the one your clients do.</span> That
+          is deliberate: the result shows up inside those two weeks and does not wait for anyone
+          outside your firm to change a habit. The client-facing side runs on the same connector and
+          follows once the first one has proved itself.
+        </p>
+
+        <p class="reveal mt-9 text-sm text-paper/70">
+          Step zero is free and takes two questions: <a href="/scenario-map/" class="link-und text-yes">get your scenario map →</a>
+        </p>
+      </div>
+    </section>
+
+    <section id="faq" class="mx-auto max-w-3xl px-5 py-24">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">
+        before you write
+      </p>
+      <h2 class="reveal mt-3 font-display text-[clamp(1.5rem,3.5vw,2.6rem)] font-600">
+        Questions professional-services firms ask
+      </h2>
+      <div class="mt-10 space-y-4">
+        {faqs.map((f, i) => (
+          <details class="reveal group rounded-2xl border border-ink/10 bg-white/40 px-6 py-4" style={`--r:${i * 0.06}s`}>
+            <summary class="cursor-pointer list-none font-semibold marker:content-none">
+              <span class="mr-2 font-mono text-yes-deep">→</span>{f.q}
+            </summary>
+            <p class="mt-3 text-sm leading-relaxed text-ink-soft">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section id="contact" class="mx-auto max-w-6xl px-5 pb-28 text-center">
+      <p class="reveal font-mono text-xs tracking-widest text-ink-faint uppercase">next step</p>
+      <h2 class="reveal mx-auto mt-3 max-w-2xl font-display text-[clamp(1.5rem,3.5vw,2.6rem)] leading-tight font-600">
+        Start with the map, not with a contract
+      </h2>
+      <p class="reveal mx-auto mt-4 max-w-md leading-relaxed text-ink-soft">
+        Two questions about your practice, and you see which scenarios are worth
+        building, in what order, and what your systems can carry today.
+      </p>
+      <div class="reveal mt-9">
+        <a href="/scenario-map/"
+          class="inline-block rounded-full bg-yes-deep px-8 py-4 font-medium text-white shadow-[0_12px_32px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+          Get your scenario map →
+        </a>
+        <p class="mt-4 text-sm text-ink-faint">
+          Rather talk to a person? <a href="https://t.me/yesmcp_bot?start=for_professional_services" class="link-und text-yes-deep">Message us on Telegram</a> or write to <a href="mailto:yes@yesmcp.com?subject=A connector for our practice" class="link-und">yes@yesmcp.com</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter width="max-w-6xl" switchHref="/ua/for/professional-services/" />
+</Layout>

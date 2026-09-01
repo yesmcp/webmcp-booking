@@ -1,0 +1,36 @@
+{
+  "name": "site",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "deploy": "npx wrangler pages deploy dist --project-name=yesmcp --branch=main --commit-dirty=true",
+    "check:uk": "python3 scripts/uk-spellcheck.py",
+    "check:design": "astro build && node scripts/design-gate.mjs",
+    "predeploy": "astro build && python3 scripts/uk-spellcheck.py && node scripts/design-gate.mjs && node scripts/check-sitemap.mjs --strict && node scripts/check-consistency.mjs",
+    "deploy:skip-gates": "astro build && npx wrangler pages deploy dist --project-name=yesmcp --branch=main --commit-dirty=true",
+    "check:sitemap": "node scripts/check-sitemap.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^7.0.7",
+    "@astrojs/rss": "^4.0.19",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.2.4",
+    "simple-icons": "^16.28.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@types/node": "^26.4.0",
+    "playwright": "^1.62.1",
+    "typescript": "^6"
+  }
+}

@@ -1,0 +1,178 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { bookEn } from "../i18n/book";
+
+// Booking without an AI chat. Until this page existed, the only way to actually
+// book was to ask an assistant that already had our connector installed — a real
+// path for a real audience, and a wall for everyone else. The times and the
+// booking itself come from the same connector our own tools use, so there is one
+// calendar and not two.
+const API = "https://mcp.yesmcp.com";
+
+// Every user-facing string lives in src/i18n/book.ts, shared with /ua/book/
+// and the Telegram Mini App at /book/tg/, so a copy edit is a copy edit and
+// never a divergence between three doors onto the same calendar.
+const i18n = bookEn;
+---
+
+<Layout
+  title="Book a call with yesmcp | yesmcp"
+  description="Pick a time and book a 30-minute call with yesmcp. No account, no AI chat needed: choose a window, leave your name and email, and the confirmation arrives with the meeting link."
+  ogTitle="Book a call with yesmcp"
+  ogDescription="Pick a window, leave your name and email, and get the meeting link. Free, 30 minutes, no account needed."
+  path="/book/"
+  alternates={{ en: "/book/", uk: "/ua/book/" }}
+>
+  <SiteNav switchHref="/ua/book/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-24 sm:pt-36">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">book a call</p>
+    <div id="book-head">
+      <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+        Pick a time<br />that suits you
+      </h1>
+
+      <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+        Thirty minutes, free, and you leave it knowing what a connector would do for your
+        business and what it would cost. Nothing to install and no account to create: pick a
+        window, leave your name and email, and the confirmation arrives with the meeting link.
+      </p>
+    </div>
+
+    <div id="book-head-done" class="hidden">
+      <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+        You're booked.<br />One thing before the call
+      </h1>
+
+      <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+        The half hour pays off most when you arrive with one question: the one your clients
+        ask you most often. Bring it, and we leave the call with a scenario map for exactly
+        that. Meanwhile, see the connector do the same job live: <a href="/connect/" class="link-und text-yes-deep">try it in your AI chat →</a>
+      </p>
+    </div>
+
+    <div
+      id="book-app"
+      class="mt-12"
+      data-endpoint={API}
+      data-locale="en"
+      data-i18n={JSON.stringify(i18n)}
+    >
+      <p id="book-status" class="text-sm text-ink-soft"></p>
+
+      <div id="book-picker" class="book-picker hidden mt-4">
+        <div>
+          <div class="book-cal-head">
+            <button id="book-prev" type="button" class="book-nav" aria-label="Previous month">←</button>
+            <p id="book-month" class="book-month" aria-live="polite"></p>
+            <button id="book-next" type="button" class="book-nav" aria-label="Next month">→</button>
+          </div>
+
+          <table id="book-grid" class="book-grid">
+            <caption class="sr-only">Days with open windows</caption>
+            <thead id="book-grid-head"></thead>
+            <tbody id="book-grid-body"></tbody>
+          </table>
+
+          <div class="book-tz">
+            <label class="block text-meta text-ink-soft" for="book-tz">Times shown in</label>
+            <select id="book-tz"></select>
+          </div>
+        </div>
+
+        <div>
+          <h2 id="book-day-head" class="book-day-head font-semibold"></h2>
+          <div id="book-slots" class="book-slots"></div>
+        </div>
+      </div>
+
+      <form id="book-form" class="hidden mt-10 rounded-2xl border border-ink/10 bg-paper-deep p-6">
+        <p class="font-mono text-meta tracking-widest text-ink-faint uppercase">your window</p>
+        <p id="book-chosen" class="mt-1 font-semibold"></p>
+
+        <label class="mt-6 block text-sm font-semibold" for="book-name">Your name</label>
+        <input
+          id="book-name"
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+        />
+
+        <label class="mt-4 block text-sm font-semibold" for="book-email">Email</label>
+        <input
+          id="book-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+        />
+        <p class="mt-1 text-meta text-ink-soft">The confirmation and the meeting link go here.</p>
+
+        <label class="mt-4 block text-sm font-semibold" for="book-topic">What would you like to discuss?</label>
+        <textarea
+          id="book-topic"
+          name="topic"
+          required
+          rows="3"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+          placeholder="A sentence is enough: what your clients ask you most often, or which system holds the answer."></textarea>
+
+        <button
+          id="book-submit"
+          type="submit"
+          class="mt-6 rounded-full bg-yes-deep px-6 py-3 font-semibold text-paper"
+        >Book this time</button>
+
+        <p id="book-error" class="mt-3 text-sm text-ink" role="alert"></p>
+
+        <p class="mt-4 text-meta text-ink-soft">
+          We store your name, your email and this sentence, and nothing else: enough to hold the
+          window and prepare for the call. <a href="/privacy/" class="link-und">How we handle it →</a>
+        </p>
+      </form>
+
+      <div
+        id="book-done"
+        class="hidden mt-10 rounded-2xl border border-yes/40 bg-yes/5 p-6"
+        role="status"
+      >
+        <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">confirmed</p>
+        <h2 class="mt-2 text-xl font-semibold">All set</h2>
+        <p class="mt-3 text-ink-soft"><strong data-when></strong></p>
+        <p class="mt-3 text-ink-soft">
+          We meet here: <a data-room class="link-und text-yes-deep" rel="noopener"></a>
+        </p>
+        <p class="mt-3 text-sm text-ink-soft">
+          A confirmation is on its way to <strong data-email></strong>. Your
+          reference: <code data-ref class="font-mono"></code>. To cancel or move the call, reply to that email.
+        </p>
+      </div>
+
+      <div id="book-fallback" class="hidden mt-8 rounded-2xl border border-dashed border-ink/25 p-6">
+        <p class="text-sm leading-relaxed text-ink-soft">
+          You can also book inside an AI chat, where our own connector does it in a
+          sentence: <a href="/connect/" class="link-und text-yes-deep">try the connector →</a>
+        </p>
+      </div>
+    </div>
+
+    <noscript>
+      <div class="mt-10 rounded-2xl border border-dashed border-ink/25 p-6">
+        <p class="text-sm leading-relaxed text-ink-soft">
+          Picking a time needs JavaScript, which is off in this browser. Two ways round
+          it: <a href="/connect/" class="link-und text-yes-deep">book inside an AI chat</a> with our
+          connector, or write to us and we will arrange a time by hand.
+        </p>
+      </div>
+    </noscript>
+  </main>
+
+  <SiteFooter />
+
+  <script is:inline src="/js/book.js" defer></script>
+</Layout>

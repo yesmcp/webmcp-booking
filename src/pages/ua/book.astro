@@ -1,0 +1,172 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import { bookUk } from "../../i18n/book";
+
+// Дзеркало /book/. Той самий конектор, той самий календар — інша мова.
+const API = "https://mcp.yesmcp.com";
+
+const i18n = bookUk;
+---
+
+<Layout
+  lang="uk"
+  title="Записатися на розмову з yesmcp | yesmcp"
+  description="Оберіть час і запишіться на 30-хвилинну розмову з yesmcp. Без акаунта і без ШІ-чату: оберіть вікно, залиште ім'я та пошту, і підтвердження прийде разом із посиланням на зустріч."
+  ogTitle="Записатися на розмову з yesmcp"
+  ogDescription="Оберіть вікно, залиште ім'я та пошту й отримайте посилання на зустріч. Безкоштовно, 30 хвилин, без акаунта."
+  path="/ua/book/"
+  alternates={{ en: "/book/", uk: "/ua/book/" }}
+>
+  <SiteNav lang="uk" switchHref="/book/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-24 sm:pt-36">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">запис на розмову</p>
+    <div id="book-head">
+      <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+        Оберіть час,<br />який вам зручний
+      </h1>
+
+      <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+        Тридцять хвилин, безкоштовно, і ви виходите з розумінням, що конектор дасть саме
+        вашому бізнесу і скільки це коштує. Нічого встановлювати й не треба реєструватися:
+        оберіть вікно, залиште ім'я та пошту, і підтвердження прийде разом із посиланням на
+        зустріч.
+      </p>
+    </div>
+
+    <div id="book-head-done" class="hidden">
+      <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+        Вас записано.<br />Одна річ до розмови
+      </h1>
+
+      <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+        Пів години дадуть найбільше, коли ви прийдете з одним питанням: тим, яке клієнти
+        ставлять вам найчастіше. Візьміть його з собою, і з розмови ми вийдемо з картою
+        сценарію саме під нього. А поки подивіться, як конектор робить те саме наживо: <a href="/connect/" class="link-und text-yes-deep">спробуйте його у своєму ШІ-чаті →</a>
+      </p>
+    </div>
+
+    <div
+      id="book-app"
+      class="mt-12"
+      data-endpoint={API}
+      data-locale="uk"
+      data-i18n={JSON.stringify(i18n)}
+    >
+      <p id="book-status" class="text-sm text-ink-soft"></p>
+
+      <div id="book-picker" class="book-picker hidden mt-4">
+        <div>
+          <div class="book-cal-head">
+            <button id="book-prev" type="button" class="book-nav" aria-label="Попередній місяць">←</button>
+            <p id="book-month" class="book-month" aria-live="polite"></p>
+            <button id="book-next" type="button" class="book-nav" aria-label="Наступний місяць">→</button>
+          </div>
+
+          <table id="book-grid" class="book-grid">
+            <caption class="sr-only">Дні, у яких є вільні вікна</caption>
+            <thead id="book-grid-head"></thead>
+            <tbody id="book-grid-body"></tbody>
+          </table>
+
+          <div class="book-tz">
+            <label class="block text-meta text-ink-soft" for="book-tz">Час показуємо в зоні</label>
+            <select id="book-tz"></select>
+          </div>
+        </div>
+
+        <div>
+          <h2 id="book-day-head" class="book-day-head font-semibold"></h2>
+          <div id="book-slots" class="book-slots"></div>
+        </div>
+      </div>
+
+      <form id="book-form" class="hidden mt-10 rounded-2xl border border-ink/10 bg-paper-deep p-6">
+        <p class="font-mono text-meta tracking-widest text-ink-faint uppercase">ваше вікно</p>
+        <p id="book-chosen" class="mt-1 font-semibold"></p>
+
+        <label class="mt-6 block text-sm font-semibold" for="book-name">Ваше ім'я</label>
+        <input
+          id="book-name"
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+        />
+
+        <label class="mt-4 block text-sm font-semibold" for="book-email">Пошта</label>
+        <input
+          id="book-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+        />
+        <p class="mt-1 text-meta text-ink-soft">Сюди прийде підтвердження і посилання на зустріч.</p>
+
+        <label class="mt-4 block text-sm font-semibold" for="book-topic">Про що хочете поговорити?</label>
+        <textarea
+          id="book-topic"
+          name="topic"
+          required
+          rows="3"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-paper px-4 py-3"
+          placeholder="Досить одного речення: що клієнти питають вас найчастіше або в якій системі лежить відповідь."></textarea>
+
+        <button
+          id="book-submit"
+          type="submit"
+          class="mt-6 rounded-full bg-yes-deep px-6 py-3 font-semibold text-paper"
+        >Записатися на цей час</button>
+
+        <p id="book-error" class="mt-3 text-sm text-ink" role="alert"></p>
+
+        <p class="mt-4 text-meta text-ink-soft">
+          Ми зберігаємо ваше ім'я, пошту й це речення, і більше нічого: рівно стільки, щоб
+          тримати вікно й підготуватися до розмови. <a href="/ua/privacy/" class="link-und">Як ми з цим поводимось →</a>
+        </p>
+      </form>
+
+      <div
+        id="book-done"
+        class="hidden mt-10 rounded-2xl border border-yes/40 bg-yes/5 p-6"
+        role="status"
+      >
+        <p class="font-mono text-meta tracking-widest text-yes-deep uppercase">підтверджено</p>
+        <h2 class="mt-2 text-xl font-semibold">Усе готово</h2>
+        <p class="mt-3 text-ink-soft"><strong data-when></strong></p>
+        <p class="mt-3 text-ink-soft">
+          Зустрічаємось тут: <a data-room class="link-und text-yes-deep" rel="noopener"></a>
+        </p>
+        <p class="mt-3 text-sm text-ink-soft">
+          Підтвердження вже летить на <strong data-email></strong>. Ваш номер
+          запису: <code data-ref class="font-mono"></code>. Щоб скасувати або перенести, відповідайте на той лист.
+        </p>
+      </div>
+
+      <div id="book-fallback" class="hidden mt-8 rounded-2xl border border-dashed border-ink/25 p-6">
+        <p class="text-sm leading-relaxed text-ink-soft">
+          Записатися можна й усередині ШІ-чату, де наш конектор робить це одним
+          реченням: <a href="/ua/connect/" class="link-und text-yes-deep">спробувати конектор →</a>
+        </p>
+      </div>
+    </div>
+
+    <noscript>
+      <div class="mt-10 rounded-2xl border border-dashed border-ink/25 p-6">
+        <p class="text-sm leading-relaxed text-ink-soft">
+          Щоб обрати час, потрібен JavaScript, а він тут вимкнений. Два шляхи: <a href="/ua/connect/" class="link-und text-yes-deep">записатися в ШІ-чаті</a> через наш
+          конектор або написати нам, і ми домовимося про час вручну.
+        </p>
+      </div>
+    </noscript>
+  </main>
+
+  <SiteFooter lang="uk" />
+
+  <script is:inline src="/js/book.js" defer></script>
+</Layout>

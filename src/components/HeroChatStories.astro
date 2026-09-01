@@ -1,0 +1,572 @@
+---
+// Hero chat demo: an interactive scripted conversation between a customer and
+// a business running our MCP connector. The transcript is a real scrollable
+// chat; the carousel scrolls, buttons and slot chips are clickable and drive
+// the story (including the reschedule / cancel branches). Autoplay "clicks"
+// the same controls for passive viewers; any user interaction takes over and
+// stops it for good. No real network and no fake AI: the composer is inert and
+// points at the live connector instead.
+//
+// Spec: docs/plans/2026-08-25-hero-widget-stories.md (owner-accepted final shape).
+// Engine: public/js/hero-stories.js (external, CSP script-src 'self').
+// Without JS the first step stays in the DOM as plain HTML and the player is
+// hidden (html.js gate, set by the Layout bootstrap script). That first frame
+// is real markup rather than a template on purpose: the engine harvests those
+// nodes into its own template on boot and replays them with chat pacing.
+//
+// Both locales live here on purpose: the strings are markup-shaped (frames,
+// widgets, chips) and would rot if split across the two page files.
+
+interface Props {
+  lang?: "en" | "uk";
+}
+
+const { lang = "en" } = Astro.props;
+
+const dict = {
+  en: {
+    connectHref: "/connect/",
+    cardAria:
+      "Interactive demo: a customer chat with a business running yesmcp's MCP connector",
+    chrome: "claude.ai · your customer's chat",
+    tapHint: "you can tap this",
+    transcriptAria: "Demo conversation",
+    composerPlaceholder: "Reply to Claude…",
+    composerAria:
+      "Reply to Claude… (a scripted demo: the real connector runs in Claude, follow the try-it-live link below)",
+    tablistAria: "Demo checkpoints",
+    jumpTo: (n: number, label: string) => `Jump to step ${n}: ${label}`,
+    pauseAria: "Stop the demo autoplay",
+    captionText: "our own connector, live in production. the in-chat cards are our work too, yours will look like this · ",
+    captionLink: "try it live",
+    steps: [
+      { label: "Browse", dur: 5 },
+      { label: "Pick a time", dur: 3.8 },
+      { label: "Booked", dur: 3.8 },
+    ],
+    // step 1
+    // Tool rows speak in plain verbs, not function-call syntax: the board
+    // (2026-08-31) counted `book_consult(slot: "…")` next to the H1 as the
+    // single most technical texture on the page, aimed at a buyer who is not
+    // a developer. The mono face stays (machine output), the syntax goes.
+    chip: "connected · yesmcp",
+    tool1: "showing services",
+    tool2: "checking the calendar",
+    tool3: "booking",
+    toolResched: "moving booking YM-7K3F",
+    toolCancel: "cancelling YM-7K3F ✓",
+    s1User: "what can yesmcp actually do for a shop like mine?",
+    s1Reply: "Here's what they do. Pick a card to go deeper:",
+    s1Cards: [
+      {
+        icon: "⚒",
+        title: "A connector, done for you",
+        text: "Fixed-scope build: from the first call to live tools in your customers' chat.",
+      },
+      {
+        icon: "☁",
+        title: "Hosting & monitoring",
+        text: "Managed infrastructure, watched by us: logs, errors, misfired conversations.",
+      },
+      {
+        icon: "🛡",
+        title: "Security by default",
+        text: "Read and write tools separated, write actions confirmed, scoped credentials.",
+      },
+      {
+        icon: "🗝",
+        title: "Yours to keep",
+        text: "The connector spec and code belong to you. Self-host at any point.",
+      },
+    ],
+    s1Cta: "Book a scoping call",
+    // step 2
+    // Weekday names without dates, deliberately: a hard-coded "Aug 26" rotted
+    // on prod within a week (found by the 2026-08-31 board — the demo said
+    // "live in production" over a calendar from the past). Weekdays never rot.
+    s2User: "Book me a scoping call",
+    s2Reply: "Here are the nearest windows:",
+    s2Tz: "Nicosia (GMT+3)",
+    s2Title: "Pick a time for your scoping call",
+    s2DayA: "Tuesday",
+    s2DayB: "Wednesday",
+    s2More: "+3 more",
+    s2ThuA: "Thu 10:00",
+    s2ThuB: "Thu 15:00",
+    s2SlotDayC: "Thursday",
+    // step 3
+    s3User: "works 👍",
+    s3Reply: "Done. Booking it.",
+    s3Booked: "Booked",
+    s3Moved: "Moved",
+    s3Mail: "Confirmation sent to your email",
+    s3Resched: "Reschedule",
+    s3Cancel: "Cancel",
+    // branches
+    reschedUser: "Actually, can we move it?",
+    reschedReply: "Of course. Same reference, new time:",
+    cancelUser: "Cancel it, please",
+    cancelTitle: "Cancelled. The slot is free again.",
+    cancelText: "No calls, no hold music. Book a new time whenever.",
+    cancelCta: "Book again",
+  },
+  uk: {
+    connectHref: "/ua/connect/",
+    cardAria:
+      "Інтерактивне демо: розмова клієнта з бізнесом, у якого працює MCP-конектор від yesmcp",
+    chrome: "claude.ai · чат клієнта",
+    tapHint: "тут можна натискати",
+    transcriptAria: "Демонстраційна розмова",
+    composerPlaceholder: "Відповісти Claude…",
+    composerAria:
+      "Відповісти Claude… (демо за сценарієм: справжній конектор працює в Claude, перейдіть за посиланням нижче)",
+    tablistAria: "Контрольні точки демо",
+    jumpTo: (n: number, label: string) => `Перейти до кроку ${n}: ${label}`,
+    pauseAria: "Зупинити автопрогравання демо",
+    captionText: "наш конектор працює наживо. картки в чаті теж наша робота, ваші виглядатимуть так само · ",
+    captionLink: "спробуйте наживо",
+    steps: [
+      { label: "Огляд", dur: 5 },
+      { label: "Час", dur: 3.8 },
+      { label: "Готово", dur: 3.8 },
+    ],
+    chip: "під'єднано · yesmcp",
+    tool1: "показує послуги",
+    tool2: "перевіряє календар",
+    tool3: "бронює",
+    toolResched: "переносить бронь YM-7K3F",
+    toolCancel: "скасовує бронь YM-7K3F ✓",
+    s1User: "а що yesmcp реально дає такому магазину, як мій?",
+    s1Reply: "Ось що вони роблять. Оберіть картку, щоб дізнатися більше:",
+    s1Cards: [
+      {
+        icon: "⚒",
+        title: "Конектор під ключ",
+        text: "Фіксований обсяг: від першого дзвінка до живих інструментів у чаті ваших клієнтів.",
+      },
+      {
+        icon: "☁",
+        title: "Хостинг і моніторинг",
+        text: "Інфраструктура на нас: логи, помилки, розмови, що пішли не туди.",
+      },
+      {
+        icon: "🛡",
+        title: "Безпека за замовчуванням",
+        text: "Читання і запис розділені, дії на запис підтверджуються, доступи обмежені.",
+      },
+      {
+        icon: "🗝",
+        title: "Залишається вашим",
+        text: "Специфікація і код конектора належать вам. Перенесете до себе будь-коли.",
+      },
+    ],
+    s1Cta: "Забронювати дзвінок-оцінку",
+    s2User: "Забронюй мені дзвінок-оцінку",
+    s2Reply: "Ось найближчі вікна:",
+    s2Tz: "Нікосія (GMT+3)",
+    s2Title: "Оберіть час для дзвінка-оцінки",
+    s2DayA: "Вівторок",
+    s2DayB: "Середа",
+    s2More: "+3 ще",
+    s2ThuA: "Чт 10:00",
+    s2ThuB: "Чт 15:00",
+    s2SlotDayC: "Четвер",
+    s3User: "підходить 👍",
+    s3Reply: "Готово. Бронюю.",
+    s3Booked: "Заброньовано",
+    s3Moved: "Перенесено",
+    s3Mail: "Підтвердження надіслали на пошту",
+    s3Resched: "Перенести",
+    s3Cancel: "Скасувати",
+    reschedUser: "А можна перенести?",
+    reschedReply: "Звісно. Той самий номер, новий час:",
+    cancelUser: "Скасуйте, будь ласка",
+    cancelTitle: "Скасовано. Час знову вільний.",
+    cancelText: "Без дзвінків і черг. Забронюєте новий час, коли захочете.",
+    cancelCta: "Забронювати знову",
+  },
+} as const;
+
+const t = dict[lang];
+
+// Slot chips: the visible label is the time, the data-full value is what the
+// booking confirmation echoes back.
+const slotsA = ["10:00", "13:30", "16:00"];
+const slotsB = ["11:00", "14:30"];
+---
+
+<div class="relative mx-auto w-full max-w-[26rem]" data-chat-shell>
+  <span class="tap-badge" aria-hidden="true">
+    <span class="tap-gesture"></span>
+    <span class="tap-word">{t.tapHint}</span>
+  </span>
+  <div
+    id="chat-card"
+    class="cl rounded-2xl border border-ink/10 p-4 shadow-[0_32px_64px_-24px_rgba(23,20,14,0.5)] lg:-rotate-1"
+    role="group"
+    aria-label={t.cardAria}
+    data-verb-booked={t.s3Booked}
+    data-verb-moved={t.s3Moved}
+  >
+    <div class="cl-faint mb-2 flex items-center gap-2 font-mono text-meta" aria-hidden="true">
+      <span class="truncate">{t.chrome}</span>
+      <span class="cl-chip ml-auto shrink-0 rounded bg-yes/20 px-1.5 py-0.5 text-stamp whitespace-nowrap">{t.chip}</span>
+    </div>
+
+    <div id="transcript" class="transcript flex flex-col gap-2.5 overflow-y-auto pr-1" tabindex="0" aria-label={t.transcriptAria}>
+      <div class="cl-bubble ml-auto w-fit max-w-[85%] rounded-xl px-3.5 py-2" data-part="0">{t.s1User}</div>
+      <div class="cl-toolrow font-mono text-meta" data-part="1">▸ yesmcp · {t.tool1}</div>
+      <div class="cl-text2 max-w-[92%] text-note" data-part="2">{t.s1Reply}</div>
+      <div class="cl-widget rounded-xl p-3" data-part="3">
+        <div class="mb-2 flex items-center justify-between">
+          <span class="rounded bg-yes-deep px-1.5 py-0.5 font-display text-meta font-semibold text-white">yesmcp</span>
+        </div>
+        <div class="svc-row flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1">
+          {t.s1Cards.map((c, i) => (
+            <div class="cl-card w-[82%] shrink-0 snap-start rounded-lg p-3">
+              <div class="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-yes/15 text-yes">{c.icon}</div>
+              <p class="cl-text font-semibold">{c.title}</p>
+              <p class="cl-text2 mt-1 text-mini">{c.text}</p>
+              {/* Every card carries the same action, because a visitor decides
+                  on whichever card convinced them and should not have to swipe
+                  back to the first one to act. Only the first is filled: the
+                  rest are ghost buttons, the same secondary treatment our real
+                  widgets use, so the carousel has one accent, not four. The
+                  engine's autoplay flash targets the first match, so it still
+                  pulses the primary. */}
+              <button
+                type="button"
+                data-act="book-cta"
+                class={`mt-2 inline-block cursor-pointer rounded-full px-3 py-1 text-mini font-medium ${
+                  i === 0
+                    ? "border-0 bg-yes-deep text-white hover:brightness-110"
+                    : "cl-ghost bg-transparent hover:brightness-125"
+                }`}
+              >{t.s1Cta}</button>
+            </div>
+          ))}
+        </div>
+        <div class="mt-2 flex justify-center gap-1">
+          <span class="dot h-1 w-3 rounded-full bg-yes"></span>
+          <span class="dot cl-dot h-1 w-1 rounded-full"></span>
+          <span class="dot cl-dot h-1 w-1 rounded-full"></span>
+          <span class="dot cl-dot h-1 w-1 rounded-full"></span>
+        </div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      id="composer"
+      class="cl-composer mt-3 flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left"
+      aria-label={t.composerAria}
+    >
+      <span class="cl-faint flex-1 truncate text-mini">{t.composerPlaceholder}</span>
+      <span class="cl-faint text-note">↑</span>
+    </button>
+  </div>
+
+  <div id="player" class="mx-auto mt-3 flex max-w-[24rem] items-center gap-2">
+    <div class="flex flex-1 gap-2" role="tablist" aria-label={t.tablistAria}>
+      {t.steps.map((s, i) => (
+        <button
+          type="button"
+          role="tab"
+          data-seg={i}
+          data-dur={s.dur}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          aria-label={t.jumpTo(i + 1, s.label)}
+          class="seg group min-h-[44px] flex-1 cursor-pointer border-0 bg-transparent p-0"
+        >
+          <span class="block h-[3px] w-full overflow-hidden rounded-full bg-ink/10">
+            <span class="fill block h-full w-0 rounded-full bg-ink/60"></span>
+          </span>
+          <span class="seg-label mt-1.5 block truncate text-center font-mono text-meta text-ink-faint">{s.label}</span>
+        </button>
+      ))}
+    </div>
+    <button
+      type="button"
+      id="pause"
+      aria-pressed="false"
+      aria-label={t.pauseAria}
+      class="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-ink/15 bg-transparent text-note text-ink-soft hover:border-yes-deep hover:text-yes-deep"
+    >
+      ⏸
+    </button>
+  </div>
+
+  <p id="caption" class="mt-2 text-center font-mono text-meta text-ink-faint transition-colors">
+    {t.captionText}<a href={t.connectHref} class="link-und">{t.captionLink}</a>
+  </p>
+</div>
+
+<!-- ── frames ─────────────────────────────── -->
+<template id="t-step2">
+  <div class="cl-bubble ml-auto w-fit max-w-[85%] rounded-xl px-3.5 py-2" data-part="0">{t.s2User}</div>
+  <div class="cl-toolrow font-mono text-meta" data-part="1">▸ yesmcp · {t.tool2}</div>
+  <div class="cl-text2 max-w-[92%] text-note" data-part="2">{t.s2Reply}</div>
+  <div class="cl-widget rounded-xl p-3" data-part="3">
+    <div class="mb-2 flex items-center justify-between">
+      <span class="rounded bg-yes-deep px-1.5 py-0.5 font-display text-meta font-semibold text-white">yesmcp</span>
+      <span class="cl-faint font-mono text-stamp">{t.s2Tz}</span>
+    </div>
+    <p class="cl-text font-semibold">{t.s2Title}</p>
+    <p class="cl-faint mt-2 font-mono text-stamp tracking-wider uppercase">{t.s2DayA}</p>
+    <div class="mt-1 flex flex-wrap gap-1.5">
+      {slotsA.map((time, i) => (
+        <button
+          type="button"
+          data-act="slot"
+          data-full={`${t.s2DayA} · ${time}`}
+          data-autopick={i === 0 ? "" : undefined}
+          class="cl-chip cursor-pointer bg-transparent px-2.5 py-1 text-mini"
+        >{time}</button>
+      ))}
+    </div>
+    <p class="cl-faint mt-2 font-mono text-stamp tracking-wider uppercase">{t.s2DayB}</p>
+    <div class="mt-1 flex flex-wrap gap-1.5">
+      {slotsB.map((time) => (
+        <button type="button" data-act="slot" data-full={`${t.s2DayB} · ${time}`} class="cl-chip cursor-pointer bg-transparent px-2.5 py-1 text-mini">{time}</button>
+      ))}
+      <button type="button" data-act="slot" data-full={`${t.s2DayB} · 17:30`} hidden class="cl-chip cursor-pointer bg-transparent px-2.5 py-1 text-mini">17:30</button>
+      <button type="button" data-act="slot" data-full={`${t.s2SlotDayC} · 10:00`} hidden class="cl-chip cursor-pointer bg-transparent px-2.5 py-1 text-mini">{t.s2ThuA}</button>
+      <button type="button" data-act="slot" data-full={`${t.s2SlotDayC} · 15:00`} hidden class="cl-chip cursor-pointer bg-transparent px-2.5 py-1 text-mini">{t.s2ThuB}</button>
+      <button type="button" data-act="more" class="cl-chip cursor-pointer bg-transparent px-2.5 py-1 text-mini">{t.s2More}</button>
+    </div>
+  </div>
+</template>
+
+<template id="t-step3">
+  <div class="cl-bubble ml-auto w-fit max-w-[85%] rounded-xl px-3.5 py-2" data-part="0"><span data-fill="short"></span>{` ${t.s3User}`}</div>
+  <div class="cl-toolrow font-mono text-meta" data-part="1">▸ yesmcp · {t.tool3} <span data-fill="short"></span> ✓</div>
+  <div class="cl-text2 max-w-[92%] text-note" data-part="2">{t.s3Reply}</div>
+  <div class="cl-widget rounded-xl p-3 text-center" data-part="3">
+    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-yes text-xl text-white">✓</div>
+    <p class="cl-text mt-2 font-semibold"><span data-fill="verb">{t.s3Booked}</span>: <span data-fill="full"></span></p>
+    <p class="cl-text2 mt-1 text-mini">{t.s3Mail}</p>
+    <span class="cl-pill cl-text mt-2 inline-block rounded px-2.5 py-1 font-mono text-mini tracking-widest">YM-7K3F</span>
+    <div class="mt-3 flex justify-center gap-2">
+      <button type="button" data-act="resched" class="cl-ghost cursor-pointer rounded-full bg-transparent px-3 py-1 text-mini hover:brightness-125">{t.s3Resched}</button>
+      <button type="button" data-act="cancel" class="cl-ghost cursor-pointer rounded-full bg-transparent px-3 py-1 text-mini hover:brightness-125">{t.s3Cancel}</button>
+    </div>
+  </div>
+</template>
+
+<template id="t-resched">
+  <div class="cl-bubble ml-auto w-fit max-w-[85%] rounded-xl px-3.5 py-2" data-part="0">{t.reschedUser}</div>
+  <div class="cl-toolrow font-mono text-meta" data-part="1">▸ yesmcp · {t.toolResched}</div>
+  <div class="cl-text2 max-w-[92%] text-note" data-part="2">{t.reschedReply}</div>
+</template>
+
+<template id="t-cancel">
+  <div class="cl-bubble ml-auto w-fit max-w-[85%] rounded-xl px-3.5 py-2" data-part="0">{t.cancelUser}</div>
+  <div class="cl-toolrow font-mono text-meta" data-part="1">▸ yesmcp · {t.toolCancel}</div>
+  <div class="cl-widget rounded-xl p-3 text-center" data-part="2">
+    <p class="cl-text font-semibold">{t.cancelTitle}</p>
+    <p class="cl-text2 mt-1 text-mini">{t.cancelText}</p>
+    <button type="button" data-act="book-cta" class="mt-2 cursor-pointer rounded-full border-0 bg-yes-deep px-3 py-1 text-mini font-medium text-white hover:brightness-110">{t.cancelCta}</button>
+  </div>
+</template>
+
+<script is:inline type="module" src="/js/hero-stories.js"></script>
+
+<style>
+  /* Styled after Claude's dark chat theme (warm near-black, warm white text).
+     Component-scoped: the palette never reaches the site design system.
+     Rules that must also hit engine-created nodes (tool rows, skeletons,
+     cloned template frames) are written as `#chat-card :global(...)` so they
+     survive Astro's scoping without leaking outside the card. */
+  #chat-card {
+    --cl-bg: hsl(0 0% 8.24%);
+    --cl-raised: hsl(60 1.59% 12.35%);
+    --cl-text: hsl(60 14.29% 97.25%);
+    --cl-text2: hsl(55 9.09% 74.12%);
+    --cl-text3: hsl(48 4.59% 57.25%);
+    --cl-border: hsl(52.5 11.76% 86.67% / 0.14);
+    background: var(--cl-bg);
+    color: var(--cl-text);
+    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  #chat-card :global(.cl-text) { color: var(--cl-text); }
+  #chat-card :global(.cl-text2) { color: var(--cl-text2); }
+  #chat-card :global(.cl-faint) { color: var(--cl-text3); }
+  #chat-card :global(.cl-dot) { background: hsl(60 14.29% 97.25% / 0.14); }
+  #chat-card :global(.cl-bubble) { background: hsl(60 14.29% 97.25% / 0.06); border: 0.5px solid hsl(60 14.29% 97.25% / 0.08); color: var(--cl-text); font-size: 13px; }
+  #chat-card :global(.cl-toolrow) { color: var(--cl-text3); }
+  #chat-card :global(.cl-widget) { background: var(--cl-raised); border: 1px solid var(--cl-border); }
+  #chat-card :global(.cl-card) { background: hsl(60 14.29% 97.25% / 0.04); border: 1px solid var(--cl-border); }
+  #chat-card :global(.cl-chip) { border: 1px solid hsl(60 14.29% 97.25% / 0.34); color: var(--cl-text2); border-radius: 999px; transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+  #chat-card :global(.cl-chip:hover) { border-color: var(--color-yes); color: var(--cl-text); }
+  #chat-card :global(.cl-chip.picked) {
+    border-color: var(--color-yes);
+    background: color-mix(in srgb, var(--color-yes) 26%, transparent);
+    color: var(--cl-text);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-yes) 18%, transparent);
+  }
+  #chat-card :global(.cl-pill) { background: color-mix(in srgb, var(--color-yes) 14%, transparent); border: 1px solid color-mix(in srgb, var(--color-yes) 45%, transparent); }
+  #chat-card :global(.cl-ghost) { border: 1px solid hsl(60 14.29% 97.25% / 0.34); color: var(--cl-text2); }
+  /* Brand green lightened for the dark card: --color-yes fails 4.5:1 on it at 10px */
+  #chat-card :global(.cl-chip) { color: var(--color-yes-bright); }
+  #chat-card :global(.cl-composer) { background: hsl(60 14.29% 97.25% / 0.04); border: 1px solid var(--cl-border); }
+  #chat-card :global(.cl-composer:hover) { border-color: hsl(60 14.29% 97.25% / 0.3); }
+
+  #transcript { height: 342px; scrollbar-width: thin; scrollbar-color: hsl(60 14.29% 97.25% / 0.2) transparent; }
+  #transcript :global(.svc-row) { scrollbar-width: none; }
+  #transcript :global(.svc-row)::-webkit-scrollbar { display: none; }
+
+  /* ---- appearance engine ------------------------------------------------
+     User turns land instantly (pop); tool calls run, then resolve; assistant
+     text streams character by character; widgets arrive behind a skeleton. */
+  #chat-card :global(.msg-pop) { animation: msg-pop 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes msg-pop { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+  #chat-card :global(.fade-in) { animation: fade-in 0.28s ease both; }
+  @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+
+  /* block caret trailing the streaming text */
+  #chat-card :global(.cl-caret) { display: inline-block; margin-left: 1px; color: var(--cl-text2); animation: caret 1.05s steps(1, end) infinite; }
+  @keyframes caret { 0%, 55% { opacity: 1 } 56%, 100% { opacity: 0.12 } }
+
+  /* tool call, phase 1: still running */
+  #chat-card :global(.cl-toolrun) { display: flex; align-items: center; gap: 6px; }
+  #chat-card :global(.cl-toolrun .tool-dot) { color: var(--color-yes); animation: tool-dot 1.1s ease-in-out infinite; }
+  @keyframes tool-dot { 0%, 100% { opacity: 0.3 } 50% { opacity: 1 } }
+  #chat-card :global(.cl-toolrun .tool-shim) {
+    background: linear-gradient(90deg, var(--cl-text3) 0%, var(--cl-text) 45%, var(--cl-text3) 90%);
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: tool-shim 1.5s linear infinite;
+  }
+  @keyframes tool-shim { from { background-position: 130% 0 } to { background-position: -130% 0 } }
+
+  /* widget, phase 1: skeleton inside the real widget frame */
+  #chat-card :global(.cl-skel) { display: flex; flex-direction: column; gap: 9px; }
+  #chat-card :global(.skel-bar) { position: relative; height: 10px; border-radius: 999px; background: hsl(60 14.29% 97.25% / 0.07); overflow: hidden; }
+  #chat-card :global(.skel-bar)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, hsl(60 14.29% 97.25% / 0.14), transparent);
+    animation: skel-sweep 1.15s ease-in-out infinite;
+  }
+  @keyframes skel-sweep { to { transform: translateX(100%) } }
+
+  /* auto-pick: the first chip lights up 1s before the step ends (autoplay only) */
+  #transcript.autopick-armed :global([data-autopick]) { animation: autopick 0.3s ease forwards; animation-delay: var(--pick-delay, 2.5s); }
+  #chat-card.paused #transcript.autopick-armed :global([data-autopick]) { animation-play-state: paused; }
+  @keyframes autopick {
+    to {
+      border-color: var(--color-yes);
+      background: color-mix(in srgb, var(--color-yes) 26%, transparent);
+      color: var(--cl-text);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-yes) 18%, transparent);
+    }
+  }
+
+  #chat-card :global(.cta-flash) { animation: cta-flash 0.35s ease 2; }
+  @keyframes cta-flash { 50% { filter: brightness(1.4); transform: scale(1.04) } }
+
+  /* the player is JS-only: without the engine there is nothing to seek */
+  #player { display: none; }
+  :global(html.js) #player { display: flex; }
+
+  .seg.done .fill { width: 100%; }
+  .seg.run .fill { animation: segfill var(--dur, 5s) linear forwards; }
+  #player.paused .seg.run .fill { animation-play-state: paused; }
+  @keyframes segfill { from { width: 0 } to { width: 100% } }
+  .seg[aria-selected="true"] .seg-label { color: var(--color-ink, #17140e); font-weight: 600; }
+  .seg:hover .seg-label { color: var(--color-yes-deep); }
+
+  #caption.pulse { color: var(--color-yes-deep); }
+
+  /* ── tap affordance ──────────────────────────────────────────────
+     The demo is fully interactive (slots, buttons, chapters), but it reads as
+     a screenshot until something says otherwise. This is a sticker parked on
+     the card's edge, half on and half off, in the same "applied by hand" idiom
+     as the language tag: a finger pad with one ripple, plus two words.
+     It removes itself the moment the visitor touches anything (data-touched,
+     set by hero-stories.js) — an affordance that outstays its welcome becomes
+     noise. It is aria-hidden: the card already announces itself as an
+     interactive demo to assistive tech, and a decorative pulse adds nothing. */
+  .tap-badge {
+    position: absolute;
+    /* parked on the card's top edge, half on and half off, like a sticker
+       applied by hand (owner, 2026-08-26) */
+    left: 1.25rem;
+    top: -0.85rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.7rem 0.3rem 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-paper) 82%, transparent);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 24px -14px rgba(23, 20, 14, 0.55);
+    transform: rotate(-4deg);
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .tap-word {
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    color: var(--color-ink-soft);
+    white-space: nowrap;
+  }
+  /* the finger pad itself; the ring is the tap landing */
+  .tap-gesture {
+    position: relative;
+    display: block;
+    height: 11px;
+    width: 11px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-yes-deep) 65%, transparent);
+    animation: tap-press 2.8s ease-out infinite;
+  }
+  .tap-gesture::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    border: 1.5px solid var(--color-yes-deep);
+    opacity: 0;
+    animation: tap-ring 2.8s ease-out infinite;
+  }
+  @keyframes tap-press {
+    0%, 100% { transform: scale(1) }
+    8% { transform: scale(0.78) }
+    20% { transform: scale(1) }
+  }
+  @keyframes tap-ring {
+    0% { opacity: 0.75; transform: scale(0.7) }
+    28% { opacity: 0; transform: scale(2.1) }
+    100% { opacity: 0; transform: scale(2.1) }
+  }
+  /* one touch and it is done, for the rest of the session */
+  [data-chat-shell][data-touched] .tap-badge {
+    opacity: 0;
+    transform: rotate(-4deg) translateY(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tap-gesture, .tap-gesture::after { animation: none; }
+    .tap-gesture::after { opacity: 0.5; }
+
+    /* the engine never renders carets/skeletons/running rows under reduced
+       motion, but belt and braces: nothing here is allowed to animate */
+    #chat-card :global(.msg-pop), #chat-card :global(.fade-in), #chat-card :global(.cta-flash) { animation: none; }
+    #chat-card :global(.cl-caret), #chat-card :global(.cl-toolrun .tool-dot), #chat-card :global(.cl-toolrun .tool-shim) { animation: none; }
+    #chat-card :global(.skel-bar)::after { animation: none; }
+    #chat-card :global(.cl-toolrun .tool-shim) { background: none; color: var(--cl-text3); -webkit-text-fill-color: currentColor; }
+    #transcript { scroll-behavior: auto; }
+    .seg.run .fill { animation: none; }
+    .seg[aria-selected="true"] .fill { width: 100%; }
+    #transcript.autopick-armed :global([data-autopick]) { animation: none; }
+    #pause { display: none; }
+  }
+</style>

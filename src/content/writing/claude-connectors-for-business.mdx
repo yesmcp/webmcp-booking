@@ -1,0 +1,156 @@
+---
+title: "Claude connectors for business: the directory, custom connectors, and what your clients see"
+headline: "Claude connectors for business: the directory, custom connectors, and what your clients see"
+description: "What Claude connectors are from the business side: how the {{census:claude:total}}-connector directory works, how your clients install one, and how a custom connector puts your services inside the chat."
+schemaDescription: "A business owner's guide to Claude connectors: what they are, a first-party census of the claude.ai directory ({{census:claude:total-connectors}} across {{census:claude:categories}} categories, latest count {{census:claude:date}}), how clients install a connector, and how a custom MCP connector puts a company's bookings, orders and support inside the chat."
+ogTitle: "Claude connectors for business: what the directory looks like from the owner's side"
+ogDescription: "{{census:claude:total-connectors}}, {{census:claude:categories}} categories, and almost none of them are local businesses. A first-party guide to putting your services inside Claude."
+date: "2026-08-25"
+dateModified: "2026-08-25"
+provenance: "directory census on a logged-in claude.ai profile, latest count {{census:claude:date}}; connector facts from our own production connector"
+ogImage: "/assets/og/claude-connectors.png"
+lede: "Most articles about Claude connectors tell you which ones to install. This one is for the other side of the counter: the business owner wondering how their booking calendar, catalog or support desk ends up inside the chat their customers already use. We counted the directory by hand, and we run a connector of our own, so the numbers here are first-party."
+blurb: "The claude.ai directory holds {{census:claude:total-connectors}} as of our count of {{census:claude:date}}, and almost none of them are ordinary service businesses. What a connector is, how clients install one, and how a custom build works, from a company that runs its own in production."
+---
+
+import CensusTable from "../../components/CensusTable.astro";
+
+Claude connectors are add-ons that let Claude use outside services during a
+conversation: read a calendar, search a catalog, create a booking. They come in two
+flavours. Directory connectors are published in the claude.ai catalog for anyone to
+install. Custom connectors are added by URL, which is how a business gives its own
+clients a private door into its services. Both are built on MCP, an open standard,
+so one build also travels toward ChatGPT and other assistants.
+
+## What is a Claude connector, in business terms?
+
+Think of a connector as a storefront inside the chat. Without one, Claude can only
+talk about your business from whatever the web says. With one, it can act: check
+real availability, quote from your actual price list, create an order in your
+system and confirm it back to the customer, all inside one conversation.
+
+Technically a connector is an MCP server, a small service that exposes a set of
+tools to the assistant. That detail matters for one reason: MCP (Model Context
+Protocol) is an open standard stewarded under the Linux Foundation, not a Claude
+feature. The connector you build for Claude is the same asset you take to the
+ChatGPT app directory and to other assistants as they open up.
+
+## How big is the connector directory really?
+
+We count it by hand on a logged-in claude.ai profile. The table below renders
+straight from that dataset, so it updates with every new count while this page
+and its address stay put. The distribution says more than the total.
+
+<CensusTable ecosystem="claude" lang="en" />
+
+Read the gaps. The catalog is dominated by software tools for knowledge workers:
+productivity, data, code. Health has 26 entries. There is no category for local
+services at all. Salons, clinics, restaurants, studios, logistics, rentals: the
+businesses whose customers ask assistants for exactly those things are almost
+absent. That absence is the opportunity, and it will not stay open forever.
+
+## How do your clients actually get your connector?
+
+The install is lighter than most owners expect, and this part we state from
+practice, because our own connector is installed this way every week.
+
+For a custom connector, your client opens Claude's settings, pastes one link, and
+signs in to your service if you require it. Done in under a minute, on any paid or
+free plan, on web, desktop and mobile. In practice you hand clients a one-link
+install page and a short «what to ask» card, because the empty-chat problem is
+real: people need three example phrases to start.
+
+A directory listing removes even the paste step: clients find you by name inside
+claude.ai and click connect. Listings pass Anthropic's review, which checks your
+authorisation flow, your privacy policy and what your tools actually do. Budget
+real calendar time for it, and treat the review not as a tax but as the moment
+your connector becomes a distribution asset instead of a link you send around.
+
+## What does «custom connector» mean when it is your business?
+
+A custom connector is not a chatbot you bolt onto your website. It is a set of
+narrow, permissioned tools over the systems you already run, with the assistant as
+the interface. From our own production build, the shape that works:
+
+<table>
+  <thead>
+    <tr><th>Your clients say</th><th>The connector does</th><th>Behind it</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>«Book me in for Saturday afternoon»</td><td>checks live slots, creates the booking, confirms</td><td>your calendar or CRM</td></tr>
+    <tr><td>«Where is my order?»</td><td>answers from the order record, not from memory</td><td>your order system</td></tr>
+    <tr><td>«What would this cost?»</td><td>quotes from the current price list, with the source shown</td><td>your catalog or docs</td></tr>
+    <tr><td>«Cancel my appointment»</td><td>asks for explicit confirmation, then acts</td><td>a write tool behind a guardrail</td></tr>
+  </tbody>
+</table>
+
+The engineering that makes this safe is where the real work lives: OAuth 2.1
+authorisation so sessions belong to a real signed-in person, read and write tools
+separated, confirmations on anything irreversible, and scoped credentials against
+your existing API rather than direct database access. We run every one of those
+patterns on our own connector in production, and we attack our own servers before
+anyone else can.
+
+## What about the ChatGPT app directory?
+
+Same bridge, a different tollbooth. ChatGPT's app directory opened in December
+2025 and became the Plugin directory in July 2026; OpenAI reviews every
+submission, and direct connectors outside the directory sit behind a developer
+setting on certain business plans. The connector you build for Claude is the
+same MCP asset you submit there: one build, two catalogs, each with its own
+review.
+
+The strategic picture rhymes too: the ChatGPT catalog is dominated by software
+platforms, and the service-business gap we counted in Claude's directory
+repeats there. We run both paths and tell you honestly what is live today
+versus pending review on each platform. A census of the ChatGPT directory is
+coming as its own article.
+
+## Does this replace your website or your app?
+
+No, and framing it that way misses the shift. The chat is a new front door next to
+the existing ones, the way a website did not replace the phone in 1998 and an app
+did not replace the website in 2008. What changes is where the customer already
+is: OpenAI reports 900 million people using ChatGPT every week, and Claude sits in
+the same habit. When a customer asks an assistant to book something, the assistant
+can only act on businesses that are connected. The rest are a paragraph of text.
+
+## What should a business owner actually do first?
+
+Start with one scenario, not a platform project. Pick the highest-friction thing
+your customers do through a human today: booking, a status check, a quote. Ship a
+connector that does that one thing well, put the one-link install page in front of
+your regulars, and read the conversations. Expansion after evidence, and every
+step from the first one runs on the open standard, so nothing is thrown away.
+
+## Frequently asked questions
+
+<details>
+  <summary><h3>Do Claude connectors work only with Claude?</h3></summary>
+  <p>No. A connector is an MCP server, and MCP is an open standard co-founded by Anthropic and OpenAI, now stewarded under the Linux Foundation. The same build is the path into the ChatGPT app directory, and each assistant adds its own install and review flow on top. You build the asset once and clear each gate separately.</p>
+</details>
+
+<details>
+  <summary><h3>Is a connector safe to give to customers?</h3></summary>
+  <p>It is as safe as it is built to be. The pattern we run in production: OAuth 2.1 sign-in, sessions bound to the user's token, read and write tools separated, explicit confirmation before anything irreversible, and scoped API credentials with no direct database access. Ask any vendor to show these, not promise them.</p>
+</details>
+
+<details>
+  <summary><h3>Do we need our own developers for this?</h3></summary>
+  <p>Not necessarily, but keep them in the loop if you have them. They will write the server. The question is who decides which five of your customers' questions belong in a chat, where the line sits that the assistant may never cross, and who is watching on Friday evening when a scenario starts answering wrongly. That is the work we sell, done with your team rather than around it.</p>
+</details>
+
+<details>
+  <summary><h3>How long does it take to get listed in the directory?</h3></summary>
+  <p>Building a focused connector is weeks, not months. The directory review adds calendar time that Anthropic controls, so treat the listing as phase two: launch with the one-link custom install your clients can use the same day, then submit for the directory while real usage accumulates. The review checks auth, privacy policy and tool behaviour.</p>
+</details>
+
+
+## Changelog
+
+- **2026-08-25**: published. The ChatGPT weekly-user figure is OpenAI's own
+  (900 million, February 2026).
+- **2026-08-24**: count #2 landed: 2,105 connectors, +74 in four days. The change
+  column under the census works from the very first week.
+- **2026-08-20**: count #1: 2,031 connectors across 10 categories, hand-counted
+  on a logged-in claude.ai profile.

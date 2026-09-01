@@ -1,0 +1,336 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+
+// Ukrainian version of /privacy/. The ENGLISH page is the binding text (it is
+// what directory reviewers compare against the connector); this page says so
+// explicitly. Mirrors ../privacy.astro — edit the English source first, then
+// this translation, in the same commit. No em/en dashes in the visible text.
+const retention = "24 місяці";
+const privacyEmail = "privacy@yesmcp.com";
+const effectiveDate = "21 серпня 2026";
+const contactEmail = "yes@yesmcp.com";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://yesmcp.com/#organization",
+      name: "Yes MCP",
+      alternateName: "yesmcp",
+      url: "https://yesmcp.com/",
+      email: contactEmail,
+      founder: { "@id": "https://yesmcp.com/#serhii" },
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://yesmcp.com/ua/privacy/#page",
+      url: "https://yesmcp.com/ua/privacy/",
+      name: "Приватність",
+      description:
+        "Що збирають цей сайт і конектор yesmcp: сайт нічого; конектор три поля, коли ви бронюєте консультацію.",
+      isPartOf: { "@id": "https://yesmcp.com/#website" },
+      publisher: { "@id": "https://yesmcp.com/#organization" },
+      inLanguage: "uk",
+      datePublished: "2026-08-21",
+    },
+  ],
+};
+---
+
+<Layout
+  title="Приватність | yesmcp"
+  description="Без cookie, без аналітики, без трекерів на цьому сайті. І рівно три поля (ім'я, email, тема), якщо ви бронюєте консультацію через конектор yesmcp."
+  ogTitle="Приватність | yesmcp"
+  ogDescription="Без cookie, без аналітики, без трекерів. Що стається з листом, який ви надсилаєте, і що збирає конектор."
+  path="/ua/privacy/"
+  lang="uk"
+  alternates={{ en: "/privacy/", uk: "/ua/privacy/" }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav lang="uk" switchHref="/privacy/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-24 sm:pt-36">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">приватність</p>
+    <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">
+      Що цей сайт і конектор<br />yesmcp знають про вас
+    </h1>
+
+    <p class="mt-5 font-mono text-xs text-ink-faint">Чинна з {effectiveDate}</p>
+
+    <p class="mt-4 font-mono text-xs leading-relaxed text-ink-faint">
+      Це переклад. Юридично чинним текстом є <a href="/privacy/" class="link-und">англійська версія</a>;
+      у разі розбіжностей вона має пріоритет.
+    </p>
+
+    <p class="mt-8 text-lg leading-relaxed text-ink-soft">
+      Якщо коротко: цей сайт не збирає <strong class="text-ink">взагалі нічого</strong>,
+      а конектор збирає <strong class="text-ink">три речі</strong>: ваше ім'я,
+      вашу email-адресу і тему в один рядок, яку ви даєте, коли бронюєте
+      консультацію. Більше нічого. Без акаунтів, без трекінгу, без платежів.
+    </p>
+
+    <div class="mt-12 space-y-11">
+      <!-- the site itself -->
+      <section>
+        <h2 class="font-display text-xl font-600">Цей сайт</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Це статичний сайт. Він не ставить <strong class="text-ink">жодних cookie</strong>,
+          не запускає аналітику і не вбудовує трекери. Про ваш візит ми не збираємо нічого.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          <strong class="text-ink">Жоден елемент цих сторінок не вантажиться зі стороннього
+          домену, крім одного винятку, названого нижче.</strong> Шрифти віддаються з цього ж домену, а не з
+          Google Fonts, тож ваш браузер не звертається ні до кого, крім нас.
+          Увесь JavaScript тут наш і з цього ж домену: скрол-анімація, демонстраційний чат,
+          мапа сценаріїв, сторінка запису й жартівливе питання на вході на головну.
+          Мапа сценаріїв тримає дві ваші відповіді в сесійному сховищі
+          браузера, щоб після переходу на іншу сторінку й повернення вам не довелося
+          заповнювати все заново. Ці дані лишаються у вашому браузері, належать одній
+          вкладці та зникають, щойно ви її закриєте. Питання на вході після відповіді
+          тримає одне слово в локальному сховищі браузера, щоб не питати вас двічі; це
+          слово нічого про вас не каже і нікуди з браузера не йде. Головна сторінка ще
+          запитує в нашого власного конектора його публічні лічильники стану. Про вас
+          нікуди нічого не йде.
+        </p>
+      </section>
+
+      <!-- the telegram mini app -->
+      <section>
+        <h2 class="font-display text-xl font-600">Запис усередині Telegram</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          У тієї самої сторінки запису є телеграмна версія: її відкривають з нашого бота, а не
+          набирають у браузері. Це <strong class="text-ink">єдине місце на цьому сайті, яке
+          вантажить файл із чужого домену</strong>: власний
+          <code class="font-mono text-note text-yes-deep">telegram-web-app.js</code> від
+          Telegram, без якого сторінка просто не буде мінізастосунком.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          Усередині Telegram передає сторінці ваші <strong class="text-ink">дані профілю в
+          Telegram</strong>: числовий ідентифікатор, ім'я та прізвище, нікнейм, якщо він у вас
+          є, і мову інтерфейсу. Ім'я заповнює форму замість вас, мова обирає, якою з двох мов
+          говорить сторінка, а ідентифікатор і нікнейм їдуть разом із записом, щоб ми знали,
+          якому акаунту він належить. Це все, для чого вони потрібні. Ми їх не продаємо, не
+          передаємо, не використовуємо для маркетингу і не будуємо з них ваш профіль. Пошта
+          лишається обов'язковою і її вводите ви, бо саме лист із підтвердженням тримає
+          зустріч. У браузері нічого не зберігається, і зі сторінки нічого не йде, поки ви не
+          натиснете кнопку.
+        </p>
+      </section>
+
+      <!-- what the host sees -->
+      <section>
+        <h2 class="font-display text-xl font-600">Що бачить хостинг</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Сайт роздає <strong class="text-ink">Cloudflare Pages</strong>. Як будь-який
+          хостинг, Cloudflare обробляє технічні дані запиту, потрібні, щоб віддати
+          сторінку: IP-адресу, user agent, URL, який ви попросили. Ми бачимо
+          сумарні лічильники трафіку в їхньому дашборді. Профілю окремого відвідувача
+          в нас немає, і ми його не будуємо.
+        </p>
+      </section>
+
+      <!-- if you email us -->
+      <section>
+        <h2 class="font-display text-xl font-600">Якщо ви пишете нам на пошту</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Листи на <a href={`mailto:${contactEmail}`} class="link-und text-ink">{contactEmail}</a> пересилаються
+          на особисту скриньку, і читає їх людина, а не робот. Зберігаємо
+          листування, поки розмова корисна, використовуємо його лише щоб відповісти
+          вам, нікого не додаємо в розсилки й не передаємо адресу третім сторонам.
+          Попросите, і ми видалимо тред.
+        </p>
+      </section>
+
+      <!-- what this covers -->
+      <section>
+        <h2 class="font-display text-xl font-600">Що покриває решта цієї сторінки</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Усе нижче стосується <strong class="text-ink">MCP-конектора yesmcp</strong>:
+          інструментів, які yesmcp відкриває всередині ШІ-асистентів, таких як Claude
+          і ChatGPT
+          (усіх десяти: <code class="font-mono text-note text-yes-deep">list_availability</code>, <code class="font-mono text-note text-yes-deep">book_consult</code>, <code class="font-mono text-note text-yes-deep">cancel_booking</code>, <code class="font-mono text-note text-yes-deep">reschedule_booking</code>, <code class="font-mono text-note text-yes-deep">get_services</code>, <code class="font-mono text-note text-yes-deep">advise_scenarios</code>, <code class="font-mono text-note text-yes-deep">demo_walkthrough</code>, <code class="font-mono text-note text-yes-deep">directory_census</code> і двох, які малюють картки просто в чаті, <code class="font-mono text-note text-yes-deep">booking_widget</code> та <code class="font-mono text-note text-yes-deep">services_widget</code>).
+          Воно не стосується самого асистента: вашу розмову з Claude чи ChatGPT
+          регулює політика приватності відповідного провайдера, і yesmcp її не
+          отримує та не зберігає.
+        </p>
+      </section>
+
+      <!-- what we collect -->
+      <section>
+        <h2 class="font-display text-xl font-600">Що ми збираємо</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Ми збираємо дані рівно в одному місці: коли ви
+          <strong class="text-ink">бронюєте консультацію</strong>. Три поля, усі
+          три ви даєте самі, у розмові, у той момент.
+        </p>
+        <div class="mt-5 grid gap-px overflow-hidden rounded-2xl border border-ink/10 bg-ink/10 sm:grid-cols-3">
+          {[
+            ["Ім'я", "щоб ми знали, з ким зустрічаємось"],
+            ["Email-адреса", "щоб надіслати підтвердження і бути на зв'язку щодо зустрічі"],
+            ["Тема", "один рядок про те, що ви хочете обговорити, щоб не витрачати дзвінок на з'ясування"],
+          ].map(([field, why]) => (
+            <div class="bg-paper p-5">
+              <p class="font-mono text-meta text-yes-deep">{field}</p>
+              <p class="mt-2 text-sm leading-relaxed text-ink-soft">{why}</p>
+            </div>
+          ))}
+        </div>
+        <p class="mt-5 leading-relaxed text-ink-soft">
+          <strong class="text-ink">Це весь список</strong> для запису з вебу або зі ШІ-чату.
+          Запис усередині Telegram додає ще два поля, і рівно два, обидва передає сам
+          Telegram: ваш ідентифікатор у Telegram і ваш нікнейм, щоб запис був прив'язаний до
+          акаунта, який його зробив. Конектор не питає і
+          технічно не може отримати номер телефону, назву компанії, платіжні
+          дані, адресу чи будь-який інший акаунт.
+        </p>
+      </section>
+
+      <!-- what we don't collect -->
+      <section>
+        <h2 class="font-display text-xl font-600">Чого ми не збираємо</h2>
+        <ul class="mt-4 space-y-3">
+          {[
+            ["Без акаунта, без логіна.", "Кожен інструмент працює як гість. Немає пароля, немає OAuth, немає профілю."],
+            ["Без вмісту розмов.", "Усі інструменти, які не керують бронюванням, лише читають. Ніщо з того, що ви кажете асистентові, не доходить до нас, крім трьох полів під час бронювання. Тип бізнесу, який ви називаєте, щоб отримати пораду зі сценаріями, обирає плейбук; він потрапляє до операційного журналу викликів, описаного нижче, без імені чи контактів, і більше нікуди."],
+            ["Без платежів.", "Жодна фінансова операція не відбувається в чаті, і жодні платіжні дані там не запитуються. Якщо далі буде платна співпраця, вона оформлюється окремо, поза конектором."],
+            ["Без трекінгу.", "Без cookie, без аналітики, без рекламних ідентифікаторів, без фінгерпринтингу пристроїв, без сторонніх трекерів."],
+            ["Без IP-адреси у вашому бронюванні.", "Ми обмежуємо частоту запитів до бронювання, щоб захистити його від зловживань, і ця перевірка живе лише в пам'яті. Один виняток, кажемо про нього прямо: якщо запит відхилено за перевищення ліміту, IP-адреса запиту пишеться в журнал зловживань, щоб їх можна було розслідувати. Бронювання, що пройшло, не лишає по собі IP."],
+          ].map(([head, body]) => (
+            <li class="flex gap-3">
+              <span class="mt-0.5 text-yes-deep">✓</span>
+              <p class="leading-relaxed text-ink-soft">
+                <strong class="text-ink">{head}</strong> {body}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- why -->
+      <section>
+        <h2 class="font-display text-xl font-600">Навіщо ми це використовуємо</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Виключно щоб <strong class="text-ink">домовитися про консультацію, яку ви
+          попросили, і провести її</strong>, а також щоб зв'язатися з вами щодо неї.
+          Ми не використовуємо ваші дані для маркетингу, не додаємо вас у розсилки,
+          не профілюємо вас, і жодних автоматизованих рішень тут немає.
+        </p>
+      </section>
+
+      <!-- where it goes -->
+      <section>
+        <h2 class="font-display text-xl font-600">Куди вони потрапляють</h2>
+        <ul class="mt-4 space-y-3 leading-relaxed text-ink-soft">
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span><strong class="text-ink">Наша власна база даних</strong> на сервері, який ми контролюємо.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span>
+              <strong class="text-ink">Наш поштовий провайдер</strong> (<a href="https://resend.com" class="link-und text-ink" rel="noopener">Resend</a>),
+              який доставляє вам лист-підтвердження від нашого імені.
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span><strong class="text-ink">Наш Telegram</strong>: сповіщення з вашим ім'ям, часом і темою, щоб бронювання одразу побачила людина, яка проведе зустріч.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="mt-0.5 font-mono text-yes-deep">→</span>
+            <span><strong class="text-ink">Наш операційний лог.</strong> Виклики інструментів логуються для надійності та розслідування зловживань; для бронювання цей рядок містить ті самі три поля і більше нічого.</span>
+          </li>
+        </ul>
+        <p class="mt-5 leading-relaxed text-ink-soft">
+          Ми <strong class="text-ink">не</strong> продаємо ваші дані, не ділимося
+          ними з рекламодавцями й не передаємо їх нікому, крім процесорів,
+          названих вище.
+        </p>
+      </section>
+
+      <!-- retention -->
+      <section>
+        <h2 class="font-display text-xl font-600">Скільки ми їх тримаємо</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Записи бронювань, разом з описаними вище рядками логів, ми тримаємо
+          <strong class="text-ink">{retention}</strong> від дати бронювання, а потім
+          видаляю. Два роки обрані для того, щоб підхопити розмову, яка
+          продовжилась через рік, і при цьому не зберігати нічого безстроково.
+        </p>
+      </section>
+
+      <!-- deletion -->
+      <section id="delete" class="rounded-2xl border border-ink/10 bg-white/40 p-7">
+        <h2 class="font-display text-xl font-600">Видалення ваших даних</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Напишіть на <a href={`mailto:${privacyEmail}?subject=Запит на видалення даних`}
+            class="link-und font-medium text-ink">{privacyEmail}</a> з адреси, з якою
+          бронювали, і ми видалимо ваш запис. Робимо це вручну: кнопки
+          самообслуговування немає, і чесніше сказати це прямо, ніж
+          вдавати протилежне. Підтвердження чекайте протягом 30 днів, на практиці
+          значно швидше. Так само можна попросити копію того, що ми зберігаємо, або
+          виправлення.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-soft">
+          Скасувати або перенести бронювання можна, <strong class="text-ink">відповівши на лист-підтвердження</strong>: його
+          читає людина, яка проведе зустріч.
+        </p>
+      </section>
+
+      <!-- test bookings -->
+      <section>
+        <h2 class="font-display text-xl font-600">Тестові бронювання</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Бронювання у тестових вікнах для рев'юерів каталогів застосунків
+          позначаються <code class="font-mono text-note text-yes-deep">[TEST]</code> і видаляються за тим самим графіком, що й усе інше. Це справжні записи,
+          бо тестове бронювання є справжнім викликом інструмента, і ставлення до
+          них однакове.
+        </p>
+      </section>
+
+      <!-- if we work together -->
+      <section>
+        <h2 class="font-display text-xl font-600">Якщо ми працюємо разом</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Співпраця це окрема історія, і вона отримує власну письмову угоду до
+          старту. Угода покриває, хто контролює дані вашої системи, куди вони
+          рухаються і що стається з доступами, коли робота завершується. Ніщо на
+          цьому сайті такої угоди не створює.
+        </p>
+      </section>
+
+      <!-- children / changes -->
+      <section>
+        <h2 class="font-display text-xl font-600">Діти й зміни</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          Конектор є інструментом для бізнесу і не адресований дітям. Якщо ця
+          політика суттєво зміниться, разом з нею зміниться дата чинності вгорі,
+          а оновлений текст буде опубліковано за цією ж адресою.
+        </p>
+      </section>
+
+      <!-- contact -->
+      <section>
+        <h2 class="font-display text-xl font-600">Контакти</h2>
+        <p class="mt-3 leading-relaxed text-ink-soft">
+          yesmcp: <a href={`mailto:${contactEmail}`} class="link-und text-ink">{contactEmail}</a>{" · "}запити щодо приватності: <a href={`mailto:${privacyEmail}`} class="link-und text-ink">{privacyEmail}</a>
+        </p>
+      </section>
+    </div>
+
+    <p class="mt-14 border-t border-ink/10 pt-7 font-mono text-sm">
+      <a href="/ua/" class="link-und text-ink-soft">← На головну</a>
+    </p>
+  </main>
+
+  <SiteFooter lang="uk" switchHref="/privacy/" />
+</Layout>

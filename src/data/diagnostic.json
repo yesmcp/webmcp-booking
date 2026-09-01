@@ -1,0 +1,201 @@
+{
+  "questions": [
+    {
+      "id": "systems",
+      "ask": "Where do your bookings, orders or client records live today?",
+      "options": {
+        "saas_with_api": "In an online service (booking system, CRM, shop platform)",
+        "spreadsheets_calendars": "In spreadsheets and calendars",
+        "custom_software": "In our own custom software",
+        "mostly_offline": "Mostly on paper, phone and memory"
+      }
+    },
+    {
+      "id": "customer_channel",
+      "ask": "How do customers reach you today?",
+      "options": {
+        "phone_messengers": "Phone and messengers",
+        "website_forms": "Website forms or online booking",
+        "walk_in": "Mostly in person",
+        "mixed": "A mix of everything"
+      }
+    }
+  ],
+  "feasibility": {
+    "saas_with_api": {
+      "verdict": "green",
+      "note": "Your system already speaks API: the standard build path, live in about two weeks of scoped work."
+    },
+    "spreadsheets_calendars": {
+      "verdict": "green",
+      "note": "Spreadsheets and calendars are workable sources: we bridge them, and the connector becomes the tidy front."
+    },
+    "custom_software": {
+      "verdict": "green",
+      "note": "Custom software with any kind of API is our home ground: the connector is built against your endpoints."
+    },
+    "mostly_offline": {
+      "verdict": "yellow",
+      "note": "Before a connector helps, bookings need a digital home. The scoping call maps the smallest system that gives you one."
+    }
+  },
+  "channelNotes": {
+    "phone_messengers": "When inquiries live in calls and DMs, your team repeats the same answers all day: the connector moves availability checks, bookings and the repeat questions into the chat.",
+    "website_forms": "You already collect structured requests: the connector turns form-and-wait into an instant answer-and-confirm inside the chat.",
+    "walk_in": "In person is where the real work happens, and everything before it still costs you time: the chat answers the hours, prices and availability questions, and books the visit before anyone arrives.",
+    "mixed": "Scattered channels mean lost context and double answers: the connector gives every inbox the same live schedule and records to work from."
+  },
+  "codes": {
+    "systems": {
+      "saas_with_api": "s1",
+      "spreadsheets_calendars": "s2",
+      "custom_software": "s3",
+      "mostly_offline": "s4"
+    },
+    "customer_channel": {
+      "phone_messengers": "c1",
+      "website_forms": "c2",
+      "walk_in": "c3",
+      "mixed": "c4"
+    }
+  },
+  "verticals": [
+    {
+      "id": "clinic-medical",
+      "title": "Clinics and medical practices",
+      "customers": [
+        "**Find and book the right appointment.** \"I need a check-up with a hygienist in the next two weeks, mornings only\": the assistant matches practitioner, appointment type and your real availability.",
+        "**Get practical answers before coming in**: what to bring, how long the visit takes, how preparation works, which insurers you work with. All from your own practice information.",
+        "**Reschedule or cancel** a booked visit, within your notice rules.",
+        "**Ask what a procedure involves** in plain language, from text your practitioners approved.",
+        "**Handle the paperwork trail**: request a referral, ask for a receipt or a document. The request routes to the right person at your practice."
+      ],
+      "team": [
+        "**Open the day in one question.** Tomorrow's list per practitioner and per room, read from your scheduling system.",
+        "**See what needs chasing**: unconfirmed appointments, overnight cancellations, reschedule requests waiting for an answer.",
+        "**Pull the administrative context before a call**: visit history, documents requested, insurer on file.",
+        "**Adjust the schedule from the chat**: move an appointment, block a slot, mark a no-show. Each change confirmed before it fires."
+      ]
+    },
+    {
+      "id": "e-commerce",
+      "title": "Online shops and e-commerce",
+      "customers": [
+        "**Find a product by describing it**, not by guessing your search keywords: \"a waterproof jacket for cycling, under a hundred, in stock in medium\".",
+        "**Check real stock and delivery dates** for a specific variant, instead of a generic shipping page.",
+        "**Ask the questions that block a purchase**: sizing, materials, care, compatibility. Answered from your product data and policies.",
+        "**Track an order**: \"where is my parcel?\" answered from your fulfilment system rather than from imagination.",
+        "**Start a return or exchange** and get told exactly what your policy allows.",
+        "**Reorder a consumable** they have bought before."
+      ],
+      "team": [
+        "**See what needs attention**: orders unfulfilled past your own threshold, deliveries running late, returns waiting for a decision.",
+        "**Answer a support message with the facts open**: the customer's orders, delivery state and return history in one question, before typing a reply.",
+        "**Check stock the way you actually think about it**: \"what is running low in the winter line\", across variants, from the same catalog API.",
+        "**Get the day in one digest**: what sold, what came back, what got stuck. Numbers read from your systems, not estimated."
+      ]
+    },
+    {
+      "id": "local-services",
+      "title": "Local and on-site services",
+      "customers": [
+        "**Describe the problem and get a real next step.** \"My boiler is making a knocking noise, can someone come this week?\": the assistant asks the qualifying questions your intake form asks, then offers genuine visit slots.",
+        "**Check whether you cover their address** and what the callout terms are for it, before anyone's time is spent.",
+        "**Book a visit window** that matches your dispatch reality: the crew, the travel time, the equipment.",
+        "**Ask for an indicative estimate** from your own price list, framed exactly as your business frames it: a range and its conditions, never a number the model made up.",
+        "**Track a job**: when is the technician coming, what happened on the last visit, is the part in."
+      ],
+      "team": [
+        "**Open the morning in one question.** Today's jobs, who is assigned where, which visit windows are tight.",
+        "**See what is unassigned**: jobs without a crew, gaps in this week's schedule worth filling.",
+        "**Pull the job context before knocking**: what the customer reported, what happened on the last visit, whether the part arrived.",
+        "**Update a job from the road**: move a visit window, log an outcome, flag a follow-up. Each change confirmed before it fires."
+      ]
+    },
+    {
+      "id": "private-education",
+      "title": "Private education and tutoring",
+      "customers": [
+        "**Book a trial lesson in one sentence.** \"My daughter is 9, we want to try English on weekday evenings\": the assistant matches level, group and your real schedule, and confirms a trial.",
+        "**Move a lesson without the guilt call.** A sick child at 7am becomes a reschedule inside the chat, within your notice rules.",
+        "**Ask what a program actually involves**: levels, group sizes, how long until results, what the difference between two courses is. Answered from your own program descriptions, not from the model's imagination.",
+        "**Keep the money side clear**: what is paid, how many lessons are left on the package, when the next payment is due, with payment by a secure link.",
+        "**Enroll the second child or renew a package** as a confirmed action, not a form hunt."
+      ],
+      "team": [
+        "**Open the day in one question.** Today's groups, rooms and teachers, read from your schedule, not from a whiteboard photo.",
+        "**See what needs a call**: trials that did not convert, packages ending this month, absences piling up for one student.",
+        "**Pull the context before talking to a parent**: attendance, progress notes, payment state. Instead of asking a colleague who remembers.",
+        "**Adjust the schedule from the chat**: move a lesson, mark an absence, block a room. Each change confirmed before it fires."
+      ]
+    },
+    {
+      "id": "professional-services",
+      "title": "Professional services and agencies",
+      "customers": [
+        "**Ask \"where are we?\" and get a real answer.** Project status, what shipped this week, what is waiting on their side. All read from your project tracker, not from a manager's memory.",
+        "**Book a call with the right person**: their account manager, not a generic inbox, against the team's real availability.",
+        "**Check the money side without an awkward email**: what the retainer covers, which invoices are open, when the next one lands.",
+        "**Hand over what you are waiting for.** The assistant tells them exactly which access, file or approval is blocking work, and confirms when it is in.",
+        "**Ask what a service involves**: timelines, what is in scope and what is not. Answered from your own service descriptions, framed the way you frame them."
+      ],
+      "team": [
+        "**Open the week in one question.** Active projects, deadlines this week, which clients have not heard from you lately.",
+        "**See what needs attention across tools**: stale proposals in the CRM, unbilled work in the tracker, invoices overdue in the books. One answer instead of three tabs.",
+        "**Pull the client context before a call**: history, open items, last invoices, who promised what. Instead of scrolling three threads.",
+        "**Log the outcome from the chat**: a follow-up task, a note on the account, a nudge to billing. Each change confirmed before it fires."
+      ]
+    },
+    {
+      "id": "restaurant",
+      "title": "Restaurants, cafés and bars",
+      "customers": [
+        "**Reserve a table** by describing the occasion: \"a table for four on Friday around eight, somewhere quiet\". The assistant reads your real availability and confirms.",
+        "**Ask the menu real questions.** What is gluten-free tonight, what changed on the seasonal menu, what goes with a dish. Answered from your actual menu data, with allergens straight from your source of truth rather than guessed.",
+        "**Order for pickup or delivery**, where your ordering system supports it, without leaving the conversation.",
+        "**Handle the group logistics**: change the party size, note a birthday, add a high chair. The details that usually cost a phone call.",
+        "**Find out what is on**: set menus, tastings, live music. All from your events data."
+      ],
+      "team": [
+        "**Open the service in one question.** Tonight's covers, the large parties, the notes that matter: birthdays, high chairs, allergies guests flagged.",
+        "**See the load per seating**: which slots are full, which tables are still free, where a walk-in could fit.",
+        "**Catch the overnight changes**: cancellations, shrunk parties, no-shows worth a follow-up.",
+        "**Adjust the book from the chat**: hold a table, move a reservation, close a slot. Each change confirmed before it fires."
+      ]
+    },
+    {
+      "id": "saas-support",
+      "title": "SaaS products and customer support",
+      "customers": [
+        "**Get answers grounded in your documentation**, with the source attached, so a user can check what they were told instead of trusting a paraphrase.",
+        "**Ask about their own account**: which plan, what usage this month, when the renewal falls, why an invoice looks the way it does.",
+        "**Do the routine account jobs**: invite a teammate, rotate a key, change a notification setting. All explicit, confirmed actions.",
+        "**Open a support ticket** with the context of the conversation already attached, so your team does not start from \"hi, what happened?\".",
+        "**Follow a setup path** step by step, with the assistant checking your API for whether each step actually took effect."
+      ],
+      "team": [
+        "**Walk into a call prepared.** One question pulls the account's plan, usage, renewal date and open tickets. Instead of four dashboard tabs.",
+        "**Triage the queue with the facts attached**: each new ticket next to the account's actual state, so priority calls are made on data.",
+        "**Watch the edges**: which accounts hit their limits this week, whose renewal is coming, who went quiet after an incident.",
+        "**Do the routine account jobs for a customer**: resend an invoice, adjust a setting. All explicit, confirmed actions logged to the account."
+      ]
+    },
+    {
+      "id": "salon-beauty",
+      "title": "Salons and beauty studios",
+      "customers": [
+        "**Book an appointment in one sentence.** \"Book me a haircut with Marina on Saturday afternoon\": the assistant checks who is free, offers the real open times, and confirms one.",
+        "**Pick by person, service or time.** A specific stylist, a specific treatment, or simply \"the first slot after work this week\".",
+        "**Reschedule or cancel** without a phone call, inside the same conversation.",
+        "**Ask what a service involves**: how long it takes, what to come prepared with, what the difference is between two treatments. Answered from your own service descriptions, not from the model's imagination.",
+        "**Rebook what they had last time**, once the connector can see their history."
+      ],
+      "team": [
+        "**Open the day in one question.** \"Who is booked with whom today?\": the schedule, read out from your booking system, not from a printout.",
+        "**Spot the money leaks**: which slots are still empty tomorrow, who cancelled overnight, which regulars have not rebooked.",
+        "**Check a client before they sit down**: last visit, usual treatment, notes your team left.",
+        "**Move the schedule from the chat**: block a slot, shift a booking, mark a no-show. Each change confirmed before it fires."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+ "ecosystem": "claude",
+ "counted_at": "2026-08-24",
+ "total": 2105,
+ "categories": [
+  { "id": "productivity", "count": 1026 },
+  { "id": "data", "count": 747 },
+  { "id": "sales-marketing", "count": 454 },
+  { "id": "code", "count": 367 },
+  { "id": "financial-services", "count": 269 },
+  { "id": "communication", "count": 201 },
+  { "id": "design", "count": 137 },
+  { "id": "legal", "count": 94 },
+  { "id": "life-sciences", "count": 45 },
+  { "id": "health", "count": 26 }
+ ],
+ "method": "category counters read from the claude.ai directory page on a logged-in dedicated profile"
+}

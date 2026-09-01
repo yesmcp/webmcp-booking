@@ -1,0 +1,48 @@
+# Cloudflare Pages reads this file. Headers the platform does not set for us —
+# the gap the ETALON audit found against wp.awrshift.com (2026-08-10).
+#
+# The CSP was widened on 2026-08-22 when the site moved from the hand-written
+# static build to Astro. What changed and why:
+#   font-src 'self'       — the type scale is self-hosted since 2026-08-22
+#                           (public/assets/fonts/*.woff2). No third-party font
+#                           origin is allowed any more; if a Google Fonts link
+#                           ever comes back, it will be blocked, on purpose.
+#   'unsafe-inline' (style) — the landing animates via inline `style="--i:…"`
+#                           custom properties; style attributes are covered by
+#                           style-src.
+#   script-src 'self'     — Astro bundles the scroll-reveal script to a hashed
+#                           file on this origin.
+#   sha256-WZRJfWv…       — the one inline bootstrap script in Layout.astro
+#                           (`document.documentElement.classList.add("js");`).
+#                           If that line is edited, recompute the hash, or the
+#                           script is blocked and the reveal animations simply
+#                           never arm (content stays visible — safe, but stale).
+#   connect-src             — the Proof section reads live numbers from
+#                           https://mcp.yesmcp.com/status (public, no auth).
+#                           default-src 'self' would block that fetch; the
+#                           section then keeps its static fallback numbers.
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'sha256-WZRJfWvsnNCPcxzZwvyhovnZGqhZaC+8gPGPRbx6wTk='; connect-src 'self' https://mcp.yesmcp.com; frame-ancestors 'self'; base-uri 'self'; form-action 'none'
+
+# The Telegram Mini App (/book/tg/), and nothing else, is allowed two things the
+# rest of the site is not: Telegram's own telegram-web-app.js, and being framed
+# by the Telegram web clients. Native Telegram apps ignore frame-ancestors — the
+# grant exists for web.telegram.org, where the Mini App really is an iframe, and
+# it is the reason X-Frame-Options has to go on this path: SAMEORIGIN would
+# forbid what the CSP allows.
+#
+# Cloudflare Pages COMBINES headers from every matching rule, joining duplicate
+# values with a comma, so a second Content-Security-Policy here would be
+# enforced as the intersection of the two and would block telegram.org. The
+# `! Header` lines detach the inherited values first; that ordering is
+# load-bearing, and it is verified with `curl -I` on the deployment URL, not
+# assumed.
+/book/tg/*
+  ! Content-Security-Policy
+  ! X-Frame-Options
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' https://telegram.org 'sha256-WZRJfWvsnNCPcxzZwvyhovnZGqhZaC+8gPGPRbx6wTk='; connect-src 'self' https://mcp.yesmcp.com; frame-ancestors https://web.telegram.org https://webk.telegram.org https://webz.telegram.org; base-uri 'self'; form-action 'none'

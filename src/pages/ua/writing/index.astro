@@ -1,0 +1,119 @@
+---
+import { getCollection } from "astro:content";
+import { expandDataTokens } from "../../../lib/census";
+import Layout from "../../../layouts/Layout.astro";
+import SiteNav from "../../../components/SiteNav.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+
+// Ukrainian writing archive. Mirrors /writing/ — edit both in the same commit.
+// The three field notes have no Ukrainian twins yet (owner decision pending on
+// translating them), so they are listed here with Ukrainian annotations and an
+// explicit "read in English" badge — an empty-looking archive of one item reads
+// as abandoned, which is worse than an honest bilingual pointer (board, 30.08).
+const sorted = (await getCollection("writingUa")).sort((a, b) =>
+  b.data.date.localeCompare(a.data.date)
+);
+// Blurbs may carry {{census:...}} tokens — the archive card stays as fresh
+// as the dataset (src/lib/census.ts).
+const posts = await Promise.all(
+  sorted.map(async (p) => ({ ...p, blurb: await expandDataTokens(p.data.blurb, "uk") }))
+);
+const dataPosts = posts.filter((p) => !p.data.engineeringNote);
+
+// EN-only field notes, annotated by hand. Keep titles and one-liners in sync
+// with src/content/writing/*.md when those change.
+const enNotes = [
+  {
+    href: "/writing/tool-results-read-as-injection/",
+    date: "2026-08-10",
+    title: "Результати ваших інструментів читаються як атака",
+    blurb:
+      "Я поклав правила поведінки в текст, який повертали мої інструменти, і хост попередив живого користувача, що конектор намагається впровадити шкідливі інструкції. За формою детектор мав рацію.",
+  },
+  {
+    href: "/writing/what-the-host-does-not-deliver/",
+    date: "2026-08-10",
+    title: "Чого хост не доставляє",
+    blurb:
+      "Польовий довідник каналів між сервером і моделлю: які доходять, які мовчки ні, і скільки коштує кожен. Жоден висновок не взятий зі специфікації.",
+  },
+  {
+    href: "/writing/spec-shipped-after-its-sdk/",
+    date: "2026-08-10",
+    title: "Специфікація MCP вийшла наступного дня після свого SDK",
+    blurb:
+      "Реліз 2026-07-28 запустив річний годинник міграції, а офіційний SDK досі розмовляє лише протоколом попередньої версії. Варто знати до планування спринту.",
+  },
+];
+---
+
+<Layout
+  title="Нотатки з живого MCP-сервера | yesmcp"
+  description="Нотатки від першої особи з Model Context Protocol сервера, який працює наживо: що насправді доставляє хост, скільки коштує протокол і як ваш бізнес потрапляє в ШІ-чати. Кожне число виміряне й датоване."
+  ogTitle="Нотатки з живого MCP-сервера"
+  ogDescription="Написано з сервера, який працює наживо, а не зі специфікації."
+  path="/ua/writing/"
+  lang="uk"
+  alternates={{ en: "/writing/", uk: "/ua/writing/" }}
+>
+  <SiteNav lang="uk" switchHref="/writing/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-20 sm:pt-36">
+    <p class="font-mono text-xs tracking-widest text-ink-faint uppercase">нотатки з живого сервера</p>
+    <h1 class="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] leading-tight font-800">Нотатки</h1>
+
+    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-ink-soft">
+      Я <a href="/ua/about/" class="link-und text-ink">Сергій Кравченко</a>, і кожна з цих
+      нотаток почалася з чогось, що зламалося, здивувало або суперечило документації,
+      поки я будував і супроводжував наші конектори. Числа виміряні на моєму власному
+      сервері, і їх можна відтворити.
+    </p>
+
+    <ul class="mt-12 space-y-4">
+      {enNotes.map((note) => (
+        <li>
+          <article class="relative rounded-2xl border border-ink/10 bg-white/40 p-6 transition-all hover:-translate-y-1 hover:border-yes/40 hover:shadow-[0_16px_40px_-16px_rgba(11,157,78,0.35)] sm:p-7">
+            <p class="flex flex-wrap items-center gap-2 font-mono text-meta text-yes-deep">
+              <time datetime={note.date}>{note.date}</time>
+              <span class="rounded bg-ink/5 px-1.5 py-0.5 text-stamp text-ink-soft">читати англійською ↗</span>
+            </p>
+            <h2 class="mt-3 font-display text-lg leading-snug font-600">
+              <a href={note.href} class="link-und after:absolute after:inset-0">{note.title}</a>
+            </h2>
+            <p class="mt-3 text-sm leading-relaxed text-ink-soft">{note.blurb}</p>
+          </article>
+        </li>
+      ))}
+    </ul>
+
+    {dataPosts.length > 0 && (
+      <section class="mt-14">
+        <h2 class="font-mono text-xs tracking-widest text-ink-faint uppercase">Дані · оновлюються щотижня</h2>
+        <ul class="mt-4 space-y-4">
+          {dataPosts.map((post) => (
+            <li>
+              <article class="relative rounded-2xl border border-yes-deep/25 bg-white/40 p-6 transition-all hover:-translate-y-1 hover:border-yes/50 hover:shadow-[0_16px_40px_-16px_rgba(11,157,78,0.35)] sm:p-7">
+                <p class="font-mono text-meta text-yes-deep">
+                  ручний перепис · <time datetime={post.data.dateModified}>{post.data.dateModified}</time>
+                </p>
+                <h3 class="mt-3 font-display text-lg leading-snug font-600">
+                  <a href={`/ua/writing/${post.id}/`} class="link-und after:absolute after:inset-0">{post.data.headline}</a>
+                </h3>
+                <p class="mt-3 text-sm leading-relaxed text-ink-soft">{post.blurb}</p>
+                <p class="relative z-10 mt-3 font-mono text-meta">
+                  <a href="/data/directory.json" class="link-und text-ink-soft">відкритий датасет · /data/directory.json · CC BY 4.0</a>
+                </p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <p class="mt-14 border-t border-ink/10 pt-7 font-mono text-sm">
+      <a href="/ua/" class="link-und text-ink-soft">← На головну</a>
+    </p>
+  </main>
+
+  <SiteFooter lang="uk" switchHref="/writing/" />
+</Layout>

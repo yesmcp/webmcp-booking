@@ -1,0 +1,220 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+
+// Ukrainian twin of /about/ (K1, docs/plans/2026-08-30-showcase-execution.md):
+// ONE structure for both locales, first person, person before company.
+// Native Ukrainian copy, not a calque; no em dashes (BRAND.md); «наживо»,
+// never «продакшн» (uk-spellcheck rule). Edit together with ../about.astro.
+const lastUpdated = "2026-08-30";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://yesmcp.com/#serhii",
+      name: "Serhii Kravchenko",
+      alternateName: "Сергій Кравченко",
+      jobTitle: "AI engineer",
+      description:
+        "AI engineer building agent systems full-time for two years, working in Claude Code since its first day on the market. Led AI on contract at a fintech; shipped agent solutions for HR, sales, marketing, lead generation and IT across industries; onboards executives and teams onto agent systems. Founder of Yes MCP; builds two products with a small team. Based in Cyprus.",
+      url: "https://yesmcp.com/about/",
+      worksFor: { "@id": "https://yesmcp.com/#organization" },
+      hasOccupation: [
+        { "@type": "Occupation", name: "AI engineer" },
+        { "@type": "Occupation", name: "AI agent engineer" },
+      ],
+      sameAs: [
+        "https://www.linkedin.com/in/awrshift/",
+        "https://x.com/awrshift",
+        "https://github.com/awrshift",
+      ],
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://yesmcp.com/#organization",
+      name: "Yes MCP",
+      alternateName: "yesmcp",
+      url: "https://yesmcp.com/",
+      email: "yes@yesmcp.com",
+      description:
+        "Yes MCP builds MCP connectors and agent systems for businesses, founded and run by AI engineer Serhii Kravchenko with a team of AI agents handling the routine. Its own connector runs live inside Claude with guest access by design; the weekly hand-counted census of the Claude connector directory is published as open data.",
+      founder: { "@id": "https://yesmcp.com/#serhii" },
+      sameAs: [
+        "https://www.linkedin.com/company/yesmcp/",
+        "https://github.com/yesmcp",
+        "https://x.com/YesMCPapp",
+        "https://www.youtube.com/@YesMCPapp",
+        "https://t.me/yesmcp",
+        "https://www.producthunt.com/@yesmcpapp",
+      ],
+    },
+    {
+      "@type": "AboutPage",
+      "@id": "https://yesmcp.com/ua/about/#page",
+      url: "https://yesmcp.com/ua/about/",
+      mainEntity: { "@id": "https://yesmcp.com/#serhii" },
+      isPartOf: { "@id": "https://yesmcp.com/#website" },
+      inLanguage: "uk",
+    },
+  ],
+};
+---
+
+<Layout
+  title="Про мене: Сергій Кравченко, інженер за yesmcp | yesmcp"
+  description="Хто будує yesmcp: AI-інженер Сергій Кравченко, два роки повний день в агентних системах, у Claude Code з його першого дня. Живий конектор, щотижневий ручний перепис і нотатки з виміряними числами."
+  ogTitle="Сергій Кравченко: інженер за yesmcp"
+  ogDescription="Два роки повний день в агентних системах. Живий конектор, щотижневий перепис, виміряні нотатки. Кого ви насправді наймаєте і що буде з вашою системою без мене."
+  ogImage="/assets/og/about-serhii-ua.png"
+  ogType="profile"
+  path="/ua/about/"
+  lang="uk"
+  alternates={{ en: "/about/", uk: "/ua/about/" }}
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <SiteNav lang="uk" switchHref="/about/" />
+
+  <main class="mx-auto max-w-3xl px-5 pt-28 pb-20 sm:pt-36">
+    <article>
+      <p class="font-mono text-xs text-ink-faint">Оновлено {lastUpdated}</p>
+
+      <h1 class="mt-4 font-display text-[clamp(1.4rem,3.4vw,2.1rem)] leading-tight font-800">
+        Я Сергій Кравченко.<br />Я будую агентні системи.
+      </h1>
+
+      <p class="mt-7 text-lg leading-relaxed text-ink-soft">
+        Я працюю в Claude Code з його першого дня на ринку. Просто зараз це
+        yesmcp: я роблю бізнес досяжним усередині ШІ-чатів його клієнтів, де
+        люди питають, обирають і бронюють, не виходячи з розмови. Конектор,
+        який робить це для нашого власного бізнесу, живе в Claude і бронює
+        справжні консультації, а щотижневий ручний перепис каталогу конекторів
+        Claude виходить як відкриті дані, яких не публікує більше ніхто.
+      </p>
+
+      <div class="prose-ink mt-10">
+        <h2>Що я збудував і виміряв</h2>
+
+        <p>
+          Докази на цьому сайті можна перевірити, а не повірити в них. Живий
+          конектор, який може спробувати будь-хто: <a href="/ua/connect/">додайте його у свій Claude за хвилину</a>, без жодної реєстрації, і забронюйте
+          справжній дзвінок зі мною. Перепис каталогу конекторів Claude, порахований
+          вручну щотижня й опублікований як <a href="/data/directory.json">відкритий датасет</a>. І <a href="/ua/writing/">нотатки</a>, де кожне число
+          виміряне на моєму власному сервері: що з надісланого сервером насправді
+          доходить до ШІ, скільки важить картка в чаті, що платформа мовчки губить.
+        </p>
+
+        <p>
+          Поруч із yesmcp я будую ще два продукти з невеликою командою. Вони не є
+          темою цього сайту, але саме завдяки їм нотатки тут народжуються з живих
+          систем, а не з читання документації.
+        </p>
+
+        <h2>Шлях, коротко</h2>
+
+        <p>
+          Агентними системами я займаюся два роки, повний день. До того були
+          власні проєкти в e-commerce: Amazon і Shopify. За ці два роки: напрям
+          ШІ у фінтеху за контрактом, агентні рішення в дуже різних галузях,
+          онбординг керівників і команд у роботу з агентними системами.
+          Вертикаль ніколи не була для мене головним. Головне, щоб був виклик, у якому агентну систему можна
+          розкрити на повну.
+        </p>
+
+        <h2>Чим я можу бути корисним</h2>
+
+        <ul>
+          <li><strong>Ваш бізнес у ШІ-чатах.</strong> Клієнти питають, обирають і бронюють просто в Claude і ChatGPT; туди їх веде MCP-конектор.</li>
+          <li><strong>Відділи, що працюють руками.</strong> Агентні системи, які я запускав у HR, продажах, маркетингу, лідогенерації та IT.</li>
+          <li><strong>Команда далі за демо.</strong> Ввожу команди й керівників у агентні системи глибше за поверхневий шар, на їхніх власних задачах.</li>
+          <li><strong>Задачі без відомої відповіді.</strong> R&amp;D: відповідь тут треба знайти, а не нагуглити. Мій улюблений жанр роботи.</li>
+        </ul>
+
+        <h2>З ким я працюю, а з ким ні</h2>
+
+        <p>
+          Мені потрібна справжня проблема. Якщо у вашій компанії щось болить:
+          заявки лишаються без відповіді, команда тоне в рутині, клієнти чекають,
+          то нам є про що говорити, навіть якщо ви ще не знаєте, до чого тут ШІ.
+          Розібратися в цьому і допомагає безкоштовна <a href="/ua/scenario-map/">мапа сценаріїв</a>. А от за «впровадьте нам ШІ, бо всі впроваджують» я не
+          беруся: коли нема чого розв'язувати, мені нема чого підсилювати.
+        </p>
+
+        <h2>Як я працюю</h2>
+
+        <p>
+          Я живу на Кіпрі й проводжу в агентних системах по десять-дванадцять
+          годин на день, ведучи два-три проєкти паралельно. Це не графік, це
+          справа, яку я люблю. Рутину yesmcp: моніторинг, перевірки, щоденні
+          операції, веде команда ШІ-агентів, яку я збудував сам. За кожен пілот
+          відповідаю особисто я: агенти виконують, а рішення ухвалюю і підпис
+          ставлю я. Цей сайт, конектор і перепис збудовані тими самими
+          інструментами, які я пропоную бізнесам.
+        </p>
+
+        <h2>Що буде з вашою системою без мене</h2>
+
+        <p>
+          Чесна відповідь на страх наймати одну людину. Код і специфікація
+          належать вам з першого дня, і ви можете перенести їх на свої сервери
+          будь-коли. Конектор стоїть на відкритому стандарті, а не на моєму
+          приватному фреймворку: інженерів, які вміють його читати, з кожним
+          місяцем більше. Документація ведеться так, щоб стороння людина
+          підхопила систему без мене.
+        </p>
+
+        <h2>Стандарт, якого тримається цей сайт</h2>
+
+        <p>
+          Усе опубліковане тут я запускав сам, і кожне число виміряне на живій
+          системі. Проза пишеться з ШІ-асистентом, і на сайті про ШІ-інструменти
+          це варто сказати вголос. Де щось є лише здогадкою, так і написано. Якщо
+          десь помилка, я радше почую про неї й виправлю на місці з датованою
+          приміткою, ніж тихо відредагую сторінку.
+        </p>
+
+        <div class="not-prose my-10 rounded-2xl border border-ink/10 bg-white/40 p-7 text-center">
+          <p class="text-ink-soft">
+            Є справжня проблема, яку варто розв'язати? Розкажіть, одного дзвінка досить.
+          </p>
+          <a href="https://t.me/yesmcp_bot?start=about_ua"
+            class="mt-5 inline-block rounded-full bg-yes-deep px-7 py-3.5 font-medium text-white shadow-[0_12px_32px_-8px_var(--color-yes)] transition-transform hover:-translate-y-0.5">
+            Написати в Telegram
+          </a>
+        </div>
+
+        <h2>Деінде</h2>
+
+        <p>
+          <a href="https://www.linkedin.com/in/awrshift/" rel="me">LinkedIn</a> ·
+          <a href="https://github.com/awrshift" rel="me">GitHub</a> ·
+          <a href="https://x.com/awrshift" rel="me">X</a> ·
+          <a href="https://t.me/yesmcp_bot?start=about_ua">Telegram</a> ·
+          <a href="mailto:yes@yesmcp.com">yes@yesmcp.com</a>
+        </p>
+
+        <div class="evidence">
+          <p class="eyebrow">Хто відповідає за цей сайт</p>
+          <p>
+            Yes MCP веде Сергій Кравченко. Контакт для будь-чого, включно з
+            виправленнями: <a href="mailto:yes@yesmcp.com">yes@yesmcp.com</a>.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <p class="mt-14 border-t border-ink/10 pt-7 font-mono text-sm">
+      <a href="/ua/" class="link-und text-ink-soft">← На головну</a>
+    </p>
+  </main>
+
+  <SiteFooter lang="uk" switchHref="/about/" />
+</Layout>

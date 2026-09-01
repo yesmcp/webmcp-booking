@@ -1,0 +1,62 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import ScenarioMap, { type ChromeStrings } from "../../components/ScenarioMap.astro";
+import raw from "../../data/diagnostic.uk.json";
+import en from "../../data/diagnostic.json";
+import { asDiagnostic } from "../../lib/scenario-map";
+
+// The answer codes are language-neutral and live only in the generated
+// English file; the Ukrainian file carries translations, not structure.
+const data = { ...asDiagnostic(raw), codes: asDiagnostic(en).codes };
+
+// The scenarios themselves live in src/data/diagnostic.uk.json (a hand-written
+// Ukrainian mirror of the connector content, marked "draft": true until the
+// owner has read it). Only the chrome below is written here.
+const t: ChromeStrings = {
+  eyebrow: "мапа сценаріїв",
+  heading: "Ваша мапа сценаріїв",
+  intro:
+    "Оберіть свій бізнес, дайте відповідь на два запитання і побачте, що ваші клієнти й ваша команда могли б робити у ШІ-чаті.",
+  step1: "1. Оберіть свій бізнес",
+  otherTitle: "Щось близьке до цього",
+  otherText: "Вашого напряму немає в списку? Оберіть найближчий, а на дзвінку ми накладемо цей сценарій на ваш реальний бізнес.",
+  step2: "2. Дайте відповідь на два запитання",
+  resultHeading: "Ваша мапа",
+  customersShelf: "Ваші клієнти",
+  teamShelf: "Ваша команда",
+  browseHeading: `Або перегляньте всі ${data.verticals.length} мап`,
+  browseHint: "Усі мапи вже на цій сторінці, відповідати не обов'язково.",
+  ctaHeading: "Обговоримо вашу мапу",
+  ctaText: "Та сама діагностика працює в нашому власному конекторі, наживо в Claude. Принесіть свою мапу, і ми скажемо, що саме покрив би перший запуск.",
+  ctaPrimary: "Обговорити вашу мапу",
+  ctaSecondary: "Подивитися наживо в Claude",
+  verdict: { green: "зелений", yellow: "жовтий" },
+  change: "Змінити",
+};
+---
+
+<Layout
+  title="Ваша мапа сценаріїв: що ШІ-чат дасть вашому бізнесу | yesmcp"
+  description="Оберіть тип свого бізнесу, дайте відповідь на два запитання і побачте конкретні сценарії, які ваші клієнти й ваша команда могли б виконувати просто в ШІ-чаті, та чесну оцінку готовності ваших систем."
+  ogTitle="Ваша мапа сценаріїв"
+  ogDescription={`Бізнес-сценарії для ${data.verticals.length} галузей: що ваші клієнти й ваша команда могли б робити в Claude чи ChatGPT і що для цього потрібно.`}
+  path="/ua/scenario-map/"
+  lang="uk"
+  alternates={{ en: "/scenario-map/", uk: "/ua/scenario-map/" }}
+>
+  <SiteNav lang="uk" switchHref="/scenario-map/" />
+  <ScenarioMap
+    data={data}
+    t={t}
+    connectHref="/ua/connect/"
+    verticalPages={{
+      "professional-services": {
+        href: "/ua/for/professional-services/",
+        label: "Скільки це коштує, скільки триває і що з ризиками: сторінка для вашої сфери",
+      },
+    }}
+  />
+  <SiteFooter lang="uk" />
+</Layout>
