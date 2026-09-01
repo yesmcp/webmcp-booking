@@ -19,8 +19,8 @@ told about is not a booking), and the owner gets a Telegram ping.
 
 ## What the WebMCP layer registers
 
-Five tools, in [`public/js/webmcp.js`](public/js/webmcp.js) (~430 lines, no dependencies,
-no framework):
+Six tools on the home page, five on every other page, in
+[`public/js/webmcp.js`](public/js/webmcp.js) (no dependencies, no framework):
 
 - **`get_services`** — the authored services catalog (same content as the MCP tool; the
   answer carries a degradation flag so an agent never presents a stub as the catalog).
@@ -32,6 +32,9 @@ no framework):
   first-class answer returned to the agent, not an error.
 - **`get_live_status`** — live proof numbers from the production connector (serving-since
   date, tool count, real bookings this month).
+- **`answer_entrance_check`** — the site asks arriving visitors one question at the door;
+  this answers it, so an agent can open the page for its human instead of stalling at a
+  dialog it cannot see past. Answering *no* triggers the site's joke and leaves a way back in.
 - **`drive_demo`** (home page only) — drives the interactive hero chat demo through the
   same controls a finger taps, so the visitor can *watch* the story an agent is telling.
   Honestly labeled as a scripted demo; the real tools sit right beside it.
