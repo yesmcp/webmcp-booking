@@ -29,7 +29,7 @@
   const T = UK
     ? {
         title: "Агент просить забронювати дзвінок",
-        explain: "Помічник на цій сторінці підготував бронювання. Перевірте і підтвердьте — або відхиліть.",
+        explain: "Помічник на цій сторінці підготував бронювання. Перевірте і підтвердьте або відхиліть.",
         when: "Час",
         name: "Імʼя",
         email: "Email",
@@ -40,7 +40,7 @@
       }
     : {
         title: "An agent asks to book a call",
-        explain: "The assistant on this page prepared a booking. Review and confirm it — or decline.",
+        explain: "The assistant on this page prepared a booking. Review and confirm it, or decline.",
         when: "Time",
         name: "Name",
         email: "Email",
